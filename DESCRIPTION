@@ -1,12 +1,29 @@
 Package: zztable1
-Title: What the Package Does (One Line, Title Case)
+Title: Create Table One Summaries for Clinical Trials
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: GPL (>= 3)
+    person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Description: Provides functions for creating "table one" summaries of baseline 
+    data in clinical trials and observational studies. Features include handling
+    of numeric and categorical variables, stratification, p-value calculations,
+    and customizable output in LaTeX and HTML formats. Compatible with tidyverse 
+    workflows and includes support for missing data and grouped summaries.
+License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 URL: https://github.com/rgt47/zztable1
 BugReports: https://github.com/rgt47/zztable1/issues
+Imports: 
+    janitor,
+    dplyr,
+    purrr,
+    kableExtra,
+    tibble,
+    broom,
+    stringr
+Suggests: 
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
