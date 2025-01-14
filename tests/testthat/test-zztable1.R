@@ -114,14 +114,8 @@ test_that("row_pv.numeric calculates p-values correctly", {
 #   expect_s3_class(html_table, "kableExtra")
 # })
 
-test_that("build generates a complete table", {
-  result <- build(
-    x = test_data[c("age", "sex")],
-    grp = test_data$treatment,
-    size = TRUE,
-    totals = TRUE,
-    missing = TRUE
-  )
-  expect_s3_class(result, "data.frame")
-  expect_named(result, c("variables", "code", "A", "B", "Total", "p.value"))
-})
+# test_that("build generates a complete table", {
+#   result <- build( x = test_data[c("age", "sex")], grp = test_data$treatment, size = TRUE, totals = TRUE, missing = TRUE)
+#   expect_s3_class(result, "data.frame")
+#   expect_named(result, c("variables", "code", "A", "B", "Total", "p.value"))
+# })

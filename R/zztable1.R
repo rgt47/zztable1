@@ -164,39 +164,44 @@ table1 <- function(form, data, ...) {
 }
 
 row_name <- function(x, nm, missing, ...) {
-        UseMethod("row_name")
+        if (is.numeric(x)) {
+                return(row_name.numeric(x, nm, missing, ...))
+        } else if (is.factor(x)) {
+                return(row_name.factor(x, nm, missing, ...))
+        } else {
+                stop("Unsupported class: ", class(x))
+        }
 }
 
-#' @keywords internal
 #' @keywords internal
 row_name.factor <- function(x, nm, missing = FALSE, ...) {
-  # Add "<NA>" as a level if missing = TRUE
-  if (missing) {
-    levels(x) <- c(levels(x), "<NA>")
-    x[is.na(x)] <- "<NA>"
-  }
-  
-  # Generate variable names
-  categs <- levels(x)
-  categs <- ifelse(is.na(categs), "<NA>", categs)  # Ensure <NA> is included
-  nms <- cbind(
-    variables = c(nm, categs),  # Include variable name and factor levels
-    code = c(1, rep(2, length(categs)))  # Assign codes: 1 for name, 2 for levels
-  )
-  
-  # Return as a data frame
-  return(as.data.frame(nms))
+        # Add "<NA>" as a level if missing = TRUE
+        if (missing) {
+                levels(x) <- c(levels(x), "<NA>")
+                x[is.na(x)] <- "<NA>"
+        }
+
+        # Generate variable names
+        categs <- levels(x)
+        categs <- ifelse(is.na(categs), "<NA>", categs) # Ensure <NA> is included
+        nms <- cbind(
+                variables = c(nm, categs), # Include variable name and factor levels
+                code = c(1, rep(2, length(categs))) # Assign codes: 1 for name, 2 for levels
+        )
+
+        # Return as a data frame
+        return(as.data.frame(nms))
 }
 
 #' @keywords internal
-row_name.numeric <- function(x, nm, missing, ...) {
+row_name.numeric <- function(x, nm, missing = FALSE, ...) {
         # Create a data frame with the variable name and a code (1 = numeric).
         out <- as.data.frame(cbind(variables = nm, code = 1))
 
         if (missing) {
                 # If missing values are included, add an extra row for "valid (missing)".
                 out2 <- as.data.frame(cbind(variables = "valid (missing)", code = 4))
-                out <- rbind(out, out2) # Combine the rows.
+                out <- rbind(out, out2)
         }
 
         # Return the resulting data frame.
@@ -204,78 +209,82 @@ row_name.numeric <- function(x, nm, missing, ...) {
 }
 
 row_summary <- function(x, grp, totals, missing, ...) {
-        UseMethod("row_summary")
+        if (is.numeric(x)) {
+                return(row_pv.numeric(x, grp, totals, missing, ...))
+        } else if (is.factor(x)) {
+                return(row_pv.factor(x, grp, totals, missing, ...))
+        } else {
+                stop("Unsupported class: ", class(x))
+        }
 }
 
 #' @keywords internal
-row_summary.factor <- function(x, grp, totals, ...) {
-        df <- data.frame(x = x, grp = grp)
-        t1 <- df |>
-                tabyl(x, grp, show_missing_levels = TRUE)
-        if (totals) {
-                t1 <- t1 |> adorn_totals("col")
-        }
-        t1 <- t1 |>
-                adorn_percentages("col") |>
-                adorn_pct_formatting(digits = 0) |>
-                adorn_ns(position = "front") |>
-                select(-x)
-        names(t1) <- gsub("NA_", "<NA>", names(t1))
-        return(rbind("", t1))
+row_summary.factor <- function(x, grp, totals = FALSE, ...) {
+    df <- data.frame(x = x, grp = grp)
+    t1 <- df |>
+        tabyl(x, grp, show_missing_levels = TRUE)
+    if (totals) {
+        t1 <- t1 |> adorn_totals("col")
+    }
+    t1 <- t1 |>
+        adorn_percentages("col") |>
+        adorn_pct_formatting(digits = 0) |>
+        adorn_ns(position = "front") |>
+        select(-x)
+    names(t1) <- gsub("NA_", "<NA>", names(t1))
+    # Ensure the output has columns
+    if (ncol(t1) == 0) stop("Output has no columns.")
+    return(t1)
 }
-
 
 #' @keywords internal
 row_summary.numeric <- function(x, grp, totals = FALSE, missing = FALSE, ...) {
-  # Split the numeric variable by group
-  sp <- split(x, grp)
-  
-  if (totals) {
-    # Add a "Total" group for all observations
-    sp[["Total"]] <- x
-  }
-  
-  # Compute mean and SD for each group
-  mm <- sp |>
-    map_vec(mean, na.rm = TRUE) |>
-    round(2)
-  
-  ss <- sp |>
-    map_vec(sd, na.rm = TRUE) |>
-    round(2) |>
-    (\(x) paste0("(", x, ")"))()
-  
-  # Combine mean and SD
-  out <- paste(mm, ss)
-  names(out) <- names(sp)  # Add group names as column names
-  
-  if (missing) {
-    # Add valid and missing counts
-    misscnt <- sapply(sp, function(x) sum(is.na(x)))
-    validcnt <- sapply(sp, function(x) sum(!is.na(x)))
-    out <- rbind(
-      out,
-      "valid (missing)" = paste0(validcnt, " (", misscnt, ")")
-    ) |> as.data.frame()
-    names(out) <- names(sp)  # Handle NA names gracefully
-  } else {
-    out <- as.data.frame(out)  # Ensure output is always a data frame
-  }
-  
-  # Ensure the "Total" column exists when totals = TRUE
-  if (totals && !"Total" %in% colnames(out)) {
-    colnames(out)[ncol(out)] <- "Total"
-  }
-  
-  return(out)
+    sp <- split(x, grp)
+
+    if (totals) {
+        sp[["Total"]] <- x
+    }
+
+    mm <- sp |>
+        map_vec(mean, na.rm = TRUE) |>
+        round(2)
+
+    ss <- sp |>
+        map_vec(sd, na.rm = TRUE) |>
+        round(2) |>
+        (\(x) paste0("(", x, ")"))()
+
+    out <- paste(mm, ss)
+    names(out) <- names(sp)
+
+    if (missing) {
+        misscnt <- sapply(sp, function(x) sum(is.na(x)))
+        validcnt <- sapply(sp, function(x) sum(!is.na(x)))
+        out <- rbind(out, "valid (missing)" = paste0(validcnt, " (", misscnt, ")")) |>
+            as.data.frame()
+    } else {
+        out <- as.list(out) |> as.data.frame()
+    }
+
+    if (totals && !"Total" %in% colnames(out)) {
+        colnames(out)[ncol(out)] <- "Total"
+    }
+
+    return(out)
 }
 
-row_pv <- function(x, grp, missing, ...) {
-        UseMethod("row_pv")
+row_pv <- function(x, grp, missing=FALSE, ...) {
+        if (is.numeric(x)) {
+                return(row_pv.numeric(x, grp, missing=FALSE, ...))
+        } else if (is.factor(x)) {
+                return(row_pv.factor(x, grp, missing=FALSE, ...))
+        } else {
+                stop("Unsupported class: ", class(x))
+        }
 }
 
 #' @keywords internal
-row_pv.factor <- function(x, grp, ...) {
+row_pv.factor <- function(x, grp, missing = FALSE, ...) {
         categs <- levels(x) |>
                 length()
         if (categs >= 2) {
@@ -300,121 +309,115 @@ row_pv.factor <- function(x, grp, ...) {
 #' @keywords internal
 #' @keywords internal
 row_pv.numeric <- function(x, grp, missing = FALSE, ...) {
-  # Perform a linear regression to calculate the p-value
-  pv <- lm(x ~ grp) |>
-    tidy() |>
-    slice(2) |>
-    pluck("p.value") |>
-    round(4) |>
-    as.character()
-  
-  # If missing is TRUE, append a blank row
-  if (missing) {
-    pv <- c(pv, "")
-  }
+        # Perform a linear regression to calculate the p-value
+        lm_fit <- lm(x ~ grp)
+        # Extract the p-value for the group variable
+        pv <- summary(lm_fit)$coefficients[2, "Pr(>|t|)"] %>%
+                round(4) %>%
+                as.character()
 
-  # Return the p-value as a character vector
-  return(pv)
+        # If missing is TRUE, append a blank row
+        if (missing) {
+                pv <- c(pv, "")
+        }
+
+        # Return the p-value as a character vector
+        return(pv)
 }
 
 #' @keywords internal
-stratify <- function(x, grp, strat, totals, missing, ...) {
-  # Split the data by stratification variable
-  x_lst <- split(x, strat)
-  grp_lst <- split(grp, strat)
-  
-  # Debug: Print stratification levels
-  message("Stratification levels: ", paste(unique(strat), collapse = ", "))
-  
-  # Ensure factor levels are preserved for each stratum
-  x_lst <- map(x_lst, function(df) {
-    map(df, function(col) {
-      if (is.factor(col)) {
-        message("Preserving levels for factor: ", deparse(substitute(col)))
-        factor(col, levels = levels(x[[1]]))  # Preserve original levels
-      } else {
-        col
-      }
-    }) |> as.data.frame()
-  })
-  
-  # Build the table for each stratum, skipping invalid subsets
-  tab <- map2(x_lst, grp_lst, function(x_stratum, grp_stratum) {
-    message("Processing stratum with grouping levels: ", paste(unique(grp_stratum), collapse = ", "))
-    if (length(unique(grp_stratum)) < 2) {
-      warning("Stratum skipped due to insufficient levels in grouping variable.")
-      return(NULL)
-    }
-    build(x = x_stratum, grp = grp_stratum, totals = totals, missing = missing, ...)
-  })
-  
-  # Filter out NULL entries caused by skipped strata
-  tab <- compact(tab)
-  
-  if (length(tab) == 0) {
-    warning("All strata were skipped due to insufficient levels.")
-    return(NULL)
-  }
-  
-  # Combine the stratified tables
-  tab1 <- bind_rows(tab)
-  
-  # Create a new data frame for the stratification labels
-  new <- data.frame(matrix(NA, nrow = length(tab), ncol = ncol(tab1)))
-  names(new) <- names(tab1)
-  new$variables <- names(tab)
-  new$code <- 5
-  
-  # Insert the stratification labels into the final table
-  rr <- cumsum(c(1, rep(nrow(tab[[1]]) + 1, length(tab) - 1)))
-  tab5 <- insertRows(tab1, rr, new, rcurr = F)
-  
-  # Debug: Print final table dimensions
-  message("Final stratified table dimensions: ", nrow(tab5), " rows, ", ncol(tab5), " columns")
-  
-  return(tab5)
+stratify <- function(x, grp, strat, size, totals, missing, ...) {
+        # Split the data by stratification variable
+        x_lst <- split(x, strat)
+        grp_lst <- split(grp, strat)
+        # Debug: Print stratification levels
+        message("Stratification levels: ", paste(unique(strat), collapse = ", "))
+        # Ensure factor levels are preserved for each stratum
+        x_lst <- map(x_lst, function(df) {
+                map2(df, x, function(col, original_col) {
+                        if (is.factor(original_col)) {
+                                message("Preserving levels for factor: ", deparse(substitute(original_col)))
+                                factor(col, levels = levels(original_col)) # Preserve original levels
+                        } else {
+                                col
+                        }
+                }) |> as.data.frame()
+        })
+        # Build the table for each stratum, skipping invalid subsets
+        tab <- map2(x_lst, grp_lst, function(x_stratum, grp_stratum) {
+                message("Processing stratum with grouping levels: ", paste(unique(grp_stratum), collapse = ", "))
+                if (length(unique(grp_stratum)) < 2) {
+                        warning("Stratum skipped due to insufficient levels in grouping variable.")
+                        return(NULL)
+                }
+                build(x = x_stratum, grp = grp_stratum, size = size, totals = totals, missing = missing, ...)
+        })
+        # Filter out NULL entries caused by skipped strata
+        tab <- compact(tab)
+
+        if (length(tab) == 0) {
+                warning("All strata were skipped due to insufficient levels.")
+                return(NULL)
+        }
+
+        # Combine the stratified tables
+        tab1 <- bind_rows(tab)
+
+        # Create a new data frame for the stratification labels
+        new <- data.frame(matrix(NA, nrow = length(tab), ncol = ncol(tab1)))
+        names(new) <- names(tab1)
+        new$variables <- names(tab)
+        new$code <- 5
+
+        # Insert the stratification labels into the final table
+        rr <- cumsum(c(1, rep(nrow(tab[[1]]) + 1, length(tab) - 1)))
+        tab5 <- insertRows(tab1, rr, new, rcurr = F)
+
+        # Debug: Print final table dimensions
+        message("Final stratified table dimensions: ", nrow(tab5), " rows, ", ncol(tab5), " columns")
+
+        return(tab5)
 }
 
 
 build <- function(x, grp, size, totals, missing, ...) {
-  # Generate the left panel of the table
-  left <- x |>
-    imap(row_name, missing = missing, ...) |>
-    bind_rows()
-  
-  # Generate the right panel of the table
-  right <- x |>
-    map(row_pv, grp = grp, missing = missing, ...) |>
-    unlist() |>
-    enframe(name = NULL) |>
-    setNames("p.value")
-  
-  # Generate the middle panel of the table
-  mid <- x |>
-    map(row_summary, grp = grp, totals = totals, missing = missing, ...) |>
-    bind_rows()
-  
-  # Debugging: Print dimensions
-  message("Dimensions of left: ", nrow(left))
-  message("Dimensions of mid: ", nrow(mid))
-  message("Dimensions of right: ", nrow(right))
-  
-browser()
-  if (size) {
-    left <- rbind(c("number", 3), left)
-    tt <- table(grp, useNA = "ifany")
-    if (totals) {
-      tt <- tt |> addmargins(FUN = list(Total = sum))
-    }
-    mid <- rbind(tt, mid)
-    right <- rbind("", right)
-  }
-  
-  # Combine all panels into a single table
-  tab <- bind_cols(left, mid, right)
-  rownames(tab) <- NULL
-  
-  return(tab)
+        # Generate the left panel of the table
+        left <- x |>
+                imap(row_name, missing = missing, ...) |>
+                bind_rows()
+
+        # Generate the right panel of the table
+        right <- x |>
+                map(row_pv, grp = grp, missing = missing, ...) |>
+                unlist() |>
+                enframe(name = NULL) |>
+                setNames("p.value")
+
+        # Generate the middle panel of the table
+        mid <- x |>
+                map(row_summary, grp = grp, totals = totals, missing = missing, ...) |>
+                bind_rows()
+
+        # Debugging: Print dimensions
+        message("Dimensions of left: ", nrow(left))
+        message("Dimensions of mid: ", nrow(mid))
+        message("Dimensions of right: ", nrow(right))
+
+        if (size) {
+                left <- rbind(c("number", 3), left)
+                tt <- table(grp, useNA = "ifany")
+                if (totals) {
+                        tt <- tt |> addmargins(FUN = list(Total = sum))
+                }
+                mid <- rbind(tt, mid)
+                right <- rbind("", right)
+        }
+
+        # Combine all panels into a single table
+        tab <- bind_cols(left, mid, right)
+        rownames(tab) <- NULL
+
+        return(tab)
 }
 
 #' @export
@@ -468,17 +471,15 @@ table1.formula <- function(form, data, strata = NULL,
                 # Call the stratify function if a stratification variable is provided.
                 tab0 <- stratify(
                         x = dat0[x_vars], grp = data[[grp]],
-                        strat = data[[strata]], totals = totals, missing = missing, ...
+                        strat = data[[strata]], size = size, totals = totals, missing = missing, ...
                 )
         } else {
                 # Otherwise, build the table directly.
                 tab0 <- build(
-                        x = dat0[x_vars], grp = data[[grp]], totals = totals,
-                        size = size,
+                        x = dat0[x_vars], grp = data[[grp]], size = size, totals = totals,
                         missing = missing, ...
                 )
         }
-browser()
         # Remove the p-value column if not requested.
         if (!pvalue) {
                 tab0 <- tab0 |>

@@ -206,10 +206,10 @@ level of the stratification variable.
 # Example dataset
 library(dplyr)
 data <- data.frame(
-  treatment = factor(c(rep("A", 50), rep("B", 50))),
-  age = rnorm(100, mean = 50, sd = 10),
-  sex = factor(sample(c("Male", "Female"), 100, replace = TRUE)),
-  site = factor(rep(c("Site 1", "Site 2"), each = 50))
+        treatment = factor(c(rep("A", 50), rep("B", 50))),
+        age = rnorm(100, mean = 50, sd = 10),
+        sex = factor(sample(c("Male", "Female"), 100, replace = TRUE)),
+        site = factor(rep(c("Site 1", "Site 2"), each = 50))
 )
 
 # Basic usage
