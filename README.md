@@ -1,12 +1,12 @@
-# zztable2
+# zztable1
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/yourusername/zztable2/workflows/R-CMD-check/badge.svg)](https://github.com/yourusername/zztable2/actions)
+[![R-CMD-check](https://github.com/yourusername/zztable1/workflows/R-CMD-check/badge.svg)](https://github.com/yourusername/zztable1/actions)
 <!-- badges: end -->
 
 ## Overview
 
-`zztable2` is an R package for creating publication-ready summary tables for clinical trial data. It simplifies the process of generating "Table 1" style baseline characteristic summaries by treatment group, with appropriate statistical tests and formatting.
+`zztable1` is an R package for creating publication-ready summary tables for clinical trial data. It simplifies the process of generating "Table 1" style baseline characteristic summaries by treatment group, with appropriate statistical tests and formatting.
 
 ## Features
 
@@ -19,11 +19,11 @@
 
 ## Installation
 
-You can install the development version of zztable2 from GitHub with:
+You can install the development version of zztable1 from GitHub with:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("yourusername/zztable2")
+devtools::install_github("yourusername/zztable1")
 ```
 
 ## Usage
@@ -31,7 +31,7 @@ devtools::install_github("yourusername/zztable2")
 ### Basic Table
 
 ```r
-library(zztable2)
+library(zztable1)
 
 # Create a basic summary table
 table1(arm ~ age + sex + bmi, data = trial_data)
@@ -89,7 +89,7 @@ A simple table for a clinical trial might look like:
 For more detailed information, see the package vignette:
 
 ```r
-vignette("zztable2-intro", package = "zztable2")
+vignette("zztable1-intro", package = "zztable1")
 ```
 
 ## Citation
@@ -97,8 +97,8 @@ vignette("zztable2-intro", package = "zztable2")
 If you use this package in your research, please cite:
 
 ```
-Your Name (Year). zztable2: Create Publication-Ready Summary Tables for Clinical Trials. 
-R package version 0.1.0. https://github.com/yourusername/zztable2
+Your Name (Year). zztable1: Create Publication-Ready Summary Tables for Clinical Trials. 
+R package version 0.1.0. https://github.com/yourusername/zztable1
 ```
 
 ## License
