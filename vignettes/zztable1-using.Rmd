@@ -1,0 +1,402 @@
+---
+title: "zztable1: Creating Publication-Ready Summary Tables for Clinical Trials"
+author: "Ronald (Ryy) G. Thomas"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cerulean
+    highlight: tango
+vignette: >
+  %\VignetteIndexEntry{zztable1: Creating Publication-Ready Summary Tables for Clinical Trials}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 7,
+  fig.height = 5,
+  fig.align = 'center',
+  comment = "#>"
+)
+```
+
+# Introduction
+
+The `zztable1` package provides tools for creating publication-ready summary tables for clinical trial data. It's particularly focused on creating "Table 1" - the baseline characteristics table that is a standard component of clinical trial publications. This vignette demonstrates the key functionalities of the package with worked examples.
+
+# Installation
+
+You can install the development version of `zztable1` from GitHub with:
+
+```{r, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("rgt47/zztable1")
+```
+
+```{r}
+# Load required packages
+library(zztable1)
+```
+
+# Creating Sample Dataset
+
+For this vignette, we'll create a sample clinical trial dataset to demonstrate the package:
+
+```{r}
+# Create a sample dataset
+set.seed(123)
+trial_data <- data.frame(
+  arm = factor(rep(c("Treatment", "Placebo"), each = 50)),
+  age = rnorm(100, mean = 45, sd = 15),
+  sex = factor(sample(c("Male", "Female"), 100, replace = TRUE)),
+  bmi = rnorm(100, mean = 26, sd = 5),
+  diabetes = factor(sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.3, 0.7))),
+  site = factor(sample(c("Site1", "Site2", "Site3"), 100, replace = TRUE))
+)
+
+# Add some missing values for demonstration
+trial_data$age[sample(1:100, 5)] <- NA
+trial_data$bmi[sample(1:100, 8)] <- NA
+trial_data$sex[sample(1:100, 3)] <- NA
+
+# View the first few rows of the data
+head(trial_data)
+```
+
+# Basic Usage
+
+## Creating a Simple Table 1
+
+The main function in the package is `table1()`, which takes a formula specifying the grouping variable and the variables to summarize:
+
+```{r}
+# Basic table with treatment arm as the grouping variable
+basic_table <- table1(form = arm ~ age + sex + bmi + diabetes, data = trial_data)
+print(basic_table)
+```
+
+In this example:
+- `arm` is the grouping variable (treatment groups)
+- `age`, `sex`, `bmi`, and `diabetes` are the variables to be summarized
+- The formula syntax is similar to that used in modeling functions in R
+
+## Adding Totals
+
+You can add a "Total" column to see overall statistics:
+
+```{r}
+# Table with totals
+totals_table <- table1(form = arm ~ age + sex + bmi + diabetes, 
+                      data = trial_data, 
+                      totals = TRUE)
+print(totals_table)
+```
+
+## Showing Missing Values
+
+To include counts of missing values for each variable:
+
+```{r}
+# Table with missing value counts
+missing_table <- table1(form = arm ~ age + sex + bmi + diabetes, 
+                       data = trial_data, 
+                       missing = TRUE)
+print(missing_table)
+```
+
+For numeric variables, this adds a "valid (missing)" row showing the count of non-missing values and the count of missing values.
+
+## Including Group Sizes
+
+To show the number of subjects in each group:
+
+```{r}
+# Table with group sizes
+size_table <- table1(form = arm ~ age + sex + bmi + diabetes, 
+                    data = trial_data, 
+                    size = TRUE)
+print(size_table)
+```
+
+## Disabling P-values
+
+By default, the table includes p-values for comparing groups. You can disable this:
+
+```{r}
+# Table without p-values
+nopvalue_table <- table1(form = arm ~ age + sex + bmi + diabetes, 
+                        data = trial_data, 
+                        pvalue = FALSE)
+print(nopvalue_table)
+```
+
+# Advanced Usage
+
+## Stratification
+
+One powerful feature of `zztable1` is the ability to stratify tables by another variable:
+
+```{r}
+# Stratified table by study site
+stratified_table <- table1(form = arm ~ age + sex + bmi + diabetes, 
+                         data = trial_data, 
+                         strata = "site")
+print(stratified_table)
+```
+
+This creates separate tables for each level of the stratification variable, allowing you to see how group comparisons vary across different strata.
+
+## Combining Options
+
+You can combine multiple options to create customized tables:
+
+```{r}
+# Comprehensive table with multiple options
+comprehensive_table <- table1(form = arm ~ age + sex + bmi + diabetes, 
+                            data = trial_data, 
+                            totals = TRUE, 
+                            missing = TRUE, 
+                            size = TRUE)
+print(comprehensive_table)
+```
+
+## Creating Tables Without a Grouping Variable
+
+If you just want summary statistics without group comparisons:
+
+```{r}
+# Table without group comparisons
+overall_table <- table1(form = ~ age + sex + bmi + diabetes, 
+                      data = trial_data, 
+                      totals = TRUE,
+                      pvalue = FALSE)
+print(overall_table)
+```
+
+Note: When using a formula without a grouping variable, you must set `totals = TRUE` and `pvalue = FALSE`.
+
+# LaTeX Output
+
+The package includes functionality to export tables in LaTeX format, which is particularly useful for publications:
+
+```{r, eval=FALSE}
+# Create a table
+my_table <- table1(form = arm ~ age + sex + bmi + diabetes, 
+                  data = trial_data, 
+                  totals = TRUE)
+
+# Export to LaTeX with default NEJM styling
+latex_table <- latex(my_table, 
+                    digits = 2, 
+                    fname = "my_clinical_trial_table")
+```
+
+This creates a LaTeX file with the table, styled according to the New England Journal of Medicine (NEJM) formatting guidelines.
+
+## Customizing LaTeX Output
+
+You can customize the appearance of your tables by defining your own theme:
+
+```{r, eval=FALSE}
+# Define a custom theme
+my_theme <- list(
+  foreground = c("black", "darkblue", "black", "darkblue", "darkred"),
+  background = c("#f0f0f0", "white", "#e0e0e0", "white", "#fff0f0")
+)
+
+# Export to LaTeX with custom styling
+custom_latex_table <- latex(my_table, 
+                          digits = 2, 
+                          fname = "custom_styled_table", 
+                          theme = my_theme)
+```
+
+# Real-World Examples
+
+## Example 1: Analyzing Clinical Trial Baseline Characteristics
+
+Let's analyze a more realistic clinical trial dataset with multiple treatment arms:
+
+```{r}
+# Create a more detailed sample dataset
+set.seed(456)
+n <- 300
+detailed_trial <- data.frame(
+  treatment = factor(sample(c("Drug A", "Drug B", "Placebo"), n, replace = TRUE)),
+  age = rnorm(n, mean = 62, sd = 12),
+  sex = factor(sample(c("Male", "Female"), n, replace = TRUE, prob = c(0.55, 0.45))),
+  race = factor(sample(c("White", "Black", "Asian", "Other"), n, replace = TRUE, 
+                      prob = c(0.70, 0.15, 0.10, 0.05))),
+  bmi = rnorm(n, mean = 28, sd = 6),
+  smoker = factor(sample(c("Current", "Former", "Never"), n, replace = TRUE, 
+                        prob = c(0.20, 0.30, 0.50))),
+  diabetes = factor(sample(c("Yes", "No"), n, replace = TRUE, prob = c(0.25, 0.75))),
+  hypertension = factor(sample(c("Yes", "No"), n, replace = TRUE, prob = c(0.40, 0.60))),
+  center = factor(sample(1:10, n, replace = TRUE))
+)
+
+# Create a comprehensive baseline characteristics table
+baseline_table <- table1(form = treatment ~ age + sex + race + bmi + smoker + 
+                               diabetes + hypertension, 
+                       data = detailed_trial, 
+                       totals = TRUE, 
+                       size = TRUE, 
+                       missing = FALSE)
+print(baseline_table)
+```
+
+## Example 2: Stratified Analysis by Study Center
+
+For multi-center trials, it's often important to examine baseline characteristics by center:
+
+```{r}
+# Analyze baseline characteristics stratified by study center
+# We'll use a subset of centers for clarity
+center_subset <- detailed_trial[detailed_trial$center %in% c(1, 2, 3), ]
+
+center_stratified <- table1(form = treatment ~ age + sex + bmi + diabetes + hypertension,
+                          data = center_subset,
+                          strata = "center",
+                          totals = TRUE)
+print(center_stratified)
+```
+
+## Example 3: Analyzing Outcomes Without Group Comparisons
+
+Sometimes you just want to describe outcomes without formal comparisons:
+
+```{r}
+# Create some outcome data
+detailed_trial$adverse_events <- rpois(n, lambda = 1.5)
+detailed_trial$completed_study <- factor(sample(c("Yes", "No"), n, replace = TRUE, 
+                                              prob = c(0.85, 0.15)))
+detailed_trial$response <- factor(sample(c("Complete", "Partial", "None"), n, replace = TRUE, 
+                                       prob = c(0.30, 0.40, 0.30)))
+
+# Summarize outcomes without group comparisons
+outcome_table <- table1(form = ~ adverse_events + completed_study + response,
+                      data = detailed_trial,
+                      totals = TRUE,
+                      pvalue = FALSE)
+print(outcome_table)
+```
+
+## Example 4: Tables for Safety Analysis
+
+Safety analysis is a common task in clinical trials. Here's how to create a table for adverse events by severity:
+
+```{r}
+# Create adverse event data
+set.seed(789)
+ae_data <- data.frame(
+  treatment = factor(rep(c("Drug A", "Drug B", "Placebo"), each = 100)),
+  headache = factor(sample(c("None", "Mild", "Moderate", "Severe"), 300, replace = TRUE, 
+                         prob = c(0.6, 0.25, 0.1, 0.05))),
+  nausea = factor(sample(c("None", "Mild", "Moderate", "Severe"), 300, replace = TRUE,
+                       prob = c(0.7, 0.2, 0.08, 0.02))),
+  dizziness = factor(sample(c("None", "Mild", "Moderate", "Severe"), 300, replace = TRUE,
+                          prob = c(0.8, 0.15, 0.04, 0.01))),
+  fatigue = factor(sample(c("None", "Mild", "Moderate", "Severe"), 300, replace = TRUE,
+                        prob = c(0.65, 0.2, 0.1, 0.05)))
+)
+
+# Create safety table
+safety_table <- table1(form = treatment ~ headache + nausea + dizziness + fatigue,
+                     data = ae_data,
+                     totals = TRUE,
+                     size = TRUE)
+print(safety_table)
+```
+
+## Example 5: Tables with Laboratory Values 
+
+Laboratory values often have their own format requirements:
+
+```{r}
+# Create lab data
+set.seed(101)
+lab_data <- data.frame(
+  treatment = factor(rep(c("Drug A", "Drug B", "Placebo"), each = 100)),
+  hemoglobin = rnorm(300, mean = 14, sd = 1.5),
+  wbc = rnorm(300, mean = 7.5, sd = 2),
+  platelets = rnorm(300, mean = 250, sd = 50),
+  creatinine = rnorm(300, mean = 0.9, sd = 0.2),
+  alt = rnorm(300, mean = 30, sd = 15),
+  ast = rnorm(300, mean = 25, sd = 10)
+)
+
+# Add some out-of-range values
+lab_data$alt[sample(1:300, 15)] <- lab_data$alt[sample(1:300, 15)] * 3
+lab_data$ast[sample(1:300, 10)] <- lab_data$ast[sample(1:300, 10)] * 2.5
+
+# Create lab value table
+lab_table <- table1(form = treatment ~ hemoglobin + wbc + platelets + creatinine + alt + ast,
+                  data = lab_data,
+                  totals = TRUE,
+                  size = TRUE)
+print(lab_table)
+```
+
+# Tips and Best Practices
+
+1. **Variable types matter**: The way variables are summarized depends on their R data type:
+   - Numeric variables are summarized with mean and standard deviation
+   - Factors are summarized with counts and percentages
+   - Make sure your variables have the appropriate type
+
+2. **Handle missing data appropriately**: Use the `missing = TRUE` option to see counts of missing values, which is important for assessing data quality
+
+3. **Consider p-value interpretation**: Remember that p-values should be interpreted in the context of multiple testing, especially when comparing many variables
+
+4. **Customizing LaTeX output**: For publications, spend time customizing the LaTeX output to meet journal requirements
+
+5. **Export to other formats**: While LaTeX output is provided natively, you can also use functions from packages like `knitr` to convert the tables to other formats like HTML or Word
+
+# Integration with Other Packages
+
+The `zztable1` package works well with other R packages:
+
+```{r, eval=FALSE}
+# Create a table
+my_table <- table1(form = arm ~ age + sex + bmi + diabetes, 
+                  data = trial_data, 
+                  totals = TRUE)
+
+# Export to HTML using kableExtra
+library(kableExtra)
+html_table <- my_table |>
+  dplyr::select(-code) |>  # Remove the code column
+  kbl(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+
+# View in browser
+if (interactive()) {
+  print(html_table)
+}
+```
+
+# Summary
+
+The `zztable1` package provides a streamlined way to create publication-ready summary tables for clinical trial data. With its formula-based interface and flexible options for customization, it can handle a wide range of table requirements for clinical research.
+
+Key features include:
+- Simple formula interface for specifying variables
+- Automatic calculation of appropriate summary statistics based on variable type
+- Calculation of p-values for group comparisons
+- Stratification by categorical variables
+- LaTeX output with customizable styling
+- Support for missing value reporting
+
+These capabilities make `zztable1` a valuable tool for clinical researchers who need to efficiently create high-quality summary tables for publications, reports, and presentations.
+
+# Session Info
+
+```{r}
+sessionInfo()
+```

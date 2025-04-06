@@ -30,8 +30,8 @@ utils::globalVariables(c("variables", "code", "p.value"))
 #' @importFrom tibble enframe
 #' @importFrom kableExtra kbl row_spec
 #'
-#' @name zztable2
-#' @docType package
+#' @name zztable1
+"_PACKAGE"
 NULL
 
 #' Create a summary table of baseline characteristics
