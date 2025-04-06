@@ -9,7 +9,6 @@ Description: Creates publication-ready tables summarizing baseline characteristi
     variables, computes appropriate statistics, and formats results for publication.
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports:
@@ -22,5 +21,8 @@ Imports:
     tibble,
     kableExtra
 Suggests:
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
 Config/testthat/edition: 3

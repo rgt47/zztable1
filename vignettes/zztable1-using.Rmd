@@ -63,7 +63,6 @@ trial_data <- data.frame(
 # Add some missing values for demonstration
 trial_data$age[sample(1:100, 5)] <- NA
 trial_data$bmi[sample(1:100, 8)] <- NA
-trial_data$sex[sample(1:100, 3)] <- NA
 
 # View the first few rows of the data
 head(trial_data)
@@ -234,15 +233,13 @@ detailed_trial <- data.frame(
   race = factor(sample(c("White", "Black", "Asian", "Other"), n, replace = TRUE, 
                       prob = c(0.70, 0.15, 0.10, 0.05))),
   bmi = rnorm(n, mean = 28, sd = 6),
-  smoker = factor(sample(c("Current", "Former", "Never"), n, replace = TRUE, 
-                        prob = c(0.20, 0.30, 0.50))),
   diabetes = factor(sample(c("Yes", "No"), n, replace = TRUE, prob = c(0.25, 0.75))),
   hypertension = factor(sample(c("Yes", "No"), n, replace = TRUE, prob = c(0.40, 0.60))),
   center = factor(sample(1:10, n, replace = TRUE))
 )
 
 # Create a comprehensive baseline characteristics table
-baseline_table <- table1(form = treatment ~ age + sex + race + bmi + smoker + 
+baseline_table <- table1(form = treatment ~ age + sex + race + bmi + 
                                diabetes + hypertension, 
                        data = detailed_trial, 
                        totals = TRUE, 
@@ -255,7 +252,7 @@ print(baseline_table)
 
 For multi-center trials, it's often important to examine baseline characteristics by center:
 
-```{r}
+```{r eval =FALSE}
 # Analyze baseline characteristics stratified by study center
 # We'll use a subset of centers for clarity
 center_subset <- detailed_trial[detailed_trial$center %in% c(1, 2, 3), ]
@@ -293,21 +290,20 @@ Safety analysis is a common task in clinical trials. Here's how to create a tabl
 
 ```{r}
 # Create adverse event data
+# Create a simpler adverse event data
 set.seed(789)
 ae_data <- data.frame(
-  treatment = factor(rep(c("Drug A", "Drug B", "Placebo"), each = 100)),
-  headache = factor(sample(c("None", "Mild", "Moderate", "Severe"), 300, replace = TRUE, 
-                         prob = c(0.6, 0.25, 0.1, 0.05))),
-  nausea = factor(sample(c("None", "Mild", "Moderate", "Severe"), 300, replace = TRUE,
-                       prob = c(0.7, 0.2, 0.08, 0.02))),
-  dizziness = factor(sample(c("None", "Mild", "Moderate", "Severe"), 300, replace = TRUE,
-                          prob = c(0.8, 0.15, 0.04, 0.01))),
-  fatigue = factor(sample(c("None", "Mild", "Moderate", "Severe"), 300, replace = TRUE,
-                        prob = c(0.65, 0.2, 0.1, 0.05)))
+  treatment = factor(rep(c("Drug A", "Drug B", "Placebo"), each = 30)),  # Reduced from 100 each
+  headache = factor(sample(c("None", "Mild", "Severe"), 90, replace = TRUE, 
+                         prob = c(0.6, 0.3, 0.1))),  # Reduced severity levels
+  nausea = factor(sample(c("None", "Mild", "Severe"), 90, replace = TRUE,
+                       prob = c(0.7, 0.2, 0.1))),
+  dizziness = factor(sample(c("None", "Present"), 90, replace = TRUE,  # Binary factor
+                          prob = c(0.8, 0.2)))
 )
 
 # Create safety table
-safety_table <- table1(form = treatment ~ headache + nausea + dizziness + fatigue,
+safety_table <- table1(form = treatment ~ headache + nausea + dizziness,
                      data = ae_data,
                      totals = TRUE,
                      size = TRUE)
