@@ -1,0 +1,20 @@
+# Development and exploration scripts
+dev-scripts/
+
+# Build artifacts
+*.tar.gz
+*.Rcheck/
+..Rcheck/
+
+# IDE files
+.Rproj.user/
+.RData
+.Rhistory
+
+# Temporary files
+*~
+.DS_Store
+~$*
+
+# Documentation build artifacts
+docs/

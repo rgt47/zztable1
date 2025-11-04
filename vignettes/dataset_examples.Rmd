@@ -1,0 +1,614 @@
+---
+title: "Comprehensive Theme Showcase: Table 1 Examples with Built-in R Datasets"
+author: "zztable1_nextgen"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    latex_engine: pdflatex
+    keep_tex: true
+    extra_dependencies:
+      - xcolor
+      - colortbl 
+      - array
+      - booktabs
+      - longtable
+      - float
+      - threeparttable
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Comprehensive Theme Showcase: Table 1 Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  results = 'asis',
+  fig.width = 8,
+  fig.height = 6
+)
+
+# Load required libraries
+library(htmltools)
+library(kableExtra)
+
+# Source all required files
+source("../R/table1.R")
+source("../R/blueprint.R")
+source("../R/validation_consolidated.R") 
+source("../R/dimensions.R")
+source("../R/cells.R")
+source("../R/themes.R")
+source("../R/rendering.R")
+source("../R/utils.R")
+```
+
+```{r theme-css, results='asis', echo=FALSE}
+# Only generate CSS for HTML output
+if (knitr::is_html_output()) {
+  # Generate and inject CSS for theme styling
+  theme_css <- generate_theme_css()
+  cat("<style>\n")
+  cat(theme_css)
+  cat("\n")
+  # Add additional styling for better presentation
+  cat("
+.theme-showcase {
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+.theme-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+.theme-description {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-bottom: 15px;
+}
+.dataset-section {
+  margin-top: 30px;
+  border-top: 2px solid #3498db;
+  padding-top: 20px;
+}
+")
+  cat("\n</style>")
+}
+```
+
+```{r helper-functions, include=FALSE}
+# Helper function for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+# Helper function to create tables with appropriate format
+create_table <- function(formula, data, ...) {
+  # Extract theme from arguments
+  args <- list(...)
+  theme_arg <- args$theme %||% "console"
+  
+  # Handle both theme names and custom theme objects
+  if (is.character(theme_arg)) {
+    theme <- get_theme(theme_arg)
+  } else if (is.list(theme_arg)) {
+    theme <- theme_arg
+  } else {
+    theme <- get_theme("console")
+  }
+  
+  bp <- table1(formula = formula, data = data, ...)
+  
+  # Detect output format and render appropriately
+  if (knitr::is_latex_output()) {
+    output <- render_latex(bp, theme)
+  } else if (knitr::is_html_output()) {
+    output <- render_html(bp, theme)
+  } else {
+    # Default to console for unknown formats
+    output <- render_console(bp, theme)
+  }
+  
+  return(knitr::asis_output(paste(output, collapse = "\n")))
+}
+```
+
+# Introduction
+
+This comprehensive vignette showcases **all available themes** in `zztable1_nextgen` using carefully selected built-in R datasets. Each theme is designed to match specific publication standards, from medical journals to general statistical reports.
+
+## Available Themes
+
+The package includes **`r length(list_available_themes())`** built-in themes:
+
+```{r theme-list, echo=FALSE}
+available_themes <- list_available_themes()
+theme_details <- data.frame(
+  Theme = available_themes,
+  Description = c(
+    "Console - Basic monospace output for development",
+    "NEJM - New England Journal of Medicine styling with authentic cream striping", 
+    "Lancet - Clean minimal formatting matching The Lancet",
+    "JAMA - Journal of American Medical Association styling",
+    "Simple - Clean general-purpose theme for reports"
+  ),
+  stringsAsFactors = FALSE
+)
+
+knitr::kable(theme_details, 
+             caption = "Available Themes in zztable1nextgen",
+             escape = FALSE, 
+             format = if(knitr::is_latex_output()) "latex" else "html") %>%
+  kableExtra::kable_styling()
+```
+
+Each theme will be demonstrated using the same dataset to clearly show the formatting differences.
+
+# Theme Showcase: Motor Trend Car Dataset
+
+We'll use the `mtcars` dataset to demonstrate all themes with identical data and parameters. This allows for direct comparison of theme formatting while maintaining consistent content.
+
+
+
+## Dataset Preparation
+
+```{r mtcars-prep}
+# Prepare mtcars with meaningful factor variables
+data(mtcars)
+mtcars$transmission <- factor(
+  ifelse(mtcars$am == 1, "Manual", "Automatic"),
+  levels = c("Automatic", "Manual")
+)
+mtcars$engine_shape <- factor(
+  ifelse(mtcars$vs == 1, "V-shaped", "Straight"),
+  levels = c("Straight", "V-shaped")
+)
+mtcars$cylinders <- factor(mtcars$cyl)
+
+# Show sample data
+knitr::kable(head(mtcars[, c("mpg", "hp", "wt", "transmission", "engine_shape", "cylinders")]), 
+             caption = "Sample of prepared mtcars data") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                           full_width = FALSE)
+```
+
+
+
+## Complete Theme Showcase
+
+Each theme below displays the same analysis (transmission type vs. car characteristics) to highlight formatting differences:
+
+### Console Theme - Basic Analysis
+*Simple comparison without p-values or totals*
+
+```{r theme-console-demo}
+create_table(
+  formula = transmission ~ mpg + hp + wt + cylinders,
+  data = mtcars,
+  pvalue = FALSE,
+  totals = FALSE,
+  missing = FALSE,
+  theme = "console"
+)
+```
+
+### NEJM Theme - Clinical Trial Style with Stratification
+*Stratified analysis by engine shape with missing values shown*
+
+```{r theme-nejm-demo}
+# Add some missing values for demonstration
+mtcars_missing <- mtcars
+mtcars_missing$mpg[c(1,5,10)] <- NA
+mtcars_missing$hp[c(3,7,15)] <- NA
+
+create_table(
+  formula = transmission ~ mpg + hp + wt,
+  data = mtcars_missing,
+  strata = "engine_shape",
+  pvalue = TRUE,
+  totals = TRUE,
+  missing = TRUE,
+  theme = "nejm"
+)
+```
+
+
+
+### 3. Lancet Theme - Multi-center Trial Format
+*Stratified by cylinder count with comprehensive statistics*
+
+```{r theme-lancet-demo}
+create_table(
+  formula = transmission ~ mpg + hp + wt + engine_shape,
+  data = mtcars,
+  strata = "cylinders",
+  pvalue = TRUE,
+  totals = TRUE,
+  missing = FALSE,
+  theme = "lancet"
+)
+```
+
+
+
+### 4. JAMA Theme (Journal of American Medical Association)
+*Professional medical journal styling with lettered footnotes*
+
+```{r theme-jama-demo}
+create_table(
+  formula = transmission ~ mpg + hp + wt + cylinders,
+  data = mtcars_missing,
+  pvalue = TRUE,
+  totals = TRUE,
+  missing = TRUE,
+  theme = "jama"
+)
+```
+
+
+
+### 5. Simple Theme - Descriptive with Footnotes
+*Descriptive statistics with custom footnotes demonstration*
+
+```{r theme-simple-demo}
+# Create footnotes for the analysis (using proper structure)
+analysis_footnotes <- list(
+  variables = list(
+    mpg = "Miles per gallon measured at highway speeds",
+    hp = "Horsepower measured at peak engine performance",
+    wt = "Weight includes vehicle and standard equipment"
+  ),
+  general = "Data from 1974 Motor Trend magazine"
+)
+
+create_table(
+  formula = transmission ~ mpg + hp + wt + cylinders,
+  data = mtcars,
+  pvalue = FALSE,
+  totals = TRUE,
+  missing = FALSE,
+  footnotes = analysis_footnotes,
+  theme = "simple"
+)
+```
+
+
+# Additional Dataset Examples
+
+
+
+## Iris Dataset: Biological Measurements
+
+The classic iris dataset demonstrates how themes handle multiple factor levels and continuous measurements.
+
+```{r iris-prep}
+data(iris)
+knitr::kable(head(iris[, c("Species", "Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]), 
+             caption = "Sample of iris data - Species comparison") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                           full_width = FALSE)
+```
+
+### Medical Journal Theme Comparison: Iris Species Analysis
+
+
+### NEJM Theme - Multi-group Analysis
+
+```{r iris-nejm}
+# Demonstrate footnotes with NEJM theme (uses numbered footnotes)
+nejm_footnotes <- list(
+  general = c(
+    "Data from Anderson's iris dataset (1935)",
+    "Measurements standardized to nearest 0.1 cm",
+    "Statistical significance tested at alpha = 0.05"
+  )
+)
+
+create_table(
+  formula = Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width,
+  data = iris,
+  pvalue = TRUE,
+  totals = TRUE,
+  footnotes = nejm_footnotes,
+  theme = "nejm"
+)
+```
+
+
+
+### JAMA Theme - Multi-group Analysis
+
+```{r iris-jama}
+# Demonstrate footnotes with JAMA theme (uses lettered footnotes)
+iris_footnotes <- list(
+  general = c(
+    "Measurements taken from dried specimens",
+    "All measurements in centimeters", 
+    "P-values from one-way ANOVA across species"
+  )
+)
+
+create_table(
+  formula = Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width,
+  data = iris,
+  pvalue = TRUE,
+  totals = TRUE,
+  footnotes = iris_footnotes,
+  theme = "jama"
+)
+```
+
+
+
+
+
+
+## Sleep Data: Clinical Trial Example
+
+Student's sleep data demonstrating clinical trial-style reporting across different themes.
+
+```{r sleep-prep}
+data(sleep)
+sleep$group <- factor(sleep$group, labels = c("Drug 1", "Drug 2"))
+
+# Add simulated baseline characteristics for better demonstration
+set.seed(456)
+sleep$age <- round(rnorm(nrow(sleep), 25, 3))
+sleep$sex <- factor(sample(c("Male", "Female"), nrow(sleep), replace = TRUE))
+
+knitr::kable(head(sleep), caption = "Sleep study data with simulated demographics") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                           full_width = FALSE)
+```
+
+### Clinical Theme Comparison: Sleep Study
+
+
+### Lancet Theme - Clinical Trial Format
+
+```{r sleep-lancet}
+create_table(
+  formula = group ~ extra + age + sex,
+  data = sleep,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "lancet"
+)
+```
+
+
+
+### Simple Theme - Report Format
+
+```{r sleep-simple}
+create_table(
+  formula = group ~ extra + age + sex,
+  data = sleep,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "simple"
+)
+```
+
+
+
+
+## 4. Plant Growth Data (`PlantGrowth`)
+
+Experimental data comparing plant weights under different conditions.
+
+```{r plantgrowth}
+data(PlantGrowth)
+knitr::kable(head(PlantGrowth), caption = "Sample of PlantGrowth data")
+
+# Simple treatment comparison
+create_table(
+  formula = group ~ weight,
+  data = PlantGrowth,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "console"
+)
+```
+
+## 5. Tooth Growth Data (`ToothGrowth`)
+
+Guinea pig tooth growth under different vitamin C treatments.
+
+```{r toothgrowth}
+data(ToothGrowth)
+ToothGrowth$dose <- factor(ToothGrowth$dose)
+knitr::kable(head(ToothGrowth), caption = "Sample of ToothGrowth data")
+
+# Demonstrate footnotes with clinical research context
+clinical_footnotes <- list(
+  variables = list(
+    supp = "VC = Vitamin C supplement (ascorbic acid); OJ = Orange juice as natural vitamin C source",
+    len = "Tooth length measured in microns",
+    dose = "Dose levels: 0.5, 1.0, and 2.0 mg/day"
+  ),
+  general = "Guinea pig tooth growth study (Crampton, 1947)"
+)
+
+# Compare by supplement type with footnotes
+create_table(
+  formula = supp ~ len + dose,
+  data = ToothGrowth,
+  pvalue = TRUE,
+  totals = TRUE,
+  footnotes = clinical_footnotes,
+  theme = "jama"
+)
+```
+
+### Analysis by Dose
+
+```{r toothgrowth-dose}
+# Analysis with dose as grouping variable
+create_table(
+  formula = dose ~ len,
+  data = ToothGrowth,
+  pvalue = TRUE,
+  theme = "lancet"
+)
+```
+
+## 6. Chickwts Data (Chicken Weights)
+
+Chicken weights by different feed types.
+
+```{r chickwts}
+data(chickwts)
+knitr::kable(head(chickwts), caption = "Sample of chickwts data")
+
+create_table(
+  formula = feed ~ weight,
+  data = chickwts,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "console"
+)
+```
+
+## 7. Built-in Dataset with Missing Values (`airquality`)
+
+Environmental data with naturally occurring missing values.
+
+```{r airquality}
+data(airquality)
+airquality$Month <- factor(
+  month.name[airquality$Month],
+  levels = month.name[5:9]  # May through September
+)
+knitr::kable(head(airquality), caption = "Sample of airquality data")
+
+# Show how missing values are handled
+create_table(
+  formula = Month ~ Ozone + Solar.R + Wind + Temp,
+  data = airquality,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "nejm"
+)
+```
+
+# Theme Comparison
+
+Let's demonstrate the different medical journal themes side by side:
+
+## Console Theme (Default)
+
+```{r theme-console}
+create_table(
+  formula = transmission ~ mpg + hp + wt,
+  data = mtcars,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "console"
+)
+```
+
+## NEJM Theme (with striping)
+
+```{r theme-nejm}
+create_table(
+  formula = transmission ~ mpg + hp + wt,
+  data = mtcars,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "nejm"
+)
+```
+
+## Lancet Theme (clean minimal)
+
+```{r theme-lancet}
+create_table(
+  formula = transmission ~ mpg + hp + wt,
+  data = mtcars,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "lancet"
+)
+```
+
+## JAMA Theme (clean minimal)
+
+```{r theme-jama}
+create_table(
+  formula = transmission ~ mpg + hp + wt,
+  data = mtcars,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "jama"
+)
+```
+
+# Performance Demo
+
+```{r performance-demo}
+# Demonstrate with larger simulated dataset
+set.seed(789)
+large_data <- data.frame(
+  treatment = factor(sample(c("Placebo", "Drug A", "Drug B"), 1000, replace = TRUE)),
+  age = round(rnorm(1000, 65, 15)),
+  sex = factor(sample(c("Male", "Female"), 1000, replace = TRUE)),
+  weight = round(rnorm(1000, 70, 15), 1),
+  height = round(rnorm(1000, 170, 10), 1),
+  center = factor(sample(paste("Center", 1:5), 1000, replace = TRUE))
+)
+
+# Time the table creation  
+system.time({
+  create_table(
+    formula = treatment ~ age + sex + weight + height,
+    data = large_data,
+    pvalue = TRUE,
+    totals = TRUE,
+    theme = "nejm"
+  )
+})
+```
+
+# Available Themes
+
+```{r available-themes}
+available_themes <- list_available_themes()
+print(available_themes)
+```
+
+The package includes `r length(available_themes)` built-in themes optimized for different journal requirements and output formats.
+
+# Conclusion
+
+The `zztable1_nextgen` package provides a flexible and efficient way to create publication-ready "Table 1" summaries. The examples in this vignette demonstrate:
+
+- **Parameter Flexibility**: `strata`, `missing`, `pvalue`, `totals`, and `footnotes` parameters
+- **Theme Variety**: All 5 built-in themes with authentic journal formatting
+- **Footnote Support**: Both numbered (NEJM, Simple) and lettered (JAMA, Lancet) footnote styles
+- **Missing Data Handling**: Comprehensive missing value reporting when `missing=TRUE`
+- **Stratified Analysis**: Multi-group comparisons using the `strata` parameter
+- **Performance**: Efficient handling of large datasets with complex parameter combinations
+
+Key footnote features demonstrated:
+- **NEJM Theme**: Numbered footnotes (1, 2, 3) for clinical publications
+- **JAMA Theme**: Lettered footnotes (a, b, c) for medical research  
+- **Simple Theme**: Numbered footnotes for general reports
+- **Custom Content**: Flexible footnote text for methods, data sources, and definitions
+
+The package maintains the familiar R formula interface while providing significant performance improvements and enhanced functionality through its optimized architecture.

@@ -1,0 +1,136 @@
+---
+title: "test tableR code"
+author: "R.G. Thomas"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+fontsize: 11pt
+geometry: "left=3cm,right=5cm,top=2cm,bottom=2cm"
+output:
+  pdf_document:
+    toc: true
+    number_sections: true
+    highlight: tango
+    keep_tex: true
+    includes:
+      in_header: "~/shr/preamble.tex"
+---
+
+
+```{r include=F, echo=F}
+# clear env: objects and packages
+rm(list = ls())
+options(
+  knitr.kable.NA = "", dplyr.summarise.inform = FALSE,
+  dplyr.print_max = 1e9, knitr.table.format = "latex"
+)
+library(pacman)
+p_load(janitor, kableExtra, tidyverse, knitr, lubridate, readxl)
+
+opts_chunk$set(
+  warning = FALSE, message = FALSE, echo = FALSE, fig.width = 3.2,
+  fig.height = 3, results = "asis", dev = "pdf",
+  opts_chunk$set(cache.path = "cache/")
+)
+source("~/shr/zz.tools.R")
+options(scipen = 1, digits = 2)
+```
+
+\input{/Users/zenn/shr/zz.tools.tex}
+
+```{r echo=F}
+source("./rgttable1/R/claude2_t2.R")
+```
+```{r }
+theme_npg <- list(
+  foreground = c("black", "black", "black", "black"),
+  background = c("#f0efd4", "#e8e6bc", "#f0efd4", "#f0efd4")
+)
+theme_nejm <- list(
+  foreground = c("black", "black", "black", "black", "black"),
+  background = c("#fff7e9", "white", "#fff7e9", "white", "white")
+)
+
+theme_green <- list(
+  foreground = c("black", "black", "black", "black"),
+  background = c("#99cfa8", "#d4f0dc", "#94ebad", "yellow")
+)
+theme_simple <- list(
+  foreground = c("black", "black", "black", "black"),
+  background = c("cyan", "blue", "green", "yellow")
+)
+theme_bw <- list(
+  foreground = c("black", "black", "black", "black"),
+  background = c("white", "white", "white", "white")
+)
+```
+```{r }
+options(knitr.kable.NA = "")
+library(pacman)
+p_load(
+  berryFunctions, atable, purrr, kableExtra, tibble,
+  janitor, broom, palmerpenguins, dplyr
+)
+set.seed(10)
+p1 <- sample_n(penguins, 100) |>
+  dplyr::select(
+    species, flipper_length_mm, sex,
+    body_mass_g, bill_length_mm, island
+  ) |>
+  dplyr::mutate(flp = flipper_length_mm > 197) |>
+  dplyr::filter(!is.na(sex))
+
+size <- c(TRUE, FALSE)
+pvalue <- c(TRUE, FALSE)
+totals <- c(TRUE, FALSE)
+missing <- c(TRUE, FALSE)
+strata_logic <- c(TRUE, FALSE)
+grp_logic <- c(TRUE, FALSE)
+```
+```{r }
+pmap_wrap <- function(x) {
+  pmap(x, function(size, pvalue, totals, missing, strata_logic, grp_logic) {
+    fname <- paste0(
+      "strt", strata_logic, "grp", grp_logic, "size",
+      size, "pv", pvalue, "tot", totals, "miss", missing
+    )
+    form1 <- "sex ~ flp + body_mass_g "
+    form2 <- " ~ flp + body_mass_g "
+    form <- ifelse(grp_logic, form1, form2)
+    strata <- NULL
+    if (strata_logic) {
+      strata <- "island"
+    }
+    table1(as.formula(form),
+      strata = strata,
+      data = p1, pvalue = pvalue, size = size,
+      totals = totals, missing = missing
+    ) |>
+      latex(theme = theme_nejm, fname = fname, digits = 3)
+    out_file <- paste0(
+      "\\vspace{.5in} \\begin{figure}[htpb] \\centering
+    \\includegraphics[width=0.8 \\textwidth]{./tables/",
+      fname, ".pdf} \\caption{", fname, "} \\end{figure}"
+    )
+    cat(out_file, file = "temp.tex", append = T)
+  })
+}
+```
+```{r }
+grid <- expand.grid(
+  size = size, pvalue = pvalue,
+  totals = totals, missing = missing, strata_logic = strata_logic, grp_logic = grp_logic
+)
+if (file.exists("temp.tex")) {
+  foo <- file.remove("temp.tex")
+}
+# filter out of grid the rows where group_logic is false, and pvalue is true
+grid2 <- grid |> dplyr::filter(!(pvalue & !grp_logic))
+grid3 <- grid2 |> dplyr::filter(!(!totals & !grp_logic))
+
+
+# slice(grid, 32:40)
+# grid2 <- slice(grid, 33:33)
+out <- grid3 %>% pmap_wrap()
+```
+
+\input{ "temp.tex" }
+

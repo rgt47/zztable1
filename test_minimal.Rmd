@@ -1,0 +1,61 @@
+---
+title: "Minimal Test"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = 'asis')
+
+# Source all required files
+source("R/table1.R")
+source("R/blueprint.R")
+source("R/validation_consolidated.R") 
+source("R/dimensions.R")
+source("R/cells.R")
+source("R/themes.R")
+source("R/rendering.R")
+source("R/utils.R")
+
+# Helper function to create tables
+create_table <- function(formula, data, ...) {
+  args <- list(...)
+  theme_arg <- args$theme %||% "console"
+  
+  if (is.character(theme_arg)) {
+    theme <- get_theme(theme_arg)
+  } else if (is.list(theme_arg)) {
+    theme <- theme_arg
+  } else {
+    theme <- get_theme("console")
+  }
+  
+  bp <- table1(formula = formula, data = data, ...)
+  
+  if (knitr::is_latex_output()) {
+    output <- render_latex(bp, theme)
+  } else if (knitr::is_html_output()) {
+    output <- render_html(bp, theme)
+  } else {
+    output <- render_console(bp, theme)
+  }
+  
+  return(knitr::asis_output(paste(output, collapse = "\n")))
+}
+
+# Helper function for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x
+```
+
+# Minimal Table Test
+
+```{r basic-test}
+data(ToothGrowth)
+ToothGrowth$dose <- factor(ToothGrowth$dose)
+
+create_table(
+  supp ~ len,
+  data = ToothGrowth,
+  theme = "console",
+  pvalue = TRUE
+)
+```

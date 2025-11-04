@@ -1,0 +1,8 @@
+^\.claude$
+^\.Rproj\.user$
+^\.Rhistory$
+^\.RData$
+^docs$
+^_pkgdown\.yml$
+^reference\.pdf$
+^zztable1nextgen_.*\.tar\.gz$

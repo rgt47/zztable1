@@ -1,0 +1,244 @@
+---
+title: "Theming System Demonstration"
+author: "zztable1_nextgen"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    latex_engine: pdflatex
+    extra_dependencies:
+      - xcolor
+      - colortbl 
+      - array
+      - booktabs
+      - longtable
+      - float
+      - threeparttable
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Theming System Demonstration}
+  %\VignetteEngine{knitr::rmarkdown}  
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  results = 'asis'
+)
+
+# Load required libraries
+library(htmltools)
+
+# Source all required files
+source("../R/table1.R")
+source("../R/blueprint.R")
+source("../R/validation_consolidated.R") 
+source("../R/dimensions.R")
+source("../R/cells.R")
+source("../R/themes.R")
+source("../R/rendering.R")
+source("../R/utils.R")
+```
+
+```{r theme-css, results='asis', echo=FALSE}
+# Generate and inject CSS for theme styling
+theme_css <- generate_theme_css()
+cat("<style>\n")
+cat(theme_css)
+cat("\n</style>")
+```
+
+```{r helper-functions, include=FALSE}
+# Helper function for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+# Helper function to create tables with appropriate format
+create_table <- function(formula, data, ...) {
+  # Determine output format
+  if (knitr::is_latex_output()) {
+    layout <- "latex"
+    format_type <- "latex"
+  } else {
+    layout <- "html"
+    format_type <- "html"
+  }
+  
+  # Extract theme from arguments
+  args <- list(...)
+  theme_arg <- args$theme %||% "console"
+  
+  # Handle both theme names and custom theme objects
+  if (is.character(theme_arg)) {
+    theme <- get_theme(theme_arg)
+  } else if (is.list(theme_arg)) {
+    theme <- theme_arg
+  } else {
+    theme <- get_theme("console")
+  }
+  
+  bp <- table1(formula = formula, data = data, ...)
+  
+  # Get the rendered output without cat() printing
+  output <- switch(format_type,
+    "html" = render_html(bp, theme),
+    "latex" = render_latex(bp, theme),
+    render_console(bp, theme)
+  )
+  
+  if (format_type == "html") {
+    # For HTML output in R Markdown, use knitr::asis_output to properly inject HTML
+    return(knitr::asis_output(paste(output, collapse = "\n")))
+  } else if (format_type == "latex") {
+    # For LaTeX output, use knitr::asis_output for raw LaTeX
+    return(knitr::asis_output(paste(output, collapse = "\n")))
+  } else {
+    # For console output
+    cat(paste(output, collapse = "\n"))
+    cat("\n")
+  }
+}
+```
+
+# Introduction
+
+The `zztable1_nextgen` package includes a comprehensive theming system that allows you to format tables according to different journal standards. This vignette demonstrates three major medical journal themes: NEJM, Lancet, and JAMA.
+
+# Sample Data Setup
+
+We'll use a consistent clinical trial dataset throughout this vignette to clearly show the differences between themes.
+
+```{r data-setup}
+# Create a realistic clinical trial dataset
+set.seed(123)
+n <- 200
+
+clinical_data <- data.frame(
+  treatment = factor(
+    sample(c("Placebo", "Drug A", "Drug B"), n, replace = TRUE, prob = c(0.4, 0.3, 0.3)),
+    levels = c("Placebo", "Drug A", "Drug B")
+  ),
+  age = round(rnorm(n, 65, 12)),
+  sex = factor(sample(c("Male", "Female"), n, replace = TRUE, prob = c(0.6, 0.4))),
+  bmi = round(rnorm(n, 28, 5), 1),
+  diabetes = factor(sample(c("No", "Yes"), n, replace = TRUE, prob = c(0.7, 0.3)))
+)
+
+# Add some missing values to make it realistic
+clinical_data$bmi[sample(1:n, 10)] <- NA
+
+head(clinical_data)
+```
+
+# Journal-Specific Themes
+
+## New England Journal of Medicine (NEJM) Theme
+
+NEJM style emphasizes clean, minimal formatting with the distinctive ± (plus-minus) format for continuous variables.
+
+```{r nejm-theme, results='asis'}
+create_table(
+  treatment ~ age + sex + bmi + diabetes,
+  data = clinical_data,
+  theme = "nejm",
+  pvalue = TRUE,
+  totals = TRUE
+)
+```
+
+**Key NEJM Features:**
+- Uses ± symbol for mean (standard deviation)
+- Minimal borders with top/middle/bottom rules only
+- Alternating light yellow/cream row striping for improved readability
+- Bold headers
+- 1 decimal place precision
+- Clean, professional appearance matching actual NEJM publications
+
+## The Lancet Theme
+
+The Lancet style uses parentheses format and slightly different formatting conventions.
+
+```{r lancet-theme, results='asis'}
+create_table(
+  treatment ~ age + sex + bmi + diabetes,
+  data = clinical_data,
+  theme = "lancet",
+  pvalue = TRUE,
+  totals = TRUE
+)
+```
+
+**Key Lancet Features:**
+- Uses parentheses for mean (standard deviation)
+- Clean white background with minimal horizontal-only borders
+- Sans-serif font family
+- 1 decimal place precision
+- Professional medical journal appearance
+
+## JAMA Theme
+
+JAMA formatting follows conservative guidelines typical of American medical publications.
+
+```{r jama-theme, results='asis'}
+create_table(
+  treatment ~ age + sex + bmi + diabetes,
+  data = clinical_data,
+  theme = "jama",
+  pvalue = TRUE,
+  totals = TRUE
+)
+```
+
+**Key JAMA Features:**
+- Uses parentheses for mean (standard deviation)
+- Clean white background with minimal horizontal-only borders
+- Traditional medical journal appearance  
+- 1 decimal place precision
+- Lettered footnote style
+
+# Theme Comparison Summary
+
+```{r theme-summary, echo=FALSE}
+theme_comparison <- data.frame(
+  Theme = c("NEJM", "Lancet", "JAMA"),
+  `Continuous Variables` = c("Mean ± SD", "Mean (SD)", "Mean (SD)"),
+  `Border Style` = c("Top/Mid/Bottom rules + striping", "Horizontal rules only", "Horizontal rules only"),
+  `Font` = c("Arial, sans-serif", "Arial, sans-serif", "Arial, sans-serif"),
+  `Decimal Places` = c("1", "1", "1"),
+  `Best For` = c(
+    "NEJM submissions",
+    "Lancet submissions", 
+    "JAMA & American journals"
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(theme_comparison, caption = "Theme Comparison Summary")
+```
+
+# Usage Guidelines
+
+Choose themes based on your target publication:
+
+- **NEJM Theme**: Use for New England Journal of Medicine submissions or when you prefer the distinctive ± format
+- **Lancet Theme**: Use for The Lancet submissions or European medical journals
+- **JAMA Theme**: Use for JAMA submissions or other American medical publications
+
+All themes maintain the same high performance and feature set while providing publication-ready formatting tailored to specific journal requirements.
+
+# Available Themes
+
+```{r available-themes}
+available_themes <- list_available_themes()
+print(available_themes)
+```
+
+The package includes `r length(available_themes)` built-in themes. The three demonstrated above represent the most commonly used medical journal styles.

@@ -1,0 +1,1139 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{threeparttable}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Comprehensive Theme Showcase: Table 1 Examples with Built-in R Datasets},
+  pdfauthor={zztable1\_nextgen},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Comprehensive Theme Showcase: Table 1 Examples with Built-in R
+Datasets}
+\author{zztable1\_nextgen}
+\date{2025-09-09}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\section{Introduction}\label{introduction}
+
+This comprehensive vignette showcases \textbf{all available themes} in
+\texttt{zztable1\_nextgen} using carefully selected built-in R datasets.
+Each theme is designed to match specific publication standards, from
+medical journals to general statistical reports.
+
+\subsection{Available Themes}\label{available-themes}
+
+The package includes \textbf{5} built-in themes:
+
+\begin{table}
+\centering
+\caption{\label{tab:theme-list}Available Themes in zztable1nextgen}
+\centering
+\begin{tabular}[t]{l|l}
+\hline
+Theme & Description\\
+\hline
+console & Console - Basic monospace output for development\\
+\hline
+nejm & NEJM - New England Journal of Medicine styling with authentic cream striping\\
+\hline
+lancet & Lancet - Clean minimal formatting matching The Lancet\\
+\hline
+jama & JAMA - Journal of American Medical Association styling\\
+\hline
+simple & Simple - Clean general-purpose theme for reports\\
+\hline
+\end{tabular}
+\end{table}
+
+Each theme will be demonstrated using the same dataset to clearly show
+the formatting differences.
+
+\section{Theme Showcase: Motor Trend Car
+Dataset}\label{theme-showcase-motor-trend-car-dataset}
+
+We'll use the \texttt{mtcars} dataset to demonstrate all themes with
+identical data and parameters. This allows for direct comparison of
+theme formatting while maintaining consistent content.
+
+\subsection{Dataset Preparation}\label{dataset-preparation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Prepare mtcars with meaningful factor variables}
+\FunctionTok{data}\NormalTok{(mtcars)}
+\NormalTok{mtcars}\SpecialCharTok{$}\NormalTok{transmission }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+  \FunctionTok{ifelse}\NormalTok{(mtcars}\SpecialCharTok{$}\NormalTok{am }\SpecialCharTok{==} \DecValTok{1}\NormalTok{, }\StringTok{"Manual"}\NormalTok{, }\StringTok{"Automatic"}\NormalTok{),}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Automatic"}\NormalTok{, }\StringTok{"Manual"}\NormalTok{)}
+\NormalTok{)}
+\NormalTok{mtcars}\SpecialCharTok{$}\NormalTok{engine\_shape }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+  \FunctionTok{ifelse}\NormalTok{(mtcars}\SpecialCharTok{$}\NormalTok{vs }\SpecialCharTok{==} \DecValTok{1}\NormalTok{, }\StringTok{"V{-}shaped"}\NormalTok{, }\StringTok{"Straight"}\NormalTok{),}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Straight"}\NormalTok{, }\StringTok{"V{-}shaped"}\NormalTok{)}
+\NormalTok{)}
+\NormalTok{mtcars}\SpecialCharTok{$}\NormalTok{cylinders }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(mtcars}\SpecialCharTok{$}\NormalTok{cyl)}
+
+\CommentTok{\# Show sample data}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(mtcars[, }\FunctionTok{c}\NormalTok{(}\StringTok{"mpg"}\NormalTok{, }\StringTok{"hp"}\NormalTok{, }\StringTok{"wt"}\NormalTok{, }\StringTok{"transmission"}\NormalTok{, }\StringTok{"engine\_shape"}\NormalTok{, }\StringTok{"cylinders"}\NormalTok{)]), }
+             \AttributeTok{caption =} \StringTok{"Sample of prepared mtcars data"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{bootstrap\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hover"}\NormalTok{, }\StringTok{"condensed"}\NormalTok{), }
+                           \AttributeTok{full\_width =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[t]{lrrrlll}
+\caption{\label{tab:mtcars-prep}Sample of prepared mtcars data}\\
+\toprule
+ & mpg & hp & wt & transmission & engine\_shape & cylinders\\
+\midrule
+Mazda RX4 & 21.0 & 110 & 2.620 & Manual & Straight & 6\\
+Mazda RX4 Wag & 21.0 & 110 & 2.875 & Manual & Straight & 6\\
+Datsun 710 & 22.8 & 93 & 2.320 & Manual & V-shaped & 4\\
+Hornet 4 Drive & 21.4 & 110 & 3.215 & Automatic & V-shaped & 6\\
+Hornet Sportabout & 18.7 & 175 & 3.440 & Automatic & Straight & 8\\
+\addlinespace
+Valiant & 18.1 & 105 & 3.460 & Automatic & V-shaped & 6\\
+\bottomrule
+\end{longtable}
+
+\subsection{Complete Theme Showcase}\label{complete-theme-showcase}
+
+Each theme below displays the same analysis (transmission type vs.~car
+characteristics) to highlight formatting differences:
+
+\subsubsection{Console Theme - Basic
+Analysis}\label{console-theme---basic-analysis}
+
+\emph{Simple comparison without p-values or totals}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt }\SpecialCharTok{+}\NormalTok{ cylinders,}
+  \AttributeTok{data =}\NormalTok{ mtcars,}
+  \AttributeTok{pvalue =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{missing =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"console"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lrr}
+\hline
+variables & Automatic & Manual \\
+\hline
+mpg & 17.1 (3.8) & 24.4 (6.2) \\
+hp & 160.3 (53.9) & 126.8 (84.1) \\
+wt & 3.8 (0.8) & 2.4 (0.6) \\
+cylinders &  &  \\
+\hspace{1em}4 & 3 (16\%) & 8 (62\%) \\
+\hspace{1em}6 & 4 (21\%) & 3 (23\%) \\
+\hspace{1em}8 & 12 (63\%) & 2 (15\%) \\
+\hline
+\end{tabular}
+
+\subsubsection{NEJM Theme - Clinical Trial Style with
+Stratification}\label{nejm-theme---clinical-trial-style-with-stratification}
+
+\emph{Stratified analysis by engine shape with missing values shown}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Add some missing values for demonstration}
+\NormalTok{mtcars\_missing }\OtherTok{\textless{}{-}}\NormalTok{ mtcars}
+\NormalTok{mtcars\_missing}\SpecialCharTok{$}\NormalTok{mpg[}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{10}\NormalTok{)] }\OtherTok{\textless{}{-}} \ConstantTok{NA}
+\NormalTok{mtcars\_missing}\SpecialCharTok{$}\NormalTok{hp[}\FunctionTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{7}\NormalTok{,}\DecValTok{15}\NormalTok{)] }\OtherTok{\textless{}{-}} \ConstantTok{NA}
+
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt,}
+  \AttributeTok{data =}\NormalTok{ mtcars\_missing,}
+  \AttributeTok{strata =} \StringTok{"engine\_shape"}\NormalTok{,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{missing =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"nejm"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% NEJM theme colors and formatting
+\definecolor{nejmstripe}{HTML}{fefcf0}
+\definecolor{nejmtext}{HTML}{333333}
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{Automatic} & \textbf{Manual} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+Engine\_shape: Straight &  &  &  &  \\
+\rowcolor{nejmstripe} mpg & 14.7 $\pm$ 2.6 & 19.5 $\pm$ 4.4 & 16.2 $\pm$ 3.9 & 4e-04 \\
+hp & 188 $\pm$ 31.9 & 180.8 $\pm$ 98.8 & 185.3 $\pm$ 62.3 & 0.3796 \\
+\rowcolor{nejmstripe} wt & 4.1 $\pm$ 0.8 & 2.9 $\pm$ 0.5 & 3.7 $\pm$ 0.9 & 0 \\
+Engine\_shape: V-shaped &  &  &  &  \\
+\rowcolor{nejmstripe} mpg & 21 $\pm$ 2.6 & 28.4 $\pm$ 4.8 & 25 $\pm$ 5.4 & 4e-04 \\
+hp & 102.1 $\pm$ 20.9 & 78.5 $\pm$ 25.8 & 91.2 $\pm$ 25.4 & 0.3796 \\
+\rowcolor{nejmstripe} wt & 3.2 $\pm$ 0.3 & 2 $\pm$ 0.4 & 2.6 $\pm$ 0.7 & 0 \\
+ &  &  &  &  \\
+\rowcolor{nejmstripe}  &  &  &  &  \\
+ &  &  &  &  \\
+\rowcolor{nejmstripe}  &  &  &  &  \\
+\bottomrule
+\end{tabular}
+
+\subsubsection{3. Lancet Theme - Multi-center Trial
+Format}\label{lancet-theme---multi-center-trial-format}
+
+\emph{Stratified by cylinder count with comprehensive statistics}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt }\SpecialCharTok{+}\NormalTok{ engine\_shape,}
+  \AttributeTok{data =}\NormalTok{ mtcars,}
+  \AttributeTok{strata =} \StringTok{"cylinders"}\NormalTok{,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{missing =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"lancet"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% Lancet theme formatting
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{Automatic} & \textbf{Manual} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+Cylinders: 6 &  &  &  &  \\
+\hspace{1em}mpg & 19.1 (1.6) & 20.6 (0.8) & 19.7 (1.5) & 3e-04 \\
+\hspace{1em}hp & 115.2 (9.2) & 131.7 (37.5) & 122.3 (24.3) & 0.1798 \\
+\hspace{1em}wt & 3.4 (0.1) & 2.8 (0.1) & 3.1 (0.4) & 0 \\
+\hspace{1em}engine\_shape &  &  &  &  \\
+\hspace{1em}Straight & 0 (0\%) & 3 (100\%) & 3 (9\%) & 0.4727 \\
+\hspace{1em}V-shaped & 4 (100\%) & 0 (0\%) & 4 (12\%) &  \\
+Cylinders: 4 &  &  &  &  \\
+\hspace{1em}mpg & 22.9 (1.5) & 28.1 (4.5) & 26.7 (4.5) & 3e-04 \\
+\hspace{1em}hp & 84.7 (19.7) & 81.9 (22.7) & 82.6 (20.9) & 0.1798 \\
+\hspace{1em}wt & 2.9 (0.4) & 2 (0.4) & 2.3 (0.6) & 0 \\
+\hspace{1em}engine\_shape &  &  &  &  \\
+\hspace{1em}Straight & 0 (0\%) & 1 (12.5\%) & 1 (3\%) & 0.4727 \\
+\hspace{1em}V-shaped & 3 (100\%) & 7 (87.5\%) & 10 (31\%) &  \\
+Cylinders: 8 &  &  &  &  \\
+\hspace{1em}mpg & 15.1 (2.8) & 15.4 (0.6) & 15.1 (2.6) & 3e-04 \\
+\hspace{1em}hp & 194.2 (33.4) & 299.5 (50.2) & 209.2 (51) & 0.1798 \\
+\hspace{1em}wt & 4.1 (0.8) & 3.4 (0.3) & 4 (0.8) & 0 \\
+\hspace{1em}engine\_shape &  &  &  &  \\
+\hspace{1em}Straight & 12 (100\%) & 2 (100\%) & 14 (44\%) & 0.4727 \\
+\hspace{1em}V-shaped & 0 (0\%) & 0 (0\%) & 0 (0\%) &  \\
+\bottomrule
+\end{tabular}
+
+\subsubsection{4. JAMA Theme (Journal of American Medical
+Association)}\label{jama-theme-journal-of-american-medical-association}
+
+\emph{Professional medical journal styling with lettered footnotes}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt }\SpecialCharTok{+}\NormalTok{ cylinders,}
+  \AttributeTok{data =}\NormalTok{ mtcars\_missing,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{missing =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"jama"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% JAMA theme formatting
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{Automatic} & \textbf{Manual} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+mpg & 16.9 (4) & 24.7 (6.4) & 20.1 (6.3) & 4e-04 \\
+ &  &  &  &  \\
+hp & 152.6 (51.3) & 129.7 (87.2) & 143.1 (68) & 0.3796 \\
+ &  &  &  &  \\
+wt & 3.8 (0.8) & 2.4 (0.6) & 3.2 (1) & 0 \\
+cylinders &  &  &  &  \\
+\hspace{1em}4 & 3 (16\%) & 8 (62\%) & 11 (34\%) & 0.0091 \\
+\hspace{1em}6 & 4 (21\%) & 3 (23\%) & 7 (22\%) &  \\
+\hspace{1em}8 & 12 (63\%) & 2 (15\%) & 14 (44\%) &  \\
+\bottomrule
+\end{tabular}
+
+\subsubsection{5. Simple Theme - Descriptive with
+Footnotes}\label{simple-theme---descriptive-with-footnotes}
+
+\emph{Descriptive statistics with custom footnotes demonstration}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create footnotes for the analysis (using proper structure)}
+\NormalTok{analysis\_footnotes }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}
+  \AttributeTok{variables =} \FunctionTok{list}\NormalTok{(}
+    \AttributeTok{mpg =} \StringTok{"Miles per gallon measured at highway speeds"}\NormalTok{,}
+    \AttributeTok{hp =} \StringTok{"Horsepower measured at peak engine performance"}\NormalTok{,}
+    \AttributeTok{wt =} \StringTok{"Weight includes vehicle and standard equipment"}
+\NormalTok{  ),}
+  \AttributeTok{general =} \StringTok{"Data from 1974 Motor Trend magazine"}
+\NormalTok{)}
+
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt }\SpecialCharTok{+}\NormalTok{ cylinders,}
+  \AttributeTok{data =}\NormalTok{ mtcars,}
+  \AttributeTok{pvalue =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{missing =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{footnotes =}\NormalTok{ analysis\_footnotes,}
+  \AttributeTok{theme =} \StringTok{"simple"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{threeparttable}
+\begin{tabular}{lccc}
+\toprule
+variables & Automatic & Manual & Total \\
+\midrule
+mpg¹ & 17.15 (3.83) & 24.39 (6.17) & 20.09 (6.03) \\
+hp² & 160.26 (53.91) & 126.85 (84.06) & 146.69 (68.56) \\
+wt³ & 3.77 (0.78) & 2.41 (0.62) & 3.22 (0.98) \\
+cylinders &  &  &  \\
+\hspace{1em}4 & 3 (16\%) & 8 (62\%) & 11 (34\%) \\
+\hspace{1em}6 & 4 (21\%) & 3 (23\%) & 7 (22\%) \\
+\hspace{1em}8 & 12 (63\%) & 2 (15\%) & 14 (44\%) \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item[1] Miles per gallon measured at highway speeds
+\item[2] Horsepower measured at peak engine performance
+\item[3] Weight includes vehicle and standard equipment
+\item[\textbullet] Data from 1974 Motor Trend magazine
+\end{tablenotes}
+\end{threeparttable}
+
+\section{Additional Dataset Examples}\label{additional-dataset-examples}
+
+\subsection{Iris Dataset: Biological
+Measurements}\label{iris-dataset-biological-measurements}
+
+The classic iris dataset demonstrates how themes handle multiple factor
+levels and continuous measurements.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(iris)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(iris[, }\FunctionTok{c}\NormalTok{(}\StringTok{"Species"}\NormalTok{, }\StringTok{"Sepal.Length"}\NormalTok{, }\StringTok{"Sepal.Width"}\NormalTok{, }\StringTok{"Petal.Length"}\NormalTok{, }\StringTok{"Petal.Width"}\NormalTok{)]), }
+             \AttributeTok{caption =} \StringTok{"Sample of iris data {-} Species comparison"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{bootstrap\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hover"}\NormalTok{, }\StringTok{"condensed"}\NormalTok{), }
+                           \AttributeTok{full\_width =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[t]{lrrrr}
+\caption{\label{tab:iris-prep}Sample of iris data - Species comparison}\\
+\toprule
+Species & Sepal.Length & Sepal.Width & Petal.Length & Petal.Width\\
+\midrule
+setosa & 5.1 & 3.5 & 1.4 & 0.2\\
+setosa & 4.9 & 3.0 & 1.4 & 0.2\\
+setosa & 4.7 & 3.2 & 1.3 & 0.2\\
+setosa & 4.6 & 3.1 & 1.5 & 0.2\\
+setosa & 5.0 & 3.6 & 1.4 & 0.2\\
+\addlinespace
+setosa & 5.4 & 3.9 & 1.7 & 0.4\\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Medical Journal Theme Comparison: Iris Species
+Analysis}\label{medical-journal-theme-comparison-iris-species-analysis}
+
+\subsubsection{NEJM Theme - Multi-group
+Analysis}\label{nejm-theme---multi-group-analysis}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Demonstrate footnotes with NEJM theme (uses numbered footnotes)}
+\NormalTok{nejm\_footnotes }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}
+  \AttributeTok{general =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Data from Anderson\textquotesingle{}s iris dataset (1935)"}\NormalTok{,}
+    \StringTok{"Measurements standardized to nearest 0.1 cm"}\NormalTok{,}
+    \StringTok{"Statistical significance tested at alpha = 0.05"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ Species }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Sepal.Length }\SpecialCharTok{+}\NormalTok{ Sepal.Width }\SpecialCharTok{+}\NormalTok{ Petal.Length }\SpecialCharTok{+}\NormalTok{ Petal.Width,}
+  \AttributeTok{data =}\NormalTok{ iris,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{footnotes =}\NormalTok{ nejm\_footnotes,}
+  \AttributeTok{theme =} \StringTok{"nejm"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% NEJM theme colors and formatting
+\definecolor{nejmstripe}{HTML}{fefcf0}
+\definecolor{nejmtext}{HTML}{333333}
+
+\begin{threeparttable}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{variables} & \textbf{setosa} & \textbf{versicolor} & \textbf{virginica} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+Sepal.Length & 5 $\pm$ 0.4 & 5.9 $\pm$ 0.5 & 6.6 $\pm$ 0.6 & 5.8 $\pm$ 0.8 & 0 \\
+\rowcolor{nejmstripe} Sepal.Width & 3.4 $\pm$ 0.4 & 2.8 $\pm$ 0.3 & 3 $\pm$ 0.3 & 3.1 $\pm$ 0.4 & 0 \\
+Petal.Length & 1.5 $\pm$ 0.2 & 4.3 $\pm$ 0.5 & 5.6 $\pm$ 0.6 & 3.8 $\pm$ 1.8 & 0 \\
+\rowcolor{nejmstripe} Petal.Width & 0.2 $\pm$ 0.1 & 1.3 $\pm$ 0.2 & 2 $\pm$ 0.3 & 1.2 $\pm$ 0.8 & 0 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item[\textbullet] Data from Anderson's iris dataset (1935)
+\item[\textbullet] Measurements standardized to nearest 0.1 cm
+\item[\textbullet] Statistical significance tested at alpha = 0.05
+\end{tablenotes}
+\end{threeparttable}
+
+\subsubsection{JAMA Theme - Multi-group
+Analysis}\label{jama-theme---multi-group-analysis}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Demonstrate footnotes with JAMA theme (uses lettered footnotes)}
+\NormalTok{iris\_footnotes }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}
+  \AttributeTok{general =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Measurements taken from dried specimens"}\NormalTok{,}
+    \StringTok{"All measurements in centimeters"}\NormalTok{, }
+    \StringTok{"P{-}values from one{-}way ANOVA across species"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ Species }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Sepal.Length }\SpecialCharTok{+}\NormalTok{ Sepal.Width }\SpecialCharTok{+}\NormalTok{ Petal.Length }\SpecialCharTok{+}\NormalTok{ Petal.Width,}
+  \AttributeTok{data =}\NormalTok{ iris,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{footnotes =}\NormalTok{ iris\_footnotes,}
+  \AttributeTok{theme =} \StringTok{"jama"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% JAMA theme formatting
+
+\begin{threeparttable}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{variables} & \textbf{setosa} & \textbf{versicolor} & \textbf{virginica} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+Sepal.Length & 5 (0.4) & 5.9 (0.5) & 6.6 (0.6) & 5.8 (0.8) & 0 \\
+Sepal.Width & 3.4 (0.4) & 2.8 (0.3) & 3 (0.3) & 3.1 (0.4) & 0 \\
+Petal.Length & 1.5 (0.2) & 4.3 (0.5) & 5.6 (0.6) & 3.8 (1.8) & 0 \\
+Petal.Width & 0.2 (0.1) & 1.3 (0.2) & 2 (0.3) & 1.2 (0.8) & 0 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item[\textbullet] Measurements taken from dried specimens
+\item[\textbullet] All measurements in centimeters
+\item[\textbullet] P-values from one-way ANOVA across species
+\end{tablenotes}
+\end{threeparttable}
+
+\subsection{Sleep Data: Clinical Trial
+Example}\label{sleep-data-clinical-trial-example}
+
+Student's sleep data demonstrating clinical trial-style reporting across
+different themes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(sleep)}
+\NormalTok{sleep}\SpecialCharTok{$}\NormalTok{group }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(sleep}\SpecialCharTok{$}\NormalTok{group, }\AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Drug 1"}\NormalTok{, }\StringTok{"Drug 2"}\NormalTok{))}
+
+\CommentTok{\# Add simulated baseline characteristics for better demonstration}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{456}\NormalTok{)}
+\NormalTok{sleep}\SpecialCharTok{$}\NormalTok{age }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(sleep), }\DecValTok{25}\NormalTok{, }\DecValTok{3}\NormalTok{))}
+\NormalTok{sleep}\SpecialCharTok{$}\NormalTok{sex }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}\FunctionTok{sample}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"Male"}\NormalTok{, }\StringTok{"Female"}\NormalTok{), }\FunctionTok{nrow}\NormalTok{(sleep), }\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{))}
+
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(sleep), }\AttributeTok{caption =} \StringTok{"Sleep study data with simulated demographics"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{bootstrap\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hover"}\NormalTok{, }\StringTok{"condensed"}\NormalTok{), }
+                           \AttributeTok{full\_width =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[t]{rllrl}
+\caption{\label{tab:sleep-prep}Sleep study data with simulated demographics}\\
+\toprule
+extra & group & ID & age & sex\\
+\midrule
+0.7 & Drug 1 & 1 & 21 & Female\\
+-1.6 & Drug 1 & 2 & 27 & Female\\
+-0.2 & Drug 1 & 3 & 27 & Female\\
+-1.2 & Drug 1 & 4 & 21 & Male\\
+-0.1 & Drug 1 & 5 & 23 & Male\\
+\addlinespace
+3.4 & Drug 1 & 6 & 24 & Female\\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Clinical Theme Comparison: Sleep
+Study}\label{clinical-theme-comparison-sleep-study}
+
+\subsubsection{Lancet Theme - Clinical Trial
+Format}\label{lancet-theme---clinical-trial-format}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ group }\SpecialCharTok{\textasciitilde{}}\NormalTok{ extra }\SpecialCharTok{+}\NormalTok{ age }\SpecialCharTok{+}\NormalTok{ sex,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"lancet"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% Lancet theme formatting
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{Drug 1} & \textbf{Drug 2} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+extra & 0.8 (1.8) & 2.3 (2) & 1.5 (2) & 0.0792 \\
+age & 25.1 (2.6) & 27.9 (3.8) & 26.5 (3.5) & 0.0698 \\
+sex &  &  &  &  \\
+\hspace{1em}Female & 7 (70\%) & 6 (60\%) & 13 (65\%) & 1 \\
+\hspace{1em}Male & 3 (30\%) & 4 (40\%) & 7 (35\%) &  \\
+\bottomrule
+\end{tabular}
+
+\subsubsection{Simple Theme - Report
+Format}\label{simple-theme---report-format}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ group }\SpecialCharTok{\textasciitilde{}}\NormalTok{ extra }\SpecialCharTok{+}\NormalTok{ age }\SpecialCharTok{+}\NormalTok{ sex,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"simple"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lcccc}
+\toprule
+variables & Drug 1 & Drug 2 & Total & p.value \\
+\midrule
+extra & 0.75 (1.79) & 2.33 (2) & 1.54 (2.02) & 0.0792 \\
+age & 25.1 (2.64) & 27.9 (3.75) & 26.5 (3.47) & 0.0698 \\
+sex &  &  &  &  \\
+\hspace{1em}Female & 7 (70\%) & 6 (60\%) & 13 (65\%) & 1 \\
+\hspace{1em}Male & 3 (30\%) & 4 (40\%) & 7 (35\%) &  \\
+\bottomrule
+\end{tabular}
+
+\subsection{\texorpdfstring{4. Plant Growth Data
+(\texttt{PlantGrowth})}{4. Plant Growth Data (PlantGrowth)}}\label{plant-growth-data-plantgrowth}
+
+Experimental data comparing plant weights under different conditions.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(PlantGrowth)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(PlantGrowth), }\AttributeTok{caption =} \StringTok{"Sample of PlantGrowth data"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}rl@{}}
+\caption{Sample of PlantGrowth data}\tabularnewline
+\toprule\noalign{}
+weight & group \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+weight & group \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+4.17 & ctrl \\
+5.58 & ctrl \\
+5.18 & ctrl \\
+6.11 & ctrl \\
+4.50 & ctrl \\
+4.61 & ctrl \\
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\CommentTok{\# Simple treatment comparison}
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ group }\SpecialCharTok{\textasciitilde{}}\NormalTok{ weight,}
+  \AttributeTok{data =}\NormalTok{ PlantGrowth,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"console"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lrrrrr}
+\hline
+variables & ctrl & trt1 & trt2 & Total & p.value \\
+\hline
+weight & 5 (0.6) & 4.7 (0.8) & 5.5 (0.4) & 5.1 (0.7) & 0.1944 \\
+\hline
+\end{tabular}
+
+\subsection{\texorpdfstring{5. Tooth Growth Data
+(\texttt{ToothGrowth})}{5. Tooth Growth Data (ToothGrowth)}}\label{tooth-growth-data-toothgrowth}
+
+Guinea pig tooth growth under different vitamin C treatments.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(ToothGrowth)}
+\NormalTok{ToothGrowth}\SpecialCharTok{$}\NormalTok{dose }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(ToothGrowth}\SpecialCharTok{$}\NormalTok{dose)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(ToothGrowth), }\AttributeTok{caption =} \StringTok{"Sample of ToothGrowth data"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}rll@{}}
+\caption{Sample of ToothGrowth data}\tabularnewline
+\toprule\noalign{}
+len & supp & dose \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+len & supp & dose \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+4.2 & VC & 0.5 \\
+11.5 & VC & 0.5 \\
+7.3 & VC & 0.5 \\
+5.8 & VC & 0.5 \\
+6.4 & VC & 0.5 \\
+10.0 & VC & 0.5 \\
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\CommentTok{\# Demonstrate footnotes with clinical research context}
+\NormalTok{clinical\_footnotes }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}
+  \AttributeTok{variables =} \FunctionTok{list}\NormalTok{(}
+    \AttributeTok{supp =} \StringTok{"VC = Vitamin C supplement (ascorbic acid); OJ = Orange juice as natural vitamin C source"}\NormalTok{,}
+    \AttributeTok{len =} \StringTok{"Tooth length measured in microns"}\NormalTok{,}
+    \AttributeTok{dose =} \StringTok{"Dose levels: 0.5, 1.0, and 2.0 mg/day"}
+\NormalTok{  ),}
+  \AttributeTok{general =} \StringTok{"Guinea pig tooth growth study (Crampton, 1947)"}
+\NormalTok{)}
+
+\CommentTok{\# Compare by supplement type with footnotes}
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ supp }\SpecialCharTok{\textasciitilde{}}\NormalTok{ len }\SpecialCharTok{+}\NormalTok{ dose,}
+  \AttributeTok{data =}\NormalTok{ ToothGrowth,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{footnotes =}\NormalTok{ clinical\_footnotes,}
+  \AttributeTok{theme =} \StringTok{"jama"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% JAMA theme formatting
+
+\begin{threeparttable}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{OJ} & \textbf{VC} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+len¹ & 20.7 (6.6) & 17 (8.3) & 18.8 (7.6) & 0.0604 \\
+dose² &  &  &  &  \\
+\hspace{1em}0.5 & 10 (33\%) & 10 (33\%) & 20 (33\%) & 1 \\
+\hspace{1em}1 & 10 (33\%) & 10 (33\%) & 20 (33\%) &  \\
+\hspace{1em}2 & 10 (33\%) & 10 (33\%) & 20 (33\%) &  \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item[1] Tooth length measured in microns
+\item[2] Dose levels: 0.5, 1.0, and 2.0 mg/day
+\item[\textbullet] Guinea pig tooth growth study (Crampton, 1947)
+\end{tablenotes}
+\end{threeparttable}
+
+\subsubsection{Analysis by Dose}\label{analysis-by-dose}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Analysis with dose as grouping variable}
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ dose }\SpecialCharTok{\textasciitilde{}}\NormalTok{ len,}
+  \AttributeTok{data =}\NormalTok{ ToothGrowth,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"lancet"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% Lancet theme formatting
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{0.5} & \textbf{1} & \textbf{2} & \textbf{p.value} \\
+\midrule
+len & 10.6 (4.5) & 19.7 (4.4) & 26.1 (3.8) & 0 \\
+\bottomrule
+\end{tabular}
+
+\subsection{6. Chickwts Data (Chicken
+Weights)}\label{chickwts-data-chicken-weights}
+
+Chicken weights by different feed types.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(chickwts)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(chickwts), }\AttributeTok{caption =} \StringTok{"Sample of chickwts data"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}rl@{}}
+\caption{Sample of chickwts data}\tabularnewline
+\toprule\noalign{}
+weight & feed \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+weight & feed \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+179 & horsebean \\
+160 & horsebean \\
+136 & horsebean \\
+227 & horsebean \\
+217 & horsebean \\
+168 & horsebean \\
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ feed }\SpecialCharTok{\textasciitilde{}}\NormalTok{ weight,}
+  \AttributeTok{data =}\NormalTok{ chickwts,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"console"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lrrrrrrrr}
+\hline
+variables & casein & horsebean & linseed & meatmeal & soybean & sunflower & Total & p.value \\
+\hline
+weight & 323.6 (64.4) & 160.2 (38.6) & 218.8 (52.2) & 276.9 (64.9) & 246.4 (54.1) & 328.9 (48.8) & 261.3 (78.1) & 0 \\
+\hline
+\end{tabular}
+
+\subsection{\texorpdfstring{7. Built-in Dataset with Missing Values
+(\texttt{airquality})}{7. Built-in Dataset with Missing Values (airquality)}}\label{built-in-dataset-with-missing-values-airquality}
+
+Environmental data with naturally occurring missing values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(airquality)}
+\NormalTok{airquality}\SpecialCharTok{$}\NormalTok{Month }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  month.name[airquality}\SpecialCharTok{$}\NormalTok{Month],}
+  \AttributeTok{levels =}\NormalTok{ month.name[}\DecValTok{5}\SpecialCharTok{:}\DecValTok{9}\NormalTok{]  }\CommentTok{\# May through September}
+\NormalTok{)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(airquality), }\AttributeTok{caption =} \StringTok{"Sample of airquality data"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}rrrrlr@{}}
+\caption{Sample of airquality data}\tabularnewline
+\toprule\noalign{}
+Ozone & Solar.R & Wind & Temp & Month & Day \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Ozone & Solar.R & Wind & Temp & Month & Day \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+41 & 190 & 7.4 & 67 & May & 1 \\
+36 & 118 & 8.0 & 72 & May & 2 \\
+12 & 149 & 12.6 & 74 & May & 3 \\
+18 & 313 & 11.5 & 62 & May & 4 \\
+NA & NA & 14.3 & 56 & May & 5 \\
+28 & NA & 14.9 & 66 & May & 6 \\
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\CommentTok{\# Show how missing values are handled}
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ Month }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Ozone }\SpecialCharTok{+}\NormalTok{ Solar.R }\SpecialCharTok{+}\NormalTok{ Wind }\SpecialCharTok{+}\NormalTok{ Temp,}
+  \AttributeTok{data =}\NormalTok{ airquality,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"nejm"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% NEJM theme colors and formatting
+\definecolor{nejmstripe}{HTML}{fefcf0}
+\definecolor{nejmtext}{HTML}{333333}
+
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{variables} & \textbf{May} & \textbf{June} & \textbf{July} & \textbf{August} & \textbf{September} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+Ozone & 23.6 $\pm$ 22.2 & 29.4 $\pm$ 18.2 & 59.1 $\pm$ 31.6 & 60 $\pm$ 39.7 & 31.4 $\pm$ 24.1 & 42.1 $\pm$ 33 & 0.6088 \\
+\rowcolor{nejmstripe} Solar.R & 181.3 $\pm$ 115.1 & 190.2 $\pm$ 92.9 & 216.5 $\pm$ 80.6 & 171.9 $\pm$ 76.8 & 167.4 $\pm$ 79.1 & 185.9 $\pm$ 90.1 & 0.7093 \\
+Wind & 11.6 $\pm$ 3.5 & 10.3 $\pm$ 3.8 & 8.9 $\pm$ 3 & 8.8 $\pm$ 3.2 & 10.2 $\pm$ 3.5 & 10 $\pm$ 3.5 & 0.1228 \\
+\rowcolor{nejmstripe} Temp & 65.5 $\pm$ 6.9 & 79.1 $\pm$ 6.6 & 83.9 $\pm$ 4.3 & 84 $\pm$ 6.6 & 76.9 $\pm$ 8.4 & 77.9 $\pm$ 9.5 & 0 \\
+\bottomrule
+\end{tabular}
+
+\section{Theme Comparison}\label{theme-comparison}
+
+Let's demonstrate the different medical journal themes side by side:
+
+\subsection{Console Theme (Default)}\label{console-theme-default}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt,}
+  \AttributeTok{data =}\NormalTok{ mtcars,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"console"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lrrrr}
+\hline
+variables & Automatic & Manual & Total & p.value \\
+\hline
+mpg & 17.1 (3.8) & 24.4 (6.2) & 20.1 (6) & 3e-04 \\
+hp & 160.3 (53.9) & 126.8 (84.1) & 146.7 (68.6) & 0.1798 \\
+wt & 3.8 (0.8) & 2.4 (0.6) & 3.2 (1) & 0 \\
+\hline
+\end{tabular}
+
+\subsection{NEJM Theme (with striping)}\label{nejm-theme-with-striping}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt,}
+  \AttributeTok{data =}\NormalTok{ mtcars,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"nejm"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% NEJM theme colors and formatting
+\definecolor{nejmstripe}{HTML}{fefcf0}
+\definecolor{nejmtext}{HTML}{333333}
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{Automatic} & \textbf{Manual} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+mpg & 17.1 $\pm$ 3.8 & 24.4 $\pm$ 6.2 & 20.1 $\pm$ 6 & 3e-04 \\
+\rowcolor{nejmstripe} hp & 160.3 $\pm$ 53.9 & 126.8 $\pm$ 84.1 & 146.7 $\pm$ 68.6 & 0.1798 \\
+wt & 3.8 $\pm$ 0.8 & 2.4 $\pm$ 0.6 & 3.2 $\pm$ 1 & 0 \\
+\bottomrule
+\end{tabular}
+
+\subsection{Lancet Theme (clean
+minimal)}\label{lancet-theme-clean-minimal}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt,}
+  \AttributeTok{data =}\NormalTok{ mtcars,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"lancet"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% Lancet theme formatting
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{Automatic} & \textbf{Manual} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+mpg & 17.1 (3.8) & 24.4 (6.2) & 20.1 (6) & 3e-04 \\
+hp & 160.3 (53.9) & 126.8 (84.1) & 146.7 (68.6) & 0.1798 \\
+wt & 3.8 (0.8) & 2.4 (0.6) & 3.2 (1) & 0 \\
+\bottomrule
+\end{tabular}
+
+\subsection{JAMA Theme (clean minimal)}\label{jama-theme-clean-minimal}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{create\_table}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ transmission }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpg }\SpecialCharTok{+}\NormalTok{ hp }\SpecialCharTok{+}\NormalTok{ wt,}
+  \AttributeTok{data =}\NormalTok{ mtcars,}
+  \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{theme =} \StringTok{"jama"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\% JAMA theme formatting
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{variables} & \textbf{Automatic} & \textbf{Manual} & \textbf{Total} & \textbf{p.value} \\
+\midrule
+mpg & 17.1 (3.8) & 24.4 (6.2) & 20.1 (6) & 3e-04 \\
+hp & 160.3 (53.9) & 126.8 (84.1) & 146.7 (68.6) & 0.1798 \\
+wt & 3.8 (0.8) & 2.4 (0.6) & 3.2 (1) & 0 \\
+\bottomrule
+\end{tabular}
+
+\section{Performance Demo}\label{performance-demo}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Demonstrate with larger simulated dataset}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{789}\NormalTok{)}
+\NormalTok{large\_data }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{treatment =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{sample}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"Placebo"}\NormalTok{, }\StringTok{"Drug A"}\NormalTok{, }\StringTok{"Drug B"}\NormalTok{), }\DecValTok{1000}\NormalTok{, }\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{)),}
+  \AttributeTok{age =} \FunctionTok{round}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{1000}\NormalTok{, }\DecValTok{65}\NormalTok{, }\DecValTok{15}\NormalTok{)),}
+  \AttributeTok{sex =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{sample}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"Male"}\NormalTok{, }\StringTok{"Female"}\NormalTok{), }\DecValTok{1000}\NormalTok{, }\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{)),}
+  \AttributeTok{weight =} \FunctionTok{round}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{1000}\NormalTok{, }\DecValTok{70}\NormalTok{, }\DecValTok{15}\NormalTok{), }\DecValTok{1}\NormalTok{),}
+  \AttributeTok{height =} \FunctionTok{round}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{1000}\NormalTok{, }\DecValTok{170}\NormalTok{, }\DecValTok{10}\NormalTok{), }\DecValTok{1}\NormalTok{),}
+  \AttributeTok{center =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{sample}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\StringTok{"Center"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{), }\DecValTok{1000}\NormalTok{, }\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{))}
+\NormalTok{)}
+
+\CommentTok{\# Time the table creation  }
+\FunctionTok{system.time}\NormalTok{(\{}
+  \FunctionTok{create\_table}\NormalTok{(}
+    \AttributeTok{formula =}\NormalTok{ treatment }\SpecialCharTok{\textasciitilde{}}\NormalTok{ age }\SpecialCharTok{+}\NormalTok{ sex }\SpecialCharTok{+}\NormalTok{ weight }\SpecialCharTok{+}\NormalTok{ height,}
+    \AttributeTok{data =}\NormalTok{ large\_data,}
+    \AttributeTok{pvalue =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{totals =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{theme =} \StringTok{"nejm"}
+\NormalTok{  )}
+\NormalTok{\})}
+\end{Highlighting}
+\end{Shaded}
+
+user system elapsed 0.007 0.000 0.007
+
+\section{Available Themes}\label{available-themes-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{available\_themes }\OtherTok{\textless{}{-}} \FunctionTok{list\_available\_themes}\NormalTok{()}
+\FunctionTok{print}\NormalTok{(available\_themes)}
+\end{Highlighting}
+\end{Shaded}
+
+{[}1{]} ``console'' ``nejm'' ``lancet'' ``jama'' ``simple''
+
+The package includes 5 built-in themes optimized for different journal
+requirements and output formats.
+
+\section{Conclusion}\label{conclusion}
+
+The \texttt{zztable1\_nextgen} package provides a flexible and efficient
+way to create publication-ready ``Table 1'' summaries. The examples in
+this vignette demonstrate:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Parameter Flexibility}: \texttt{strata}, \texttt{missing},
+  \texttt{pvalue}, \texttt{totals}, and \texttt{footnotes} parameters
+\item
+  \textbf{Theme Variety}: All 5 built-in themes with authentic journal
+  formatting
+\item
+  \textbf{Footnote Support}: Both numbered (NEJM, Simple) and lettered
+  (JAMA, Lancet) footnote styles
+\item
+  \textbf{Missing Data Handling}: Comprehensive missing value reporting
+  when \texttt{missing=TRUE}
+\item
+  \textbf{Stratified Analysis}: Multi-group comparisons using the
+  \texttt{strata} parameter
+\item
+  \textbf{Performance}: Efficient handling of large datasets with
+  complex parameter combinations
+\end{itemize}
+
+Key footnote features demonstrated: - \textbf{NEJM Theme}: Numbered
+footnotes (1, 2, 3) for clinical publications - \textbf{JAMA Theme}:
+Lettered footnotes (a, b, c) for medical research\\
+- \textbf{Simple Theme}: Numbered footnotes for general reports -
+\textbf{Custom Content}: Flexible footnote text for methods, data
+sources, and definitions
+
+The package maintains the familiar R formula interface while providing
+significant performance improvements and enhanced functionality through
+its optimized architecture.
+
+\end{document}

@@ -1,0 +1,540 @@
+---
+title: "zztable1_nextgen: Advanced Publication-Ready Summary Tables"
+author: "zztable1_nextgen Development Team"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    latex_engine: pdflatex
+    extra_dependencies:
+      - xcolor
+      - colortbl 
+      - array
+      - booktabs
+      - longtable
+      - float
+      - threeparttable
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    theme: flatly
+    highlight: tango
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{zztable1_nextgen: Advanced Publication-Ready Summary Tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE,
+  results = 'asis'
+)
+
+# Source all required files
+source("../R/table1.R")
+source("../R/blueprint.R")
+source("../R/validation_consolidated.R") 
+source("../R/dimensions.R")
+source("../R/cells.R")
+source("../R/themes.R")
+source("../R/rendering.R")
+source("../R/utils.R")
+```
+
+# Introduction
+
+The `zztable1_nextgen` package provides a next-generation architecture for
+creating publication-ready summary tables (commonly called "Table 1") used
+in biomedical research and clinical trials. This vignette demonstrates the
+key features and capabilities of the package.
+
+## Key Features
+
+- **Lazy Evaluation Architecture**: Fast blueprint creation with computation
+  on demand
+- **Journal-Specific Theming**: NEJM, Lancet, JAMA, BMJ formatting styles
+- **Advanced Footnote System**: Variable-specific, column-specific, and
+  general footnotes with superscript markers
+- **Multiple Output Formats**: Console, LaTeX, and HTML output with proper column headers
+- **Flexible Statistics**: Built-in and custom summary statistics
+- **Stratified Analysis**: Support for subgroup analyses
+- **Full Compatibility**: Same interface as original zztable1 package
+- **R Markdown Integration**: Automatic format detection for seamless PDF/HTML output
+
+## Installation and Setup
+
+```{r install, eval=FALSE}
+# Development version (when available)
+# devtools::install_github("user/zztable1_nextgen")
+
+# For this vignette, source the development file
+source("zztable1_nextgen.R")
+```
+
+# Basic Usage
+
+## Simple Summary Tables
+
+Let's start with a basic example using the mtcars dataset:
+
+```{r basic_example}
+# Prepare data
+data(mtcars)
+mtcars$transmission <- factor(
+  ifelse(mtcars$am == 1, "Manual", "Automatic"),
+  levels = c("Automatic", "Manual")
+)
+mtcars$engine_type <- factor(
+  ifelse(mtcars$vs == 1, "V-shaped", "Straight"),
+  levels = c("Straight", "V-shaped")
+)
+
+# Create basic summary table
+bp_basic <- table1(transmission ~ mpg + hp + wt, data = mtcars)
+
+# Display the table
+display_table(bp_basic, mtcars)
+```
+
+## Adding Statistical Tests
+
+Include p-values for group comparisons:
+
+```{r with_pvalues}
+bp_pvalues <- table1(transmission ~ mpg + hp + wt, 
+                     data = mtcars, 
+                     pvalue = TRUE)
+
+display_table(bp_pvalues, mtcars)
+```
+
+## Including Total Column
+
+Add an overall summary column:
+
+```{r with_totals}
+bp_totals <- table1(transmission ~ mpg + hp + wt,
+                    data = mtcars,
+                    pvalue = TRUE,
+                    totals = TRUE)
+
+display_table(bp_totals, mtcars)
+```
+
+# Advanced Features
+
+## Custom Numeric Summaries
+
+### Built-in Options
+
+The package provides several built-in summary statistics:
+
+```{r numeric_summaries}
+# Default: Mean (SD)
+bp_mean_sd <- table1(transmission ~ mpg + hp, data = mtcars)
+cat("Mean (SD) format:\n")
+display_table(bp_mean_sd, mtcars)
+
+# Median [IQR]
+bp_median_iqr <- table1(transmission ~ mpg + hp, data = mtcars,
+                        numeric_summary = "median_iqr")
+cat("\nMedian [IQR] format:\n")
+display_table(bp_median_iqr, mtcars)
+
+# Mean +/- SE
+bp_mean_se <- table1(transmission ~ mpg + hp, data = mtcars,
+                     numeric_summary = "mean_se")
+cat("\nMean +/- SE format:\n")
+display_table(bp_mean_se, mtcars)
+```
+
+### Custom Functions
+
+Create your own summary statistics:
+
+```{r custom_summary}
+# Custom function: Median (Min-Max)
+custom_summary <- function(x) {
+  med <- round(median(x, na.rm = TRUE), 1)
+  min_val <- round(min(x, na.rm = TRUE), 1)
+  max_val <- round(max(x, na.rm = TRUE), 1)
+  paste0(med, " (", min_val, "-", max_val, ")")
+}
+
+bp_custom <- table1(transmission ~ mpg + hp, data = mtcars,
+                    numeric_summary = custom_summary)
+
+cat("Custom Median (Min-Max) format:\n")
+display_table(bp_custom, mtcars)
+```
+
+## Stratified Analysis
+
+Perform subgroup analyses using stratification:
+
+```{r stratified}
+# Create stratification variable
+mtcars$cylinder_group <- factor(
+  ifelse(mtcars$cyl <= 4, "4-cylinder",
+  ifelse(mtcars$cyl <= 6, "6-cylinder", "8-cylinder")),
+  levels = c("4-cylinder", "6-cylinder", "8-cylinder")
+)
+
+# Stratified analysis
+bp_strata <- table1(transmission ~ mpg + hp, 
+                    data = mtcars,
+                    strata = "cylinder_group",
+                    pvalue = TRUE)
+
+display_table(bp_strata, mtcars)
+```
+
+# Journal-Specific Theming
+
+## Available Themes
+
+View all available themes:
+
+```{r list_themes}
+themes <- list_available_themes()
+print(themes)
+```
+
+## Theme Comparison
+
+### Default Theme
+
+```{r theme_default}
+bp_default <- table1(transmission ~ mpg + hp, data = mtcars, 
+                     theme = "default")
+cat("Default Theme:\n")
+display_table(bp_default, mtcars)
+```
+
+### NEJM Theme (1 decimal place)
+
+```{r theme_nejm}
+bp_nejm <- table1(transmission ~ mpg + hp, data = mtcars,
+                  theme = "nejm")
+cat("NEJM Theme (1 decimal place):\n")
+display_table(bp_nejm, mtcars)
+```
+
+### JAMA Theme (2 decimal places)
+
+```{r theme_jama}
+bp_jama <- table1(transmission ~ mpg + hp, data = mtcars,
+                  theme = "jama")
+cat("JAMA Theme (2 decimal places):\n")
+display_table(bp_jama, mtcars)
+```
+
+### Lancet Theme
+
+```{r theme_lancet}
+bp_lancet <- table1(transmission ~ mpg + hp, data = mtcars,
+                    theme = "lancet")
+cat("Lancet Theme:\n")
+display_table(bp_lancet, mtcars)
+```
+
+# Footnote System
+
+## Variable-Specific Footnotes
+
+Add footnotes to specific variables with superscript markers:
+
+```{r footnotes_variables}
+bp_footnotes <- table1(transmission ~ mpg + hp + wt,
+                       data = mtcars,
+                       theme = "nejm",
+                       footnotes = list(
+                         variables = list(
+                           mpg = "EPA fuel economy rating in miles per gallon",
+                           hp = "Gross horsepower measured at crankshaft",
+                           wt = "Vehicle weight in thousands of pounds"
+                         )
+                       ))
+
+display_table(bp_footnotes, mtcars)
+```
+
+## Column-Specific Footnotes
+
+Add footnotes to columns:
+
+```{r footnotes_columns}
+bp_col_footnotes <- table1(transmission ~ mpg + hp,
+                           data = mtcars,
+                           theme = "nejm",
+                           pvalue = TRUE,
+                           footnotes = list(
+                             columns = list(
+                               "p.value" = "Two-tailed t-test, alpha = 0.05"
+                             )
+                           ))
+
+display_table(bp_col_footnotes, mtcars)
+```
+
+## Comprehensive Footnotes
+
+Combine multiple footnote types:
+
+```{r footnotes_comprehensive}
+bp_all_footnotes <- table1(transmission ~ mpg + hp,
+                           data = mtcars,
+                           theme = "nejm",
+                           pvalue = TRUE,
+                           footnotes = list(
+                             variables = list(
+                               mpg = "EPA fuel economy standard",
+                               hp = "Gross horsepower"
+                             ),
+                             columns = list(
+                               "p.value" = "Statistical significance testing"
+                             ),
+                             general = list(
+                               "Data source: Henderson and Velleman (1981)",
+                               "Missing values excluded from analysis"
+                             )
+                           ))
+
+display_table(bp_all_footnotes, mtcars)
+```
+
+# Clinical Trial Example
+
+## Simulated Clinical Trial Data
+
+Let's create a more realistic clinical trial example:
+
+```{r clinical_trial_data}
+set.seed(123)
+n <- 200
+
+# Generate clinical trial data
+trial_data <- data.frame(
+  patient_id = 1:n,
+  treatment = factor(
+    sample(c("Placebo", "Drug A", "Drug B"), n, replace = TRUE),
+    levels = c("Placebo", "Drug A", "Drug B")
+  ),
+  age = round(rnorm(n, 65, 12)),
+  sex = factor(sample(c("Male", "Female"), n, replace = TRUE)),
+  race = factor(
+    sample(c("White", "Black", "Hispanic", "Asian", "Other"), 
+           n, replace = TRUE, prob = c(0.6, 0.2, 0.1, 0.08, 0.02)),
+    levels = c("White", "Black", "Hispanic", "Asian", "Other")
+  ),
+  baseline_bmi = round(rnorm(n, 28, 5), 1),
+  diabetes = factor(sample(c("No", "Yes"), n, replace = TRUE, prob = c(0.7, 0.3))),
+  hypertension = factor(sample(c("No", "Yes"), n, replace = TRUE, prob = c(0.6, 0.4))),
+  center = factor(sample(paste("Center", 1:4), n, replace = TRUE))
+)
+
+# Preview the data
+head(trial_data, 10)
+```
+
+## Basic Clinical Table 1
+
+```{r clinical_basic}
+bp_clinical <- table1(treatment ~ age + sex + race + baseline_bmi + 
+                      diabetes + hypertension,
+                      data = trial_data,
+                      theme = "nejm",
+                      pvalue = TRUE)
+
+display_table(bp_clinical, trial_data)
+```
+
+## With Footnotes and Stratification
+
+```{r clinical_advanced}
+bp_clinical_advanced <- table1(treatment ~ age + sex + race + baseline_bmi + 
+                               diabetes + hypertension,
+                               data = trial_data,
+                               strata = "center",
+                               theme = "nejm",
+                               pvalue = TRUE,
+                               footnotes = list(
+                                 variables = list(
+                                   age = "Age at enrollment (years)",
+                                   baseline_bmi = "Body mass index at baseline (kg/m²)",
+                                   diabetes = "Type 2 diabetes mellitus diagnosis",
+                                   hypertension = "Hypertension diagnosis"
+                                 ),
+                                 columns = list(
+                                   "p.value" = "ANOVA for continuous, chi-squared for categorical"
+                                 ),
+                                 general = list(
+                                   "Data are mean (SD) or n (%)",
+                                   "ITT population (N=200)"
+                                 )
+                               ))
+
+display_table(bp_clinical_advanced, trial_data)
+```
+
+# Different Output Formats
+
+## Console Output (Default)
+
+```{r format_console}
+bp_console <- table1(transmission ~ mpg + hp, data = mtcars,
+                     layout = "console", theme = "nejm")
+display_table(bp_console, mtcars)
+```
+
+## LaTeX Output
+
+```{r format_latex}
+bp_latex <- table1(transmission ~ mpg + hp, data = mtcars,
+                   layout = "latex", theme = "nejm")
+
+# Note: LaTeX output would contain LaTeX markup
+cat("LaTeX theme config:\n")
+cat("Font size:", bp_latex$metadata$theme$latex$font_size, "\n")
+cat("Packages:", paste(bp_latex$metadata$theme$latex$packages, collapse = ", "), "\n")
+```
+
+## HTML Output
+
+```{r format_html}
+bp_html <- table1(transmission ~ mpg + hp, data = mtcars,
+                  layout = "html", theme = "nejm")
+
+# Note: HTML output would contain HTML markup
+cat("HTML theme ready for web display\n")
+```
+
+# Performance and Architecture
+
+## Blueprint Architecture
+
+The lazy evaluation approach provides several benefits:
+
+```{r performance_demo}
+# Large dataset simulation
+large_data <- data.frame(
+  group = factor(sample(c("A", "B", "C"), 10000, replace = TRUE)),
+  var1 = rnorm(10000),
+  var2 = rnorm(10000),
+  var3 = rnorm(10000),
+  var4 = rnorm(10000),
+  var5 = rnorm(10000)
+)
+
+# Fast blueprint creation (no computations yet)
+system.time({
+  bp_large <- table1(group ~ var1 + var2 + var3 + var4 + var5, 
+                     data = large_data)
+})
+
+# Computations happen only during display
+cat("Blueprint created instantly. Computations happen during display.\n")
+cat("Blueprint dimensions:", dim(bp_large), "\n")
+```
+
+## Memory Efficiency
+
+```{r memory_demo}
+# Blueprint object structure
+bp_small <- table1(transmission ~ mpg, data = mtcars)
+
+cat("Blueprint components:\n")
+cat("- Cells: ", length(bp_small$cells), "\n")
+cat("- Dimensions: ", dim(bp_small), "\n")
+cat("- Metadata keys: ", names(bp_small$metadata), "\n")
+```
+
+# Best Practices
+
+## Recommendations
+
+1. **Choose Appropriate Themes**: Use journal-specific themes for manuscript
+   preparation
+2. **Add Informative Footnotes**: Explain variables and statistical methods
+3. **Use Stratification Wisely**: For meaningful subgroup analyses
+4. **Custom Functions**: Create domain-specific summary statistics
+5. **Validate Results**: Check statistical assumptions and interpret p-values
+   carefully
+
+## Common Patterns
+
+```{r best_practices}
+# Standard clinical trial baseline table
+create_baseline_table <- function(data, treatment_var, theme = "nejm") {
+  formula_str <- paste(treatment_var, "~ .")
+  bp <- table1(as.formula(formula_str), 
+               data = data,
+               theme = theme,
+               pvalue = TRUE,
+               footnotes = list(
+                 general = list(
+                   "Data are mean (SD) or n (%)",
+                   "P-values from ANOVA or chi-squared test"
+                 )
+               ))
+  return(bp)
+}
+
+# Example usage
+# bp_standard <- create_baseline_table(trial_data, "treatment")
+cat("Utility function created for standardized baseline tables\n")
+```
+
+# Troubleshooting
+
+## Common Issues
+
+1. **Missing Variables**: Ensure all formula variables exist in the data
+2. **Factor Levels**: Check factor level ordering for expected display
+3. **Missing Values**: Use `missing = TRUE` to show missing counts
+4. **Theme Application**: Themes affect decimal places and formatting
+5. **Large Tables**: Use stratification to break down complex tables
+
+## Error Handling
+
+```{r error_handling, error=TRUE}
+# Example of error handling
+tryCatch({
+  # This will cause an error - variable doesn't exist
+  bp_error <- table1(nonexistent_var ~ mpg, data = mtcars)
+}, error = function(e) {
+  cat("Error caught:", e$message, "\n")
+  cat("Solution: Check that all variables in formula exist in data\n")
+})
+```
+
+# Conclusion
+
+The `zztable1_nextgen` package provides a powerful, flexible system for
+creating publication-ready summary tables. Key advantages include:
+
+- **Performance**: Lazy evaluation for fast blueprint creation
+- **Flexibility**: Multiple themes, custom statistics, advanced footnotes  
+- **Compatibility**: Same interface as original zztable1
+- **Publication-Ready**: Journal-specific formatting out of the box
+
+For more information, see the package documentation and function help files.
+
+---
+
+## Session Information
+
+```{r session_info}
+sessionInfo()
+```
