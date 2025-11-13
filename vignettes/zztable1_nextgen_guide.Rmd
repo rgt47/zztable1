@@ -41,15 +41,54 @@ knitr::opts_chunk$set(
   results = 'asis'
 )
 
+# Load required libraries
+library(htmltools)
+library(kableExtra)
+
 # Source all required files
 source("../R/table1.R")
 source("../R/blueprint.R")
-source("../R/validation_consolidated.R") 
+source("../R/validation_consolidated.R")
 source("../R/dimensions.R")
 source("../R/cells.R")
 source("../R/themes.R")
 source("../R/rendering.R")
 source("../R/utils.R")
+```
+
+```{r helper-functions, include=FALSE}
+# Helper function for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+# Helper function to create tables with appropriate format
+create_table <- function(formula, data, ...) {
+  # Extract theme from arguments
+  args <- list(...)
+  theme_arg <- args$theme %||% "console"
+
+  # Handle both theme names and custom theme objects
+  if (is.character(theme_arg)) {
+    theme <- get_theme(theme_arg)
+  } else if (is.list(theme_arg)) {
+    theme <- theme_arg
+  } else {
+    theme <- get_theme("console")
+  }
+
+  bp <- table1(formula = formula, data = data, ...)
+
+  # Detect output format and render appropriately
+  if (knitr::is_latex_output()) {
+    output <- render_latex(bp, theme)
+  } else if (knitr::is_html_output()) {
+    output <- render_html(bp, theme)
+  } else {
+    # Default to console for unknown formats
+    output <- render_console(bp, theme)
+  }
+
+  return(knitr::asis_output(paste(output, collapse = "\n")))
+}
 ```
 
 # Introduction
