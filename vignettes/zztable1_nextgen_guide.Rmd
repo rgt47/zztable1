@@ -140,10 +140,7 @@ mtcars$engine_type <- factor(
 )
 
 # Create basic summary table
-bp_basic <- table1(transmission ~ mpg + hp + wt, data = mtcars)
-
-# Display the table
-display_table(bp_basic, mtcars)
+create_table(transmission ~ mpg + hp + wt, data = mtcars)
 ```
 
 ## Adding Statistical Tests
@@ -151,11 +148,9 @@ display_table(bp_basic, mtcars)
 Include p-values for group comparisons:
 
 ```{r with_pvalues}
-bp_pvalues <- table1(transmission ~ mpg + hp + wt, 
-                     data = mtcars, 
-                     pvalue = TRUE)
-
-display_table(bp_pvalues, mtcars)
+create_table(transmission ~ mpg + hp + wt,
+             data = mtcars,
+             pvalue = TRUE)
 ```
 
 ## Including Total Column
@@ -163,12 +158,10 @@ display_table(bp_pvalues, mtcars)
 Add an overall summary column:
 
 ```{r with_totals}
-bp_totals <- table1(transmission ~ mpg + hp + wt,
-                    data = mtcars,
-                    pvalue = TRUE,
-                    totals = TRUE)
-
-display_table(bp_totals, mtcars)
+create_table(transmission ~ mpg + hp + wt,
+             data = mtcars,
+             pvalue = TRUE,
+             totals = TRUE)
 ```
 
 # Advanced Features
@@ -181,21 +174,18 @@ The package provides several built-in summary statistics:
 
 ```{r numeric_summaries}
 # Default: Mean (SD)
-bp_mean_sd <- table1(transmission ~ mpg + hp, data = mtcars)
 cat("Mean (SD) format:\n")
-display_table(bp_mean_sd, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars)
 
 # Median [IQR]
-bp_median_iqr <- table1(transmission ~ mpg + hp, data = mtcars,
-                        numeric_summary = "median_iqr")
 cat("\nMedian [IQR] format:\n")
-display_table(bp_median_iqr, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars,
+             numeric_summary = "median_iqr")
 
 # Mean +/- SE
-bp_mean_se <- table1(transmission ~ mpg + hp, data = mtcars,
-                     numeric_summary = "mean_se")
 cat("\nMean +/- SE format:\n")
-display_table(bp_mean_se, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars,
+             numeric_summary = "mean_se")
 ```
 
 ### Custom Functions
@@ -211,11 +201,9 @@ custom_summary <- function(x) {
   paste0(med, " (", min_val, "-", max_val, ")")
 }
 
-bp_custom <- table1(transmission ~ mpg + hp, data = mtcars,
-                    numeric_summary = custom_summary)
-
 cat("Custom Median (Min-Max) format:\n")
-display_table(bp_custom, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars,
+             numeric_summary = custom_summary)
 ```
 
 ## Stratified Analysis
@@ -231,12 +219,10 @@ mtcars$cylinder_group <- factor(
 )
 
 # Stratified analysis
-bp_strata <- table1(transmission ~ mpg + hp, 
-                    data = mtcars,
-                    strata = "cylinder_group",
-                    pvalue = TRUE)
-
-display_table(bp_strata, mtcars)
+create_table(transmission ~ mpg + hp,
+             data = mtcars,
+             strata = "cylinder_group",
+             pvalue = TRUE)
 ```
 
 # Journal-Specific Theming
@@ -255,37 +241,33 @@ print(themes)
 ### Default Theme
 
 ```{r theme_default}
-bp_default <- table1(transmission ~ mpg + hp, data = mtcars, 
-                     theme = "default")
 cat("Default Theme:\n")
-display_table(bp_default, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars,
+             theme = "default")
 ```
 
 ### NEJM Theme (1 decimal place)
 
 ```{r theme_nejm}
-bp_nejm <- table1(transmission ~ mpg + hp, data = mtcars,
-                  theme = "nejm")
 cat("NEJM Theme (1 decimal place):\n")
-display_table(bp_nejm, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars,
+             theme = "nejm")
 ```
 
 ### JAMA Theme (2 decimal places)
 
 ```{r theme_jama}
-bp_jama <- table1(transmission ~ mpg + hp, data = mtcars,
-                  theme = "jama")
 cat("JAMA Theme (2 decimal places):\n")
-display_table(bp_jama, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars,
+             theme = "jama")
 ```
 
 ### Lancet Theme
 
 ```{r theme_lancet}
-bp_lancet <- table1(transmission ~ mpg + hp, data = mtcars,
-                    theme = "lancet")
 cat("Lancet Theme:\n")
-display_table(bp_lancet, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars,
+             theme = "lancet")
 ```
 
 # Footnote System
@@ -295,18 +277,16 @@ display_table(bp_lancet, mtcars)
 Add footnotes to specific variables with superscript markers:
 
 ```{r footnotes_variables}
-bp_footnotes <- table1(transmission ~ mpg + hp + wt,
-                       data = mtcars,
-                       theme = "nejm",
-                       footnotes = list(
-                         variables = list(
-                           mpg = "EPA fuel economy rating in miles per gallon",
-                           hp = "Gross horsepower measured at crankshaft",
-                           wt = "Vehicle weight in thousands of pounds"
-                         )
-                       ))
-
-display_table(bp_footnotes, mtcars)
+create_table(transmission ~ mpg + hp + wt,
+             data = mtcars,
+             theme = "nejm",
+             footnotes = list(
+               variables = list(
+                 mpg = "EPA fuel economy rating in miles per gallon",
+                 hp = "Gross horsepower measured at crankshaft",
+                 wt = "Vehicle weight in thousands of pounds"
+               )
+             ))
 ```
 
 ## Column-Specific Footnotes
@@ -314,17 +294,15 @@ display_table(bp_footnotes, mtcars)
 Add footnotes to columns:
 
 ```{r footnotes_columns}
-bp_col_footnotes <- table1(transmission ~ mpg + hp,
-                           data = mtcars,
-                           theme = "nejm",
-                           pvalue = TRUE,
-                           footnotes = list(
-                             columns = list(
-                               "p.value" = "Two-tailed t-test, alpha = 0.05"
-                             )
-                           ))
-
-display_table(bp_col_footnotes, mtcars)
+create_table(transmission ~ mpg + hp,
+             data = mtcars,
+             theme = "nejm",
+             pvalue = TRUE,
+             footnotes = list(
+               columns = list(
+                 "p.value" = "Two-tailed t-test, alpha = 0.05"
+               )
+             ))
 ```
 
 ## Comprehensive Footnotes
@@ -332,25 +310,23 @@ display_table(bp_col_footnotes, mtcars)
 Combine multiple footnote types:
 
 ```{r footnotes_comprehensive}
-bp_all_footnotes <- table1(transmission ~ mpg + hp,
-                           data = mtcars,
-                           theme = "nejm",
-                           pvalue = TRUE,
-                           footnotes = list(
-                             variables = list(
-                               mpg = "EPA fuel economy standard",
-                               hp = "Gross horsepower"
-                             ),
-                             columns = list(
-                               "p.value" = "Statistical significance testing"
-                             ),
-                             general = list(
-                               "Data source: Henderson and Velleman (1981)",
-                               "Missing values excluded from analysis"
-                             )
-                           ))
-
-display_table(bp_all_footnotes, mtcars)
+create_table(transmission ~ mpg + hp,
+             data = mtcars,
+             theme = "nejm",
+             pvalue = TRUE,
+             footnotes = list(
+               variables = list(
+                 mpg = "EPA fuel economy standard",
+                 hp = "Gross horsepower"
+               ),
+               columns = list(
+                 "p.value" = "Statistical significance testing"
+               ),
+               general = list(
+                 "Data source: Henderson and Velleman (1981)",
+                 "Missing values excluded from analysis"
+               )
+             ))
 ```
 
 # Clinical Trial Example
@@ -390,41 +366,37 @@ head(trial_data, 10)
 ## Basic Clinical Table 1
 
 ```{r clinical_basic}
-bp_clinical <- table1(treatment ~ age + sex + race + baseline_bmi + 
-                      diabetes + hypertension,
-                      data = trial_data,
-                      theme = "nejm",
-                      pvalue = TRUE)
-
-display_table(bp_clinical, trial_data)
+create_table(treatment ~ age + sex + race + baseline_bmi +
+             diabetes + hypertension,
+             data = trial_data,
+             theme = "nejm",
+             pvalue = TRUE)
 ```
 
 ## With Footnotes and Stratification
 
 ```{r clinical_advanced}
-bp_clinical_advanced <- table1(treatment ~ age + sex + race + baseline_bmi + 
-                               diabetes + hypertension,
-                               data = trial_data,
-                               strata = "center",
-                               theme = "nejm",
-                               pvalue = TRUE,
-                               footnotes = list(
-                                 variables = list(
-                                   age = "Age at enrollment (years)",
-                                   baseline_bmi = "Body mass index at baseline (kg/m²)",
-                                   diabetes = "Type 2 diabetes mellitus diagnosis",
-                                   hypertension = "Hypertension diagnosis"
-                                 ),
-                                 columns = list(
-                                   "p.value" = "ANOVA for continuous, chi-squared for categorical"
-                                 ),
-                                 general = list(
-                                   "Data are mean (SD) or n (%)",
-                                   "ITT population (N=200)"
-                                 )
-                               ))
-
-display_table(bp_clinical_advanced, trial_data)
+create_table(treatment ~ age + sex + race + baseline_bmi +
+             diabetes + hypertension,
+             data = trial_data,
+             strata = "center",
+             theme = "nejm",
+             pvalue = TRUE,
+             footnotes = list(
+               variables = list(
+                 age = "Age at enrollment (years)",
+                 baseline_bmi = "Body mass index at baseline (kg/m²)",
+                 diabetes = "Type 2 diabetes mellitus diagnosis",
+                 hypertension = "Hypertension diagnosis"
+               ),
+               columns = list(
+                 "p.value" = "ANOVA for continuous, chi-squared for categorical"
+               ),
+               general = list(
+                 "Data are mean (SD) or n (%)",
+                 "ITT population (N=200)"
+               )
+             ))
 ```
 
 # Different Output Formats
@@ -432,9 +404,7 @@ display_table(bp_clinical_advanced, trial_data)
 ## Console Output (Default)
 
 ```{r format_console}
-bp_console <- table1(transmission ~ mpg + hp, data = mtcars,
-                     layout = "console", theme = "nejm")
-display_table(bp_console, mtcars)
+create_table(transmission ~ mpg + hp, data = mtcars, theme = "nejm")
 ```
 
 ## LaTeX Output
