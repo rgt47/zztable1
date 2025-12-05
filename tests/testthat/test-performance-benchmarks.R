@@ -199,7 +199,7 @@ test_that("Vectorized operations outperform loops", {
   
   # Time vectorized variable analysis
   start_time <- Sys.time()
-  vectorized_result <- analyze_variables_vectorized(var_names, test_data, FALSE)
+  vectorized_result <- analyze_variables(var_names, test_data, FALSE)
   vectorized_time <- as.numeric(Sys.time() - start_time, units = "secs")
   
   # Simulate loop-based analysis (simplified)

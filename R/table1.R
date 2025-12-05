@@ -328,86 +328,146 @@ populate_blueprint <- function(blueprint, data, dimensions, theme_config) {
 
 #' Populate Variable Cells Optimized
 #'
-#' Efficient population of variable cells using dimension analysis results.
+#' Dispatcher function for efficient population of variable cells.
+#' Routes to stratified or non-stratified implementation based on analysis.
 #'
 #' @param blueprint Blueprint object
 #' @param data Data frame
 #' @param dimensions Dimension analysis
+#' @param theme_config Theme configuration
 #'
 #' @return Blueprint with variable cells populated
 #' @keywords internal
 populate_variable_cells <- function(blueprint, data, dimensions, theme_config) {
+  # Determine which variant to use
+  n_strata <- dimensions$summary$n_strata
+  has_strata <- n_strata > 0 && !is.null(blueprint$metadata$options$strata)
+
+  if (has_strata) {
+    # Delegate to stratified implementation
+    populate_variable_cells_stratified(blueprint, data, dimensions, theme_config)
+  } else {
+    # Delegate to non-stratified implementation
+    populate_variable_cells_simple(blueprint, data, dimensions, theme_config)
+  }
+}
+
+#' Populate Variable Cells - Stratified Analysis
+#'
+#' Handles variable cell population for stratified tables.
+#' Each stratum gets its own section with header and variable data.
+#'
+#' @param blueprint Blueprint object
+#' @param data Data frame
+#' @param dimensions Dimension analysis
+#' @param theme_config Theme configuration
+#'
+#' @return Blueprint with stratified cells populated
+#' @keywords internal
+populate_variable_cells_stratified <- function(blueprint, data, dimensions, theme_config) {
   var_info <- dimensions$var_info
   options <- blueprint$metadata$options
-  grp_var <- blueprint$metadata$data_info$grp_var
+  n_strata <- dimensions$summary$n_strata
+  strata_levels <- unique(data[[options$strata]][!is.na(data[[options$strata]])])
+  current_row <- 1
+
+  # Process each stratum
+  for (stratum_idx in seq_len(n_strata)) {
+    current_stratum <- strata_levels[stratum_idx]
+    stratum_data <- data[data[[options$strata]] == current_stratum & !is.na(data[[options$strata]]), ]
+
+    # Add stratum header (shown for first variable only)
+    stratum_label <- paste0(tools::toTitleCase(options$strata), ": ", current_stratum)
+    blueprint[current_row, 1] <- Cell(type = "content", content = stratum_label)
+    current_row <- current_row + 1
+
+    # Process variables within this stratum
+    current_row <- populate_variables_for_stratum(
+      blueprint, stratum_data, var_info, dimensions, theme_config,
+      current_row
+    )
+  }
+
+  return(blueprint)
+}
+
+#' Populate Variables for Single Stratum
+#'
+#' Helper function to populate variables within a single stratum.
+#'
+#' @param blueprint Blueprint object
+#' @param stratum_data Data frame for this stratum
+#' @param var_info Variable information
+#' @param dimensions Dimension analysis
+#' @param theme_config Theme configuration
+#' @param start_row Starting row number
+#'
+#' @return Updated row number after population
+#' @keywords internal
+populate_variables_for_stratum <- function(blueprint, stratum_data, var_info,
+                                          dimensions, theme_config, start_row) {
+  current_row <- start_row
+
+  for (i in seq_along(var_info$variables)) {
+    var_name <- var_info$variables[i]
+    var_type <- var_info$types[i]
+
+    if (var_type == "factor") {
+      populate_factor_variable_stratified(
+        blueprint, var_name, stratum_data, current_row, dimensions, theme_config, NULL
+      )
+      levels_count <- length(levels(stratum_data[[var_name]]))
+      current_row <- current_row + 1 + levels_count
+    } else {
+      populate_numeric_variable_stratified(
+        blueprint, var_name, stratum_data, current_row, dimensions, theme_config, NULL
+      )
+      current_row <- current_row + 1
+    }
+  }
+
+  return(current_row)
+}
+
+#' Populate Variable Cells - Simple (Non-Stratified) Analysis
+#'
+#' Handles variable cell population for non-stratified tables.
+#' Simpler logic without stratum handling.
+#'
+#' @param blueprint Blueprint object
+#' @param data Data frame
+#' @param dimensions Dimension analysis
+#' @param theme_config Theme configuration
+#'
+#' @return Blueprint with cells populated
+#' @keywords internal
+populate_variable_cells_simple <- function(blueprint, data, dimensions, theme_config) {
+  var_info <- dimensions$var_info
+  options <- blueprint$metadata$options
+  current_row <- 1
 
   # Get theme information for formatting
   theme_digits <- get_theme_decimal_places(options$theme)
   theme_name <- if (is.character(options$theme)) options$theme else options$theme$theme_name
 
-  # Check if we have stratification
-  n_strata <- dimensions$summary$n_strata
-  if (n_strata > 0 && !is.null(options$strata)) {
-    # Stratified analysis
-    strata_levels <- unique(data[[options$strata]][!is.na(data[[options$strata]])])
-    current_row <- 1
+  # Process each variable
+  for (i in seq_along(var_info$variables)) {
+    var_name <- var_info$variables[i]
+    var_type <- var_info$types[i]
 
-    # For each stratum
-    for (stratum_idx in seq_len(n_strata)) {
-      current_stratum <- strata_levels[stratum_idx]
-      stratum_data <- data[data[[options$strata]] == current_stratum & !is.na(data[[options$strata]]), ]
-
-      # For each variable in this stratum
-      for (i in seq_along(var_info$variables)) {
-        var_name <- var_info$variables[i]
-        var_type <- var_info$types[i]
-
-        # Add stratum header if this is the first variable in this stratum
-        if (i == 1) {
-          # Create stratum header row (no indentation)
-          stratum_label <- paste0(tools::toTitleCase(options$strata), ": ", current_stratum)
-          blueprint[current_row, 1] <- Cell(type = "content", content = stratum_label)
-          current_row <- current_row + 1
-        }
-
-        # Populate based on type with indentation
-        if (var_type == "factor") {
-          blueprint <- populate_factor_variable_stratified(
-            blueprint, var_name, stratum_data, current_row, dimensions, theme_config, current_stratum
-          )
-          # Factor variables use multiple rows (header + levels)
-          levels_count <- length(levels(stratum_data[[var_name]]))
-          current_row <- current_row + 1 + levels_count # header + level rows
-        } else {
-          blueprint <- populate_numeric_variable_stratified(
-            blueprint, var_name, stratum_data, current_row, dimensions, theme_config, current_stratum
-          )
-          current_row <- current_row + 1 # numeric variables use one row
-        }
-      }
+    # Populate based on variable type
+    if (var_type == "factor") {
+      populate_factor_variable(
+        blueprint, var_name, data, current_row, dimensions, theme_digits
+      )
+    } else {
+      populate_numeric_variable(
+        blueprint, var_name, data, current_row, dimensions, theme_digits, theme_name
+      )
     }
-  } else {
-    # Non-stratified analysis - use original logic
-    current_row <- 1
 
-    for (i in seq_along(var_info$variables)) {
-      var_name <- var_info$variables[i]
-      var_type <- var_info$types[i]
-
-      # Populate based on type
-      if (var_type == "factor") {
-        blueprint <- populate_factor_variable(
-          blueprint, var_name, data, current_row, dimensions, theme_digits
-        )
-      } else {
-        blueprint <- populate_numeric_variable(
-          blueprint, var_name, data, current_row, dimensions, theme_digits, theme_name
-        )
-      }
-
-      # Update row counter
-      current_row <- current_row + var_info$row_requirements$total_rows[i]
-    }
+    # Update row counter
+    current_row <- current_row + var_info$row_requirements$total_rows[i]
   }
 
   return(blueprint)

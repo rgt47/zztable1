@@ -55,8 +55,8 @@ test_that("Vectorized operations are efficient", {
   
   start_time <- Sys.time()
   
-  if (exists("analyze_variables_vectorized", mode = "function")) {
-    result <- analyze_variables_vectorized(vars, mtcars, FALSE)
+  if (exists("analyze_variables", mode = "function")) {
+    result <- analyze_variables(vars, mtcars, FALSE)
     end_time <- Sys.time()
     
     elapsed <- as.numeric(end_time - start_time, units = "secs")
@@ -64,7 +64,7 @@ test_that("Vectorized operations are efficient", {
     
     expect_equal(length(result$variables), length(vars))
   } else {
-    skip("analyze_variables_vectorized not available")
+    skip("analyze_variables not available")
   }
 })
 

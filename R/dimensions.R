@@ -42,17 +42,17 @@ analyze_dimensions <- function(x_vars, grp_var, data, strata = NULL,
                                          layout = "console", footnotes = NULL,
                                          theme = NULL) {
   # Quick validation (detailed validation happens earlier)
-  validate_inputs_fast(x_vars, grp_var, data, strata)
+  validate_dimensions_inputs(x_vars, grp_var, data, strata)
 
   # Get theme object if string provided
   theme_obj <- if (is.character(theme)) get_theme(theme) else theme
 
   # Use functional approach - each function returns immutable result
   analyses <- list(
-    variables = analyze_variables_vectorized(x_vars, data, missing),
-    groups = analyze_groups_fast(grp_var, data),
-    strata = if (!is.null(strata)) analyze_strata_fast(strata, data) else NULL,
-    footnotes = if (!is.null(footnotes)) analyze_footnotes_fast(footnotes, x_vars) else NULL
+    variables = analyze_variables(x_vars, data, missing),
+    groups = analyze_groups(grp_var, data),
+    strata = if (!is.null(strata)) analyze_strata(strata, data) else NULL,
+    footnotes = if (!is.null(footnotes)) analyze_footnotes(footnotes, x_vars) else NULL
   )
 
   # Calculate dimensions using theme-aware functions if theme provided
@@ -65,10 +65,13 @@ analyze_dimensions <- function(x_vars, grp_var, data, strata = NULL,
   return(dimensions)
 }
 
-#' Fast Input Validation
+#' Validate Dimension Analysis Inputs
 #'
 #' Streamlined validation focusing only on critical checks.
 #' Detailed validation should happen at the API boundary.
+#'
+#' This is an internal function used during dimension analysis.
+#' Performs vectorized validation for efficiency.
 #'
 #' @param x_vars Analysis variables
 #' @param grp_var Grouping variable
@@ -76,7 +79,7 @@ analyze_dimensions <- function(x_vars, grp_var, data, strata = NULL,
 #' @param strata Stratification variable
 #'
 #' @keywords internal
-validate_inputs_fast <- function(x_vars, grp_var, data, strata) {
+validate_dimensions_inputs <- function(x_vars, grp_var, data, strata) {
   # Only essential checks - assume detailed validation done upstream
   if (length(x_vars) == 0 || is.null(grp_var) || nrow(data) == 0) {
     stop("Invalid inputs to dimension analysis", call. = FALSE)
@@ -90,10 +93,13 @@ validate_inputs_fast <- function(x_vars, grp_var, data, strata) {
   }
 }
 
-#' Vectorized Variable Analysis
+#' Analyze Variables
 #'
-#' Much more efficient variable analysis using vectorized operations
+#' Efficient variable analysis using vectorized operations
 #' and functional programming patterns.
+#'
+#' This is an internal function for dimension analysis.
+#' Uses vectorized operations (vapply) for performance.
 #'
 #' @param x_vars Character vector of variables
 #' @param data Data frame
@@ -101,7 +107,7 @@ validate_inputs_fast <- function(x_vars, grp_var, data, strata) {
 #'
 #' @return Optimized variable analysis structure
 #' @keywords internal
-analyze_variables_vectorized <- function(x_vars, data, missing) {
+analyze_variables <- function(x_vars, data, missing) {
   # Extract all variables at once (vectorized)
   var_data <- data[x_vars]
 
@@ -160,16 +166,19 @@ analyze_variables_vectorized <- function(x_vars, data, missing) {
   )
 }
 
-#' Fast Group Analysis
+#' Analyze Groups
 #'
 #' Streamlined group analysis with essential information only.
+#'
+#' This is an internal function for dimension analysis.
+#' Efficiently extracts group levels and sizes.
 #'
 #' @param grp_var Grouping variable name
 #' @param data Data frame
 #'
 #' @return Group analysis structure
 #' @keywords internal
-analyze_groups_fast <- function(grp_var, data) {
+analyze_groups <- function(grp_var, data) {
   grp_data <- data[[grp_var]]
 
   # Get observed levels efficiently
@@ -192,16 +201,19 @@ analyze_groups_fast <- function(grp_var, data) {
   )
 }
 
-#' Fast Strata Analysis
+#' Analyze Strata
 #'
 #' Efficient stratification analysis.
+#'
+#' This is an internal function for dimension analysis.
+#' Extracts stratification levels and sizes.
 #'
 #' @param strata Strata variable name
 #' @param data Data frame
 #'
 #' @return Strata analysis structure
 #' @keywords internal
-analyze_strata_fast <- function(strata, data) {
+analyze_strata <- function(strata, data) {
   strata_data <- data[[strata]]
 
   if (is.factor(strata_data)) {
@@ -218,16 +230,19 @@ analyze_strata_fast <- function(strata, data) {
   )
 }
 
-#' Fast Footnote Analysis
+#' Analyze Footnotes
 #'
 #' Efficient footnote processing with clear separation of concerns.
+#'
+#' This is an internal function for dimension analysis.
+#' Processes footnote specifications and generates markers.
 #'
 #' @param footnotes Footnote specification
 #' @param x_vars Analysis variables
 #'
 #' @return Footnote analysis structure
 #' @keywords internal
-analyze_footnotes_fast <- function(footnotes, x_vars) {
+analyze_footnotes <- function(footnotes, x_vars) {
   markers <- list()
   footnote_text <- character(0)
   counter <- 1L
