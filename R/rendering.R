@@ -5,6 +5,148 @@
 # Multi-format rendering for console, LaTeX, HTML, and other outputs
 #
 
+#' Base Rendering Pipeline (Format-Agnostic)
+#'
+#' Internal function that provides the common rendering flow for all formats.
+#' Handles theme resolution, headers, table content, and footnotes.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration (optional) - will be resolved if character
+#' @param format Output format ("console", "latex", "html", etc.)
+#' @param default_theme Default theme name if none specified
+#' @return Character vector with rendered output
+#'
+#' @keywords internal
+render_pipeline <- function(blueprint, theme = NULL, format, default_theme = "console") {
+  # Validate input
+  if (!inherits(blueprint, "table1_blueprint")) {
+    stop("First argument must be a table1_blueprint", call. = FALSE)
+  }
+
+  # Resolve theme
+  if (is.null(theme)) {
+    theme <- get_theme(default_theme)
+  } else if (is.character(theme)) {
+    theme <- get_theme(theme)
+  }
+
+  # Initialize output
+  output_lines <- character(0)
+
+  # Step 1: Add title/header if present
+  if (!is.null(blueprint$metadata$title)) {
+    output_lines <- c(output_lines, blueprint$metadata$title, "")
+  }
+
+  # Step 2: Format-specific setup (LaTeX packages, HTML tags, etc.)
+  setup_lines <- get_format_setup(theme, format)
+  if (length(setup_lines) > 0) {
+    output_lines <- c(output_lines, setup_lines, "")
+  }
+
+  # Step 3: Add table headers with footnote markers
+  header_lines <- render_table_headers(blueprint, theme, format)
+  if (length(header_lines) > 0) {
+    output_lines <- c(output_lines, header_lines)
+  }
+
+  # Step 4: Render table content (lazy evaluation of cells)
+  table_lines <- render_table_content(blueprint, theme, format)
+  if (length(table_lines) > 0) {
+    output_lines <- c(output_lines, table_lines)
+  }
+
+  # Step 5: Add footnotes if present
+  footnote_lines <- render_footnotes(blueprint, theme, format)
+  if (length(footnote_lines) > 0) {
+    output_lines <- c(output_lines, footnote_lines)
+  }
+
+  # Step 6: Format-specific cleanup (closing tags, etc.)
+  cleanup_lines <- get_format_cleanup(theme, format)
+  if (length(cleanup_lines) > 0) {
+    output_lines <- c(output_lines, cleanup_lines)
+  }
+
+  output_lines
+}
+
+#' Get format-specific setup lines
+#'
+#' @param theme Theme configuration
+#' @param format Output format
+#' @return Character vector with setup commands
+#'
+#' @keywords internal
+get_format_setup <- function(theme, format) {
+  switch(format,
+    "latex" = generate_latex_theme_setup(theme),
+    "html" = character(0),  # HTML setup handled in render_html
+    "console" = character(0),
+    character(0)
+  )
+}
+
+#' Get format-specific cleanup lines
+#'
+#' @param theme Theme configuration
+#' @param format Output format
+#' @return Character vector with cleanup commands
+#'
+#' @keywords internal
+get_format_cleanup <- function(theme, format) {
+  # Cleanup is typically handled at end of render_* functions
+  character(0)
+}
+
+#' Render Table Headers (Format-Agnostic)
+#'
+#' Renders column headers with proper footnote markers for the specified format.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @param format Output format
+#' @return Character vector with rendered headers
+#'
+#' @keywords internal
+render_table_headers <- function(blueprint, theme, format) {
+  if (length(blueprint$col_names) == 0) {
+    return(character(0))
+  }
+
+  # Apply footnote markers to column names
+  col_headers <- character(length(blueprint$col_names))
+  for (i in seq_along(blueprint$col_names)) {
+    col_name <- blueprint$col_names[i]
+    marker_key <- paste0("col_", col_name)
+    col_headers[i] <- apply_footnote_marker(col_name, marker_key,
+                                           blueprint$metadata$footnote_markers,
+                                           format)
+  }
+
+  # Format headers based on output format
+  switch(format,
+    "latex" = {
+      formatted_headers <- apply_latex_header_formatting(col_headers, theme)
+      header_line <- paste0(paste(formatted_headers, collapse = " & "), " \\\\")
+
+      # Add middle rule after headers
+      mid_rule <- get_latex_rule(theme, "middle")
+      c(header_line, mid_rule)
+    },
+    "html" = {
+      header_cells <- paste0("  <th>", col_headers, "</th>")
+      header_line <- paste0("<tr>\n", paste(header_cells, collapse = "\n"), "\n</tr>")
+      c(header_line)
+    },
+    "console" = {
+      # Console headers are handled by render_table_content
+      character(0)
+    },
+    character(0)
+  )
+}
+
 #' Render Blueprint to Console
 #'
 #' @param blueprint Table1Blueprint object
@@ -12,36 +154,7 @@
 #' @return Character vector for console output
 #' @export
 render_console <- function(blueprint, theme = NULL) {
-  if (!inherits(blueprint, "table1_blueprint")) {
-    stop("First argument must be a table1_blueprint", call. = FALSE)
-  }
-
-  if (is.null(theme)) {
-    theme <- get_theme("console")
-  } else if (is.character(theme)) {
-    theme <- get_theme(theme)
-  }
-  # If theme is already a list (custom theme), use as-is
-
-  # Build output line by line
-  output_lines <- character(0)
-
-  # Add header if present
-  if (!is.null(blueprint$metadata$title)) {
-    output_lines <- c(output_lines, blueprint$metadata$title, "")
-  }
-
-  # Render table content
-  table_lines <- render_table_content(blueprint, theme, "console")
-  output_lines <- c(output_lines, table_lines)
-
-  # Add footnotes if present
-  footnote_lines <- render_footnotes(blueprint, theme, "console")
-  if (length(footnote_lines) > 0) {
-    output_lines <- c(output_lines, "", footnote_lines)
-  }
-
-  output_lines
+  render_pipeline(blueprint, theme, "console", default_theme = "console")
 }
 
 #' Render Blueprint to LaTeX
@@ -60,68 +173,43 @@ render_latex <- function(blueprint, theme = NULL) {
   } else if (is.character(theme)) {
     theme <- get_theme(theme)
   }
-  # If theme is already a list (custom theme), use as-is
+
+  # Check for footnotes (needed for threeparttable)
+  has_footnotes <- !is.null(blueprint$metadata$footnote_list) &&
+                   length(blueprint$metadata$footnote_list) > 0
 
   output_lines <- character(0)
-  
-  # Add theme-specific LaTeX packages and setup if needed
-  latex_setup <- generate_latex_theme_setup(theme)
-  if (length(latex_setup) > 0) {
-    output_lines <- c(output_lines, latex_setup, "")
-  }
 
-  # Check if we need threeparttable for footnotes
-  has_footnotes <- !is.null(blueprint$metadata$footnote_list) && length(blueprint$metadata$footnote_list) > 0
-  
-  # LaTeX table setup with theme-specific enhancements
+  # Use pipeline for common rendering
+  pipeline_output <- render_pipeline(blueprint, theme, "latex", "nejm")
+  output_lines <- c(output_lines, pipeline_output)
+
+  # Insert LaTeX table environment setup (before headers if added by pipeline)
+  # Find where pipeline output ends before headers
   col_spec <- generate_latex_column_spec(blueprint$ncols, theme)
   table_env <- get_latex_table_environment(theme)
-  
-  # If footnotes present, wrap in threeparttable
+
+  # Handle threeparttable wrapping
   if (has_footnotes) {
-    output_lines <- c(output_lines, "\\begin{threeparttable}")
+    output_lines <- c("\\begin{threeparttable}", output_lines)
   }
-  
-  output_lines <- c(output_lines, paste0("\\begin{", table_env, "}{", col_spec, "}"))
-  
-  # Theme-specific top rule
+
+  # Insert table environment start after title (if present)
+  title_end <- if (!is.null(blueprint$metadata$title)) 1 else 0
+  table_start <- paste0("\\begin{", table_env, "}{", col_spec, "}")
   top_rule <- get_latex_rule(theme, "top")
-  output_lines <- c(output_lines, top_rule)
 
-  # Add column headers with theme-specific formatting and footnote markers
-  if (length(blueprint$col_names) > 0) {
-    # Apply footnote markers to column names first
-    col_headers_with_markers <- character(length(blueprint$col_names))
-    for (i in seq_along(blueprint$col_names)) {
-      col_name <- blueprint$col_names[i]
-      marker_key <- paste0("col_", col_name)
-      col_headers_with_markers[i] <- apply_footnote_marker(col_name, marker_key, blueprint$metadata$footnote_markers, "latex")
-    }
-    
-    formatted_headers <- apply_latex_header_formatting(col_headers_with_markers, theme)
-    header_line <- paste0(paste(formatted_headers, collapse = " & "), " \\\\")
-    output_lines <- c(output_lines, header_line)
-    
-    # Theme-specific middle rule after headers
-    mid_rule <- get_latex_rule(theme, "middle")
-    output_lines <- c(output_lines, mid_rule)
-  }
+  output_lines <- c(
+    output_lines[1:title_end],
+    table_start,
+    top_rule,
+    output_lines[(title_end + 1):length(output_lines)]
+  )
 
-  # Render table content
-  table_lines <- render_table_content(blueprint, theme, "latex")
-  output_lines <- c(output_lines, table_lines)
-
-  # Theme-specific bottom rule
+  # Add bottom rule before table end
   bottom_rule <- get_latex_rule(theme, "bottom")
-  output_lines <- c(output_lines, bottom_rule)
-  output_lines <- c(output_lines, paste0("\\end{", table_env, "}"))
+  output_lines <- c(output_lines, bottom_rule, paste0("\\end{", table_env, "}"))
 
-  # Add footnotes with theme-specific formatting
-  footnote_lines <- render_footnotes(blueprint, theme, "latex")
-  if (length(footnote_lines) > 0) {
-    output_lines <- c(output_lines, footnote_lines)
-  }
-  
   # Close threeparttable if opened
   if (has_footnotes) {
     output_lines <- c(output_lines, "\\end{threeparttable}")
@@ -130,68 +218,9 @@ render_latex <- function(blueprint, theme = NULL) {
   output_lines
 }
 
-# ============================================================================
-# LaTeX Helper Functions for Theme-Specific Formatting
-# ============================================================================
-
-
-#' Generate LaTeX column specification based on theme
-#' @param ncols Number of columns
-#' @param theme Theme configuration
-#' @return Character string with column specification
-generate_latex_column_spec <- function(ncols, theme) {
-  # For most themes, use left-aligned first column, centered others
-  if (ncols <= 1) return("l")
-  
-  col_spec <- paste0("l", paste(rep("c", ncols - 1), collapse = ""))
-  col_spec
-}
-
-#' Get LaTeX table environment based on theme
-#' @param theme Theme configuration
-#' @return Character string with table environment name
-get_latex_table_environment <- function(theme) {
-  "tabular"
-}
-
-#' Get theme-specific LaTeX rules
-#' @param theme Theme configuration
-#' @param position "top", "middle", or "bottom"
-#' @return Character string with LaTeX rule command
-get_latex_rule <- function(theme, position) {
-  theme_name <- theme$name
-  
-  if (theme_name %in% c("New England Journal of Medicine", "The Lancet", "JAMA")) {
-    switch(position,
-      "top" = "\\toprule",
-      "middle" = "\\midrule", 
-      "bottom" = "\\bottomrule"
-    )
-  } else {
-    # Console/other themes use simple horizontal lines
-    switch(position,
-      "top" = "\\hline",
-      "middle" = "\\hline",
-      "bottom" = "\\hline"
-    )
-  }
-}
-
-#' Apply LaTeX header formatting based on theme
-#' @param headers Column header names
-#' @param theme Theme configuration
-#' @return Character vector with formatted headers
-apply_latex_header_formatting <- function(headers, theme) {
-  theme_name <- theme$name
-  
-  if (theme_name %in% c("New England Journal of Medicine", "The Lancet", "JAMA")) {
-    # Bold headers for journal themes
-    paste0("\\textbf{", headers, "}")
-  } else {
-    # Plain headers for console theme
-    headers
-  }
-}
+# NOTE: LaTeX helper functions have been consolidated to avoid duplication.
+# See lines 759-865 for the unified theme-aware implementations.
+# The simple versions that were here have been removed to eliminate code duplication.
 
 #' Render table content based on output format
 #' @param blueprint Table1Blueprint object
@@ -328,45 +357,22 @@ render_html <- function(blueprint, theme = NULL) {
   } else if (is.character(theme)) {
     theme <- get_theme(theme)
   }
-  # If theme is already a list (custom theme), use as-is
 
-  output_lines <- character(0)
-
-  # HTML table setup with theme-specific CSS class
+  # Get HTML table CSS class
   css_class <- if (!is.null(theme$css_class)) {
     paste("table1", theme$css_class)
   } else {
     "table1"
   }
-  output_lines <- c(output_lines, paste0("<table class=\"", css_class, "\">"))
 
-  # Add column headers with footnote markers
-  if (length(blueprint$col_names) > 0) {
-    # Apply footnote markers to column names
-    col_headers <- character(length(blueprint$col_names))
-    for (i in seq_along(blueprint$col_names)) {
-      col_name <- blueprint$col_names[i]
-      marker_key <- paste0("col_", col_name)
-      col_headers[i] <- apply_footnote_marker(col_name, marker_key, blueprint$metadata$footnote_markers, "html")
-    }
-    
-    header_cells <- paste0("  <th>", col_headers, "</th>")
-    header_line <- paste0("<tr>\n", paste(header_cells, collapse = "\n"), "\n</tr>")
-    output_lines <- c(output_lines, header_line)
-  }
+  # Start with opening table tag
+  output_lines <- c(paste0("<table class=\"", css_class, "\">"))
 
-  # Render table content
-  table_lines <- render_table_content(blueprint, theme, "html")
-  output_lines <- c(output_lines, table_lines)
+  # Use pipeline for content (headers, content, footnotes)
+  pipeline_output <- render_pipeline(blueprint, theme, "html", "console")
 
-  # HTML table end
-  output_lines <- c(output_lines, "</table>")
-
-  # Add footnotes
-  footnote_lines <- render_footnotes(blueprint, theme, "html")
-  if (length(footnote_lines) > 0) {
-    output_lines <- c(output_lines, footnote_lines)
-  }
+  # Combine and close table
+  output_lines <- c(output_lines, pipeline_output, "</table>")
 
   output_lines
 }

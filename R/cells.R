@@ -304,10 +304,10 @@ validate_cell_by_type <- function(x, strict) {
   return(errors)
 }
 
-#' Enhanced Cell Evaluation
+#' Enhanced Cell Evaluation (S3 Generic)
 #'
-#' Optimized cell evaluation with better error handling, caching,
-#' and performance monitoring.
+#' S3 generic function for cell evaluation with type-specific methods.
+#' Routes to appropriate evaluation method based on cell class.
 #'
 #' @param cell Cell object to evaluate
 #' @param data Data frame for computation context
@@ -315,55 +315,94 @@ validate_cell_by_type <- function(x, strict) {
 #' @param force_recalc Logical to force cache invalidation
 #'
 #' @return Evaluated cell result
+#'
+#' @details
+#' This is an S3 generic function that dispatches to type-specific methods:
+#' - `evaluate_cell.cell_content` - Evaluates static content cells
+#' - `evaluate_cell.cell_computation` - Evaluates computation cells
+#' - `evaluate_cell.cell_separator` - Evaluates separator cells
+#' - `evaluate_cell.default` - Fallback for unknown cell types
+#'
 #' @export
 evaluate_cell <- function(cell, data, env = parent.frame(),
-                                    force_recalc = FALSE) {
+                         force_recalc = FALSE) {
   # Input validation
   validate_cell(cell)
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame", call. = FALSE)
   }
 
-  # Wrap evaluation in error handling
-  tryCatch(
-    {
-      # Direct dispatch based on cell type
-      switch(cell$type,
-        "content" = evaluate_cell.content(NULL, cell, data, env, force_recalc),
-        "computation" = evaluate_cell.computation(NULL, cell, data, env, force_recalc),
-        "separator" = evaluate_cell.separator(NULL, cell, data, env, force_recalc),
-        evaluate_cell.default(NULL, cell, data, env, force_recalc)
-      )
-    },
-    error = function(e) {
-      warning("Cell evaluation failed: ", e$message, call. = FALSE)
-      "[Error]"
-    }
-  )
+  # Use S3 method dispatch based on cell class
+  # Cell objects have class like c("cell_content", "cell") or c("cell_computation", "cell")
+  UseMethod("evaluate_cell", cell)
 }
 
-#' S3 Method for Content Cells
+#' Evaluate Static Content Cell
+#'
+#' S3 method for evaluating content cells containing static text.
+#'
+#' @param cell Content cell object
+#' @param data Data frame (not used for content cells)
+#' @param env Evaluation environment (not used)
+#' @param force_recalc Force recalculation (not used)
+#'
+#' @return Cell content as character string
+#'
 #' @keywords internal
-evaluate_cell.content <- function(x, cell, data, env, force_recalc) {
+evaluate_cell.cell_content <- function(cell, data, env = parent.frame(),
+                                       force_recalc = FALSE) {
   cell$content %||% ""
 }
 
-#' S3 Method for Computation Cells  
+#' Evaluate Computation Cell
+#'
+#' S3 method for evaluating cells that perform computations.
+#'
+#' @param cell Computation cell object
+#' @param data Data frame for computation context
+#' @param env Evaluation environment
+#' @param force_recalc Force cache invalidation
+#'
+#' @return Computed result as character string
+#'
 #' @keywords internal
-evaluate_cell.computation <- function(x, cell, data, env, force_recalc) {
+evaluate_cell.cell_computation <- function(cell, data, env = parent.frame(),
+                                           force_recalc = FALSE) {
   evaluate_computation_cell(cell, data, env, force_recalc)
 }
 
-#' S3 Method for Separator Cells
+#' Evaluate Separator Cell
+#'
+#' S3 method for evaluating separator cells.
+#'
+#' @param cell Separator cell object
+#' @param data Data frame (not used)
+#' @param env Evaluation environment (not used)
+#' @param force_recalc Force recalculation (not used)
+#'
+#' @return Separator string
+#'
 #' @keywords internal
-evaluate_cell.separator <- function(x, cell, data, env, force_recalc) {
+evaluate_cell.cell_separator <- function(cell, data, env = parent.frame(),
+                                         force_recalc = FALSE) {
   cell$content %||% "|"
 }
 
-#' Default S3 Method
+#' Default Cell Evaluation Method
+#'
+#' Fallback S3 method for unknown cell types.
+#'
+#' @param cell Cell object of unknown type
+#' @param data Data frame (not used)
+#' @param env Evaluation environment (not used)
+#' @param force_recalc Force recalculation (not used)
+#'
+#' @return Error indicator string
+#'
 #' @keywords internal
-evaluate_cell.default <- function(x, cell, data, env, force_recalc) {
-  "[Unknown Type]"
+evaluate_cell.default <- function(cell, data, env = parent.frame(),
+                                  force_recalc = FALSE) {
+  "[Unknown Cell Type]"
 }
 
 #' Evaluate Computation Cell (Optimized)
