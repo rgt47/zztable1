@@ -400,3 +400,95 @@ safe_eval <- function(expr, fallback = "[Error]") {
     }
   )
 }
+
+#' Generate Cache Key for Statistical Computation
+#'
+#' Creates a unique, deterministic cache key for a statistical computation
+#' based on variable, stratum, and test type. Used for blueprint-level
+#' result caching to avoid recomputing statistics across multiple renders.
+#'
+#' @param variable Character string with variable name
+#' @param stratum Optional stratum identifier (NULL or character)
+#' @param test_type Character string with test type (e.g., "ttest", "chisq")
+#'
+#' @return Character string with unique cache key
+#'
+#' @details
+#' Cache key format: "var_{variable}_strat_{stratum}_test_{test_type}"
+#' where stratum defaults to "none" if NULL.
+#'
+#' @examples
+#' \dontrun{
+#' create_stat_cache_key("age", "arm==treatment", "ttest")
+#' # Returns: "var_age_strat_arm==treatment_test_ttest"
+#'
+#' create_stat_cache_key("sex", NULL, "chisq")
+#' # Returns: "var_sex_strat_none_test_chisq"
+#' }
+#'
+#' @keywords internal
+create_stat_cache_key <- function(variable, stratum = NULL, test_type = "none") {
+  # Sanitize inputs to create safe cache keys
+  var_safe <- gsub("[^a-zA-Z0-9_]", "_", variable)
+  stratum_safe <- if (is.null(stratum)) {
+    "none"
+  } else {
+    gsub("[^a-zA-Z0-9_=]", "_", as.character(stratum))
+  }
+  test_safe <- gsub("[^a-zA-Z0-9_]", "_", test_type)
+
+  # Create unique key
+  paste0("var_", var_safe, "_strat_", stratum_safe, "_test_", test_safe)
+}
+
+#' Check Blueprint Cache Status
+#'
+#' Determines if a statistical result is cached in the blueprint.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param cache_key Character string with cache key
+#'
+#' @return Logical indicating if result is cached
+#' @keywords internal
+is_cached <- function(blueprint, cache_key) {
+  if (is.null(blueprint$metadata$stat_cache)) {
+    return(FALSE)
+  }
+
+  cache_key %in% ls(blueprint$metadata$stat_cache, all.names = TRUE)
+}
+
+#' Get Cached Result
+#'
+#' Retrieves a cached statistical result from the blueprint.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param cache_key Character string with cache key
+#'
+#' @return Cached result or NULL if not found
+#' @keywords internal
+get_cached <- function(blueprint, cache_key) {
+  if (!is_cached(blueprint, cache_key)) {
+    return(NULL)
+  }
+
+  blueprint$metadata$stat_cache[[cache_key]]
+}
+
+#' Set Cached Result
+#'
+#' Stores a statistical result in the blueprint cache.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param cache_key Character string with cache key
+#' @param result Result to cache
+#'
+#' @return Invisibly returns the result
+#' @keywords internal
+set_cached <- function(blueprint, cache_key, result) {
+  if (!is.null(blueprint$metadata$stat_cache)) {
+    blueprint$metadata$stat_cache[[cache_key]] <- result
+  }
+
+  invisible(result)
+}

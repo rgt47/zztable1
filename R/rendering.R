@@ -401,7 +401,7 @@ render_table_content <- function(blueprint, theme, format) {
     if (is.na(pos$row) || is.na(pos$col)) next # Skip invalid keys
 
     cell <- blueprint$cells[[key]]
-    content <- evaluate_cell(cell, blueprint$metadata$data)
+    content <- evaluate_cell(cell, blueprint$metadata$data, blueprint = blueprint)
     content <- format_cell_content(content, theme, cell$type)
     content <- format_content_for_output(content, format, pos$row, pos$col, theme)
 
@@ -905,7 +905,7 @@ as.data.frame.table1_blueprint <- function(x, row.names = NULL, optional = FALSE
     for (j in 1:x$ncols) {
       cell <- x[i, j]
       if (!is.null(cell)) {
-        result_df[i, j] <- as.character(evaluate_cell(cell, data))
+        result_df[i, j] <- as.character(evaluate_cell(cell, data, blueprint = x))
       }
     }
   }

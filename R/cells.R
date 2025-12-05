@@ -325,7 +325,7 @@ validate_cell_by_type <- function(x, strict) {
 #'
 #' @export
 evaluate_cell <- function(cell, data, env = parent.frame(),
-                         force_recalc = FALSE) {
+                         force_recalc = FALSE, blueprint = NULL) {
   # Input validation
   validate_cell(cell)
   if (!is.data.frame(data)) {
@@ -350,7 +350,7 @@ evaluate_cell <- function(cell, data, env = parent.frame(),
 #'
 #' @keywords internal
 evaluate_cell.cell_content <- function(cell, data, env = parent.frame(),
-                                       force_recalc = FALSE) {
+                                       force_recalc = FALSE, blueprint = NULL) {
   cell$content %||% ""
 }
 
@@ -367,8 +367,8 @@ evaluate_cell.cell_content <- function(cell, data, env = parent.frame(),
 #'
 #' @keywords internal
 evaluate_cell.cell_computation <- function(cell, data, env = parent.frame(),
-                                           force_recalc = FALSE) {
-  evaluate_computation_cell(cell, data, env, force_recalc)
+                                           force_recalc = FALSE, blueprint = NULL) {
+  evaluate_computation_cell(cell, data, env, force_recalc, blueprint)
 }
 
 #' Evaluate Separator Cell
@@ -384,7 +384,7 @@ evaluate_cell.cell_computation <- function(cell, data, env = parent.frame(),
 #'
 #' @keywords internal
 evaluate_cell.cell_separator <- function(cell, data, env = parent.frame(),
-                                         force_recalc = FALSE) {
+                                         force_recalc = FALSE, blueprint = NULL) {
   cell$content %||% "|"
 }
 
@@ -401,7 +401,7 @@ evaluate_cell.cell_separator <- function(cell, data, env = parent.frame(),
 #'
 #' @keywords internal
 evaluate_cell.default <- function(cell, data, env = parent.frame(),
-                                  force_recalc = FALSE) {
+                                  force_recalc = FALSE, blueprint = NULL) {
   "[Unknown Cell Type]"
 }
 
@@ -416,8 +416,16 @@ evaluate_cell.default <- function(cell, data, env = parent.frame(),
 #'
 #' @return Computed result
 #' @keywords internal
-evaluate_computation_cell <- function(cell, data, env, force_recalc) {
-  # Check cache first
+evaluate_computation_cell <- function(cell, data, env, force_recalc, blueprint = NULL) {
+  # Check blueprint-level cache first
+  if (!force_recalc && !is.null(blueprint) && !is.null(cell$cache_key)) {
+    cached_result <- get_cached(blueprint, cell$cache_key)
+    if (!is.null(cached_result)) {
+      return(cached_result)
+    }
+  }
+
+  # Check cell-level cache as fallback
   if (!force_recalc && !is.null(cell$cached_result)) {
     return(cell$cached_result)
   }
@@ -426,7 +434,7 @@ evaluate_computation_cell <- function(cell, data, env, force_recalc) {
   result <- safe_eval({
     # Evaluate data subset
     data_subset <- eval(cell$data_subset, list(data = data))
-    
+
     if (is.null(data_subset)) {
       return("[No Data]")
     }
@@ -437,7 +445,7 @@ evaluate_computation_cell <- function(cell, data, env, force_recalc) {
       n = length(data_subset),
       data = data
     )
-    
+
     computation_result <- if (is.function(cell$computation)) {
       cell$computation(data_subset)
     } else {
@@ -447,10 +455,16 @@ evaluate_computation_cell <- function(cell, data, env, force_recalc) {
     format_computation_result(computation_result)
   }, "[Error]")
 
-  # Cache successful results
+  # Cache successful results at both levels
   if (!identical(result, "[Error]") && !identical(result, "[No Data]")) {
+    # Cell-level cache
     cell$cached_result <- result
     cell$cache_timestamp <- Sys.time()
+
+    # Blueprint-level cache
+    if (!is.null(blueprint) && !is.null(cell$cache_key)) {
+      set_cached(blueprint, cell$cache_key, result)
+    }
   }
 
   result

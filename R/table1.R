@@ -302,7 +302,10 @@ create_metadata <- function(formula, options, data_info, dimensions) {
     cell_count = 0L,
 
     # Theme information (set later)
-    theme = NULL
+    theme = NULL,
+
+    # Caching infrastructure (Phase 5.2)
+    stat_cache = new.env(hash = TRUE, parent = emptyenv())
   )
 }
 
