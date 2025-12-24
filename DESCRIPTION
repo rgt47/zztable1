@@ -2,13 +2,15 @@ Package: zztable1
 Version: 0.1.0
 Title: Next Generation Summary Tables
 Description: A package to create publication-quality summary tables with a flexible and powerful interface. Features sparse storage, comprehensive validation, modular architecture for high-performance table generation, and seamless R Markdown integration with automatic format detection for LaTeX and HTML output.
-Author: Ronald (Ryy) G. Thomas <rgthomas@ucsd.edu>
-Authors@R: person("Ronald (Ryy) G. Thomas", email = "rgthomas@ucsd.edu", role = c("aut", "cre"))
-Maintainer: Ronald (Ryy) G. Thomas <rgthomas@ucsd.edu>
+Authors@R:
+    person("Ronald (Ryy) G", "Thomas", , "rgthomas@ucsd.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-1686-4965"))
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
+URL: https://github.com/rgt47/zztable1
+BugReports: https://github.com/rgt47/zztable1/issues
 VignetteBuilder: knitr
 Depends: R (>= 3.5.0)
 Imports: stats, utils
