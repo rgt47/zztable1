@@ -1,4 +1,4 @@
-# zztable1_nextgen Development Notes
+# zztable1 Development Notes
 
 ## Project Overview
 Redesigning the zztable1 R package architecture while maintaining the same input interface (formula + data + options). The key innovation is moving from immediate computation to a lazy evaluation approach with a single R object output.
@@ -101,7 +101,7 @@ list(
 - **Console Theme**: Monospace font, basic styling for development/testing
 
 ### Vignette System:
-- `vignettes/zztable1_nextgen_guide.Rmd` - Comprehensive package guide
+- `vignettes/zztable1_guide.Rmd` - Comprehensive package guide
 - `vignettes/theming_system.Rmd` - Medical journal theme demonstrations
 - `vignettes/stratified_examples.Rmd` - Multi-center trial stratified analysis
 - `vignettes/dataset_examples.Rmd` - Built-in R dataset examples (rewritten for current functions)
@@ -123,7 +123,7 @@ list(
 - `stratified_examples.pdf` (253KB) - Multi-center trial stratified analysis examples
 - `theming_system.pdf` (228KB) - Medical journal theme demonstrations
 - `toothgrowth_example.pdf` (326KB) - Complete clinical trial analysis example
-- `zztable1_nextgen_guide.pdf` (270KB) - Comprehensive package guide
+- `zztable1_guide.pdf` (270KB) - Comprehensive package guide
 
 ### Blueprint Construction Documentation
 - **Created comprehensive technical guide**: Written 10-page `Blueprint_Construction_Guide.md` covering the complete blueprint construction sequence
@@ -168,5 +168,5 @@ list(
 
 ## Context Files
 - Original package: `/Users/zenn/prj/d03/zztable1/`
-- Current working directory: `/Users/zenn/Dropbox/prj/d03/zztable1_nextgen/`
+- Current working directory: `/Users/zenn/Dropbox/prj/d03/zztable1/`
 - Sample papers analyzed: `NEJMoa050151.pdf`, `lancet-neurology-rct.pdf`, `jama-neurology.pdf`
