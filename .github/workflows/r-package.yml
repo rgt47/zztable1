@@ -16,7 +16,7 @@ jobs:
 
       - name: Install system dependencies
         run: |
-          apt-get update && apt-get install -y jq libcurl4-openssl-dev libssl-dev libxml2-dev
+          apt-get update && apt-get install -y jq libcurl4-openssl-dev libssl-dev libxml2-dev pandoc
 
       - name: Validate package dependencies
         run: |
@@ -37,7 +37,7 @@ jobs:
         run: |
           Rscript -e "install.packages('renv', repos = 'https://cloud.r-project.org')"
           Rscript -e "if (file.exists('renv.lock')) renv::restore() else renv::init()"
-          Rscript -e "install.packages(c('rcmdcheck', 'testthat'), repos = 'https://cloud.r-project.org')"
+          Rscript -e "install.packages(c('rcmdcheck', 'testthat', 'knitr', 'rmarkdown'), repos = 'https://cloud.r-project.org')"
 
       - name: Run R CMD check
         run: |
