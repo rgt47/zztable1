@@ -4,7 +4,7 @@
 \alias{populate_variable_cells}
 \title{Populate Variable Cells Optimized}
 \usage{
-populate_variable_cells(blueprint, data, dimensions)
+populate_variable_cells(blueprint, data, dimensions, theme_config)
 }
 \arguments{
 \item{blueprint}{Blueprint object}
@@ -12,11 +12,14 @@ populate_variable_cells(blueprint, data, dimensions)
 \item{data}{Data frame}
 
 \item{dimensions}{Dimension analysis}
+
+\item{theme_config}{Theme configuration}
 }
 \value{
 Blueprint with variable cells populated
 }
 \description{
-Efficient population of variable cells using dimension analysis results.
+Dispatcher function for efficient population of variable cells.
+Routes to stratified or non-stratified implementation based on analysis.
 }
 \keyword{internal}

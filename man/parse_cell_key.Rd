@@ -2,17 +2,17 @@
 % Please edit documentation in R/utils.R
 \name{parse_cell_key}
 \alias{parse_cell_key}
-\title{Parse Cell Key (Optimized)}
+\title{Parse Cell Key (Simplified)}
 \usage{
 parse_cell_key(key)
 }
 \arguments{
-\item{key}{Character cell key (e.g., "r1_c2")}
+\item{key}{Character cell key (e.g., "1_2")}
 }
 \value{
 List with integer row and col, or NA on failure
 }
 \description{
-Optimized key parsing using fast string manipulation instead of regex.
+Fast key parsing for simplified "row_col" format.
 }
 \keyword{internal}

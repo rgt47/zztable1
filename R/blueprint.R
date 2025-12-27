@@ -50,7 +50,7 @@
 #' @examples
 #' # Small table - minimal memory usage
 #' bp_small <- Table1Blueprint(5, 3)
-#' bp_small[1, 1] <- Cell(type = "static", content = "Variable")
+#' bp_small[1, 1] <- Cell(type = "content", content = "Variable")
 #'
 #' # Large sparse table - still efficient
 #' bp_large <- Table1Blueprint(1000, 100) # Only uses memory for metadata
@@ -269,7 +269,7 @@ validate_table1_blueprint <- function(x, strict = FALSE) {
 #'
 #' @examples
 #' bp <- Table1Blueprint(5, 3)
-#' bp[1, 1] <- Cell(type = "static", content = "Variable")
+#' bp[1, 1] <- Cell(type = "content", content = "Variable")
 #' cell <- bp[1, 1] # O(1) lookup
 #'
 #' @export
@@ -349,7 +349,7 @@ validate_table1_blueprint <- function(x, strict = FALSE) {
 #' bp <- Table1Blueprint(5, 3)
 #'
 #' # Assign cell
-#' bp[1, 1] <- Cell(type = "static", content = "Variable")
+#' bp[1, 1] <- Cell(type = "content", content = "Variable")
 #'
 #' # Remove cell
 #' bp[1, 1] <- NULL

@@ -43,7 +43,7 @@ of pre-allocating all cells. Benefits include:
 \examples{
 # Small table - minimal memory usage
 bp_small <- Table1Blueprint(5, 3)
-bp_small[1, 1] <- Cell(type = "static", content = "Variable")
+bp_small[1, 1] <- Cell(type = "content", content = "Variable")
 
 # Large sparse table - still efficient
 bp_large <- Table1Blueprint(1000, 100) # Only uses memory for metadata

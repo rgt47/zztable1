@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{create_cell_key}
 \alias{create_cell_key}
-\title{Create Hash Key for Cell Position}
+\title{Create Hash Key for Cell Position (Optimized)}
 \usage{
 create_cell_key(row, col)
 }
@@ -15,6 +15,6 @@ create_cell_key(row, col)
 Character hash key
 }
 \description{
-Create Hash Key for Cell Position
+Create Hash Key for Cell Position (Optimized)
 }
 \keyword{internal}

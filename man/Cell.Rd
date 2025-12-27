@@ -20,7 +20,7 @@ Cell(
 \item{type}{Character string specifying cell type. Must be one of:
 "content", "computation", "separator"}
 
-\item{content}{Static text content (required for "content" type)}
+\item{content}{Static text content (required for "static" type)}
 
 \item{data_subset}{R expression for data subsetting (required for "computation")}
 
@@ -44,7 +44,7 @@ User-facing constructor that provides comprehensive input validation
 and creates properly validated Cell objects.
 }
 \examples{
-# Content cell
+# Static cell
 Cell(type = "content", content = "Age (years)")
 
 # Computation cell
@@ -55,7 +55,10 @@ Cell(
   dependencies = c("data", "age", "group")
 )
 
-# Separator cell
-Cell(type = "separator", content = "---")
+# Footnote cell
+Cell(
+  type = "footnote", footnote_number = 1,
+  footnote_text = "Age measured at baseline"
+)
 
 }

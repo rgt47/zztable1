@@ -2,13 +2,17 @@
 % Please edit documentation in R/themes.R
 \name{list_available_themes}
 \alias{list_available_themes}
-\title{Get Available Themes}
+\title{List Available Themes}
 \usage{
 list_available_themes()
 }
 \value{
-Character vector of available theme names
+Character vector of theme names
 }
 \description{
-Get Available Themes
+Returns names of all available themes in the package.
+}
+\examples{
+list_available_themes()
+
 }

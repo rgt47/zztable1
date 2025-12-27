@@ -2,20 +2,20 @@
 % Please edit documentation in R/themes.R
 \name{format_cell_content}
 \alias{format_cell_content}
-\title{Format Cell Content with Theme}
+\title{Format Cell Content}
 \usage{
-format_cell_content(content, theme, cell_type = "static")
+format_cell_content(content, theme, cell_type = "content")
 }
 \arguments{
-\item{content}{Cell content (usually character)}
+\item{content}{Cell content to format}
 
 \item{theme}{Theme configuration}
 
-\item{cell_type}{Type of cell (static, computation, etc.)}
+\item{cell_type}{Type of cell ("content", "computation", "separator")}
 }
 \value{
-Formatted content
+Formatted content string
 }
 \description{
-Format Cell Content with Theme
+Applies theme-specific formatting to cell content.
 }

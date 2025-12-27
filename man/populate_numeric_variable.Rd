@@ -10,7 +10,8 @@ populate_numeric_variable(
   data,
   start_row,
   dimensions,
-  theme_digits
+  theme_digits,
+  theme_name
 )
 }
 \arguments{

@@ -4,7 +4,7 @@
 \alias{combine_row_content}
 \title{Combine Row Content}
 \usage{
-combine_row_content(row_content, format, theme)
+combine_row_content(row_content, format, theme, row_index = 1)
 }
 \arguments{
 \item{row_content}{Character vector of cell contents}

@@ -2,17 +2,25 @@
 % Please edit documentation in R/themes.R
 \name{get_theme}
 \alias{get_theme}
-\title{Get Theme Configuration (Cached)}
+\title{Get Theme Configuration}
 \usage{
 get_theme(theme_name = "console")
 }
 \arguments{
-\item{theme_name}{Character, theme name (console, nejm, lancet, jama, etc.)}
+\item{theme_name}{Character string specifying theme name (e.g., "nejm", "lancet")}
 }
 \value{
-List with theme configuration
+Theme object (list with class "table1_theme")
 }
 \description{
-Retrieves theme configuration with intelligent caching for performance.
-Themes are cached after first access to avoid repeated computation.
+Retrieves a theme configuration by name. Falls back to console theme
+if the requested theme is not found.
+}
+\details{
+Available themes: "console", "nejm", "lancet", "jama", "bmj", "simple"
+}
+\examples{
+theme <- get_theme("nejm")
+cat(theme$name)
+
 }

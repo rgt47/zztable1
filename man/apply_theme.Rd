@@ -9,11 +9,12 @@ apply_theme(blueprint, theme)
 \arguments{
 \item{blueprint}{Table1Blueprint object}
 
-\item{theme}{Theme configuration list}
+\item{theme}{Theme name (character) or theme object (list)}
 }
 \value{
 Modified blueprint with theme applied
 }
 \description{
-Apply Theme to Blueprint
+Applies a theme configuration to a table1_blueprint object.
+Updates metadata with theme information.
 }

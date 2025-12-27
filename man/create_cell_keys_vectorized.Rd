@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{create_cell_keys_vectorized}
 \alias{create_cell_keys_vectorized}
-\title{Vectorized Cell Key Creation}
+\title{Vectorized Cell Key Creation (Optimized)}
 \usage{
 create_cell_keys_vectorized(rows, cols)
 }

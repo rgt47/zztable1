@@ -4,7 +4,7 @@
 \alias{populate_blueprint}
 \title{Populate Blueprint Optimized}
 \usage{
-populate_blueprint(blueprint, data, dimensions)
+populate_blueprint(blueprint, data, dimensions, theme_config)
 }
 \arguments{
 \item{blueprint}{Empty blueprint object}

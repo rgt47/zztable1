@@ -11,7 +11,7 @@ new_table1_blueprint(
   row_names = character(nrows),
   col_names = character(ncols),
   metadata = list(formula = NULL, options = list(), data_info = list(), cell_count = 0L,
-    created = Sys.time())
+    created = Sys.time(), stat_cache = new.env(hash = TRUE, parent = emptyenv()))
 )
 }
 \arguments{

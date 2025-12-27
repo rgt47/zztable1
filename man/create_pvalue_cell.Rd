@@ -4,7 +4,7 @@
 \alias{create_pvalue_cell}
 \title{Create P-value Cell Optimized}
 \usage{
-create_pvalue_cell(var_name, grp_var, test_type)
+create_pvalue_cell(var_name, grp_var, test_type, data = NULL)
 }
 \arguments{
 \item{var_name}{Variable name}

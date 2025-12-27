@@ -35,7 +35,7 @@ Assignment automatically manages memory by:
 bp <- Table1Blueprint(5, 3)
 
 # Assign cell
-bp[1, 1] <- Cell(type = "static", content = "Variable")
+bp[1, 1] <- Cell(type = "content", content = "Variable")
 
 # Remove cell
 bp[1, 1] <- NULL

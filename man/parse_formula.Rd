@@ -4,10 +4,10 @@
 \alias{parse_formula}
 \title{Parse Formula Components Optimized}
 \usage{
-parse_formula(form, data, totals, pvalue)
+parse_formula(formula, data, totals, pvalue)
 }
 \arguments{
-\item{form}{Formula object}
+\item{formula}{Formula object}
 
 \item{data}{Data frame}
 

@@ -28,7 +28,7 @@ R environments. Bounds checking is performed to ensure safe access.
 }
 \examples{
 bp <- Table1Blueprint(5, 3)
-bp[1, 1] <- Cell(type = "static", content = "Variable")
+bp[1, 1] <- Cell(type = "content", content = "Variable")
 cell <- bp[1, 1] # O(1) lookup
 
 }

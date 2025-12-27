@@ -39,7 +39,7 @@
 #'
 #' @examples
 #' # Static cell
-#' Cell(type = "static", content = "Age (years)")
+#' Cell(type = "content", content = "Age (years)")
 #'
 #' # Computation cell
 #' Cell(

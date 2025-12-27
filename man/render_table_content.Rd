@@ -2,8 +2,10 @@
 % Please edit documentation in R/rendering.R
 \name{render_table_content}
 \alias{render_table_content}
-\title{Render Table Content (Optimized)}
+\title{Render table content based on output format}
 \usage{
+render_table_content(blueprint, theme, format)
+
 render_table_content(blueprint, theme, format)
 }
 \arguments{
@@ -14,6 +16,8 @@ render_table_content(blueprint, theme, format)
 \item{format}{Output format (console, latex, html)}
 }
 \value{
+Character vector with formatted table content
+
 Character vector with table content
 }
 \description{

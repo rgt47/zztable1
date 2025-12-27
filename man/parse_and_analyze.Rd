@@ -5,7 +5,7 @@
 \title{Parse Formula and Analyze Dimensions (Combined)}
 \usage{
 parse_and_analyze(
-  form,
+  formula,
   data,
   strata,
   missing,

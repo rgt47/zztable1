@@ -14,7 +14,8 @@ analyze_dimensions(
   totals = FALSE,
   pvalue = TRUE,
   layout = "console",
-  footnotes = NULL
+  footnotes = NULL,
+  theme = NULL
 )
 }
 \arguments{

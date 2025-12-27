@@ -4,12 +4,14 @@
 \alias{get_numeric_summary_expression}
 \title{Get Numeric Summary Expression Optimized}
 \usage{
-get_numeric_summary_expression(summary_type, digits = 2)
+get_numeric_summary_expression(summary_type, digits = 2, theme_name = NULL)
 }
 \arguments{
 \item{summary_type}{Summary type specification}
 
 \item{digits}{Number of decimal places}
+
+\item{theme_name}{Theme name for format selection (NEJM uses ± format)}
 }
 \value{
 Expression for numeric summary
