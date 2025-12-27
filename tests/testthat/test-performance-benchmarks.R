@@ -1,8 +1,13 @@
 # =============================================================================
 # Performance Benchmark Tests
 # =============================================================================
+# NOTE: These tests are skipped on CI because timing thresholds are
+# machine-dependent and can produce false failures on slower CI runners.
+# =============================================================================
 
 library(testthat)
+
+skip_on_ci()
 
 # Test data generation
 create_test_data <- function(n_rows = 1000, n_vars = 10) {
