@@ -288,7 +288,7 @@ get_theme <- function(theme_name = "console") {
 #'
 #' @keywords internal
 get_theme_registry <- function() {
-  ns <- getNamespace("zztable1nextgen")
+  ns <- getNamespace("zztable1")
   registry <- get0(".theme_registry", envir = ns, inherits = FALSE)
 
   # Fallback to creating themes if registry not initialized

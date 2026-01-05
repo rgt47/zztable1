@@ -37,7 +37,7 @@ register_theme <- function(theme_obj, overwrite = FALSE) {
   validate_theme_structure(theme_obj)
 
   # Get registry
-  ns <- getNamespace("zztable1nextgen")
+  ns <- getNamespace("zztable1")
   registry <- get0(".theme_registry", envir = ns, inherits = FALSE)
 
   # Check if already registered
@@ -85,7 +85,7 @@ unregister_theme <- function(theme_name) {
     )
   }
 
-  ns <- getNamespace("zztable1nextgen")
+  ns <- getNamespace("zztable1")
   registry <- get0(".theme_registry", envir = ns, inherits = FALSE)
 
   if (!is.null(registry) && theme_name %in% names(registry)) {
@@ -222,8 +222,8 @@ export_theme_to_package <- function(theme_obj, file = NULL) {
     decimal_places = %d,\n\
     css_properties = %s\n\
   )\n\
-  if (requireNamespace('zztable1nextgen', quietly = TRUE)) {\n\
-    zztable1nextgen::register_theme(theme)\n\
+  if (requireNamespace('zztable1', quietly = TRUE)) {\n\
+    zztable1::register_theme(theme)\n\
   }\n\
 }\n\
 \n\
