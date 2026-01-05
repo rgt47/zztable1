@@ -4,12 +4,19 @@
 \alias{generate_theme_css}
 \title{Generate CSS for Theme Styling}
 \usage{
-generate_theme_css()
+generate_theme_css(theme = NULL)
+}
+\arguments{
+\item{theme}{Optional theme object. If NULL, generates CSS for all themes.}
 }
 \value{
 CSS string
 }
 \description{
-Generates comprehensive CSS for all themes in the package.
+Generate Theme CSS
+}
+\details{
+Generates CSS for themes. If a specific theme is provided, generates CSS
+for that theme only. Otherwise generates comprehensive CSS for all themes.
 }
 \keyword{internal}

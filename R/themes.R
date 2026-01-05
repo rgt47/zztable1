@@ -575,12 +575,23 @@ get_theme_decimal_places <- function(theme_name) {
 
 #' Generate CSS for Theme Styling
 #'
-#' Generates comprehensive CSS for all themes in the package.
+#' Generate Theme CSS
 #'
+#' Generates CSS for themes. If a specific theme is provided, generates CSS
+#' for that theme only. Otherwise generates comprehensive CSS for all themes.
+#'
+#' @param theme Optional theme object. If NULL, generates CSS for all themes.
 #' @return CSS string
 #'
 #' @keywords internal
-generate_theme_css <- function() {
+generate_theme_css <- function(theme = NULL) {
+  # If a specific theme is provided, generate CSS for just that theme
+
+  if (!is.null(theme)) {
+    return(generate_single_theme_css(theme))
+  }
+
+  # Otherwise generate CSS for all themes
   css_parts <- character()
 
   # Base table styling
@@ -666,4 +677,59 @@ generate_theme_css <- function() {
   }
 
   paste(css_parts, collapse = "\n")
+}
+
+#' Generate CSS for a Single Theme
+#'
+#' Internal helper to generate CSS for a specific theme object.
+#'
+#' @param theme Theme object
+#' @return CSS string for the theme
+#' @keywords internal
+generate_single_theme_css <- function(theme) {
+  # Use theme_name for short CSS class if available
+  css_class <- if (!is.null(theme$theme_name)) {
+    paste0("table1-", theme$theme_name)
+  } else {
+    theme$css_class
+  }
+  css_props <- theme$css_properties
+
+  if (is.null(css_class)) {
+    return("")
+  }
+
+  theme_css <- paste0("/* ", theme$name, " theme */\n")
+  theme_css <- paste0(theme_css, ".", css_class, " {\n")
+
+  if (!is.null(css_props)) {
+    for (prop_name in names(css_props)) {
+      prop_value <- css_props[[prop_name]]
+      css_property <- switch(prop_name,
+        "font_family" = "font-family",
+        "font_size" = "font-size",
+        "background_color" = "background-color",
+        "border_color" = "border-color",
+        "line_height" = "line-height",
+        prop_name
+      )
+      theme_css <- paste0(theme_css, "  ", css_property, ": ", prop_value, ";\n")
+    }
+  }
+
+  # Add NEJM-specific striping if this is NEJM theme
+  theme_name <- theme$theme_name %||% theme$name
+  if (theme_name %in% c("nejm", "New England Journal of Medicine")) {
+    theme_css <- paste0(theme_css, "}\n\n")
+    theme_css <- paste0(theme_css, ".", css_class, " tr:nth-child(odd) td {\n")
+    theme_css <- paste0(theme_css, "  background-color: #ffffff;\n")
+    theme_css <- paste0(theme_css, "}\n\n")
+    theme_css <- paste0(theme_css, ".", css_class, " tr:nth-child(even) td {\n")
+    theme_css <- paste0(theme_css, "  background-color: #fefcf0;\n")
+    theme_css <- paste0(theme_css, "}\n")
+  } else {
+    theme_css <- paste0(theme_css, "}\n")
+  }
+
+  theme_css
 }

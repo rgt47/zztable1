@@ -129,21 +129,19 @@ test_that("Theme-specific formatting differences", {
 test_that("Theme CSS generation works correctly", {
   # Test CSS generation for all themes
   themes <- list_available_themes()
-  
+
   for (theme_name in themes) {
     theme <- get_theme(theme_name)
     theme_css <- generate_theme_css(theme)
-    
+
     # Should generate non-empty CSS
     expect_true(nchar(theme_css) > 0)
-    
-    # Should contain theme-specific CSS class
-    css_class <- theme$css_class
-    if (!is.null(css_class)) {
-      expect_true(grepl(css_class, theme_css))
-    }
+
+    # Should contain theme-specific CSS class (using short theme_name)
+    expected_class <- paste0("table1-", theme_name)
+    expect_true(grepl(expected_class, theme_css))
   }
-  
+
   # NEJM theme should have striping CSS
   nejm_theme <- get_theme("nejm")
   nejm_css <- generate_theme_css(nejm_theme)
@@ -156,19 +154,19 @@ test_that("Font and spacing specifications", {
   nejm_theme <- get_theme("nejm")
   lancet_theme <- get_theme("lancet")
   jama_theme <- get_theme("jama")
-  
-  # Should have font family specifications
-  expect_true(!is.null(nejm_theme$font_family))
-  expect_true(!is.null(lancet_theme$font_family))
-  expect_true(!is.null(jama_theme$font_family))
-  
+
+  # Should have font family specifications (in css_properties)
+  expect_true(!is.null(nejm_theme$css_properties$font_family))
+  expect_true(!is.null(lancet_theme$css_properties$font_family))
+  expect_true(!is.null(jama_theme$css_properties$font_family))
+
   # Should have different decimal places
   decimal_places <- c(
     nejm_theme$decimal_places,
     lancet_theme$decimal_places,
     jama_theme$decimal_places
   )
-  
+
   # At least some themes should have different decimal places
   expect_true(length(unique(decimal_places)) >= 1)
 })

@@ -168,7 +168,10 @@ render_latex <- function(blueprint, theme = NULL) {
     stop("First argument must be a table1_blueprint", call. = FALSE)
   }
 
-  if (is.null(theme)) {
+  # Use blueprint's theme if available, then parameter, then default to nejm
+  if (is.null(theme) && !is.null(blueprint$metadata$theme)) {
+    theme <- blueprint$metadata$theme
+  } else if (is.null(theme)) {
     theme <- get_theme("nejm") # Default to journal theme for LaTeX
   } else if (is.character(theme)) {
     theme <- get_theme(theme)
@@ -358,8 +361,10 @@ render_html <- function(blueprint, theme = NULL) {
     theme <- get_theme(theme)
   }
 
-  # Get HTML table CSS class
-  css_class <- if (!is.null(theme$css_class)) {
+  # Get HTML table CSS class - prefer theme_name for short class names
+  css_class <- if (!is.null(theme$theme_name)) {
+    paste("table1", paste0("table1-", theme$theme_name))
+  } else if (!is.null(theme$css_class)) {
     paste("table1", theme$css_class)
   } else {
     "table1"

@@ -213,10 +213,10 @@ test_that("Theme edge cases", {
   bp1 <- table1(transmission ~ mpg, data = mtcars, theme = NULL)
   expect_s3_class(bp1, "table1_blueprint")
   
-  # Theme with missing configuration
+  # Theme with missing configuration (plain list, not a theme object)
   custom_theme <- list(name = "Incomplete")
   expect_error(
     apply_theme(Table1Blueprint(3, 3), custom_theme),
-    "required fields"
+    "character string or theme object"
   )
 })
