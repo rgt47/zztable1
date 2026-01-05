@@ -194,34 +194,61 @@ render_latex <- function(blueprint, theme = NULL) {
   output_lines <- c(output_lines, pipeline_output)
 
   # Insert LaTeX table environment setup (before headers if added by pipeline)
-  # Find where pipeline output ends before headers
   col_spec <- generate_latex_column_spec(blueprint$ncols, theme)
   table_env <- get_latex_table_environment(theme)
-
-  # Handle threeparttable wrapping
-  if (has_footnotes) {
-    output_lines <- c("\\begin{threeparttable}", output_lines)
-  }
 
   # Insert table environment start after title (if present)
   title_end <- if (!is.null(blueprint$metadata$title)) 1 else 0
   table_start <- paste0("\\begin{", table_env, "}{", col_spec, "}")
   top_rule <- get_latex_rule(theme, "top")
 
+  # Safely split output lines
+  pre_content <- if (title_end > 0) output_lines[1:title_end] else character(0)
+  post_content <- if (title_end < length(output_lines)) {
+    output_lines[(title_end + 1):length(output_lines)]
+  } else {
+    character(0)
+  }
+
   output_lines <- c(
-    output_lines[1:title_end],
+    pre_content,
     table_start,
     top_rule,
-    output_lines[(title_end + 1):length(output_lines)]
+    post_content
   )
 
   # Add bottom rule before table end
   bottom_rule <- get_latex_rule(theme, "bottom")
   output_lines <- c(output_lines, bottom_rule, paste0("\\end{", table_env, "}"))
 
-  # Close threeparttable if opened
+  # Handle threeparttable wrapping with footnotes
+  # Structure: \begin{threeparttable} \begin{tabular}...\end{tabular} \begin{tablenotes}...\end{tablenotes} \end{threeparttable}
   if (has_footnotes) {
-    output_lines <- c(output_lines, "\\end{threeparttable}")
+    footnotes <- blueprint$metadata$footnote_list
+    markers <- blueprint$metadata$footnote_markers
+    n_with_markers <- length(markers)
+
+    # Build tablenotes
+    tablenotes <- c("\\begin{tablenotes}", "\\small")
+
+    # Numbered footnotes
+    if (n_with_markers > 0) {
+      for (i in 1:min(n_with_markers, length(footnotes))) {
+        tablenotes <- c(tablenotes, paste0("\\item[", i, "] ", escape_latex(footnotes[[i]])))
+      }
+    }
+
+    # General footnotes without numbers
+    if (length(footnotes) > n_with_markers) {
+      for (i in (n_with_markers + 1):length(footnotes)) {
+        tablenotes <- c(tablenotes, paste0("\\item[\\textbullet] ", escape_latex(footnotes[[i]])))
+      }
+    }
+
+    tablenotes <- c(tablenotes, "\\end{tablenotes}")
+
+    # Wrap everything: threeparttable -> tabular -> tablenotes
+    output_lines <- c("\\begin{threeparttable}", output_lines, tablenotes, "\\end{threeparttable}")
   }
 
   output_lines
@@ -561,26 +588,9 @@ render_footnotes <- function(blueprint, theme, format) {
       }
     },
     "latex" = {
-      if (length(footnotes) > 0) {
-        output_lines <- c(output_lines, "\\begin{tablenotes}")
-        output_lines <- c(output_lines, "\\small")
-        
-        # Numbered footnotes
-        if (n_with_markers > 0) {
-          for (i in 1:min(n_with_markers, length(footnotes))) {
-            output_lines <- c(output_lines, paste0("\\item[", i, "] ", escape_latex(footnotes[[i]])))
-          }
-        }
-        
-        # General footnotes without numbers
-        if (length(footnotes) > n_with_markers) {
-          for (i in (n_with_markers + 1):length(footnotes)) {
-            output_lines <- c(output_lines, paste0("\\item[\\textbullet] ", escape_latex(footnotes[[i]])))
-          }
-        }
-        
-        output_lines <- c(output_lines, "\\end{tablenotes}")
-      }
+      # For LaTeX, footnotes are handled separately by render_latex()
+      # to ensure proper placement after \end{tabular} but before \end{threeparttable}
+      # Return empty here to avoid duplicate footnotes
     },
     "html" = {
       output_lines <- c(output_lines, "<div class=\"footnotes\">")
