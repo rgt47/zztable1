@@ -2,7 +2,7 @@
 title: "Customizing Statistics and Tests in zztable1_nextgen"
 author: "zztable1_nextgen"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
     toc: true
     toc_float: true
@@ -14,9 +14,11 @@ output:
     toc_depth: 3
     number_sections: true
     latex_engine: pdflatex
+    includes:
+      in_header: preamble.tex
     extra_dependencies:
       - xcolor
-      - colortbl 
+      - colortbl
       - array
       - booktabs
       - longtable

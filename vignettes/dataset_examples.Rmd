@@ -2,16 +2,18 @@
 title: "Comprehensive Theme Showcase: Table 1 Examples with Built-in R Datasets"
 author: "zztable1_nextgen"
 date: "`r Sys.Date()`"
-output: 
+output:
   pdf_document:
     toc: true
     toc_depth: 3
     number_sections: true
     latex_engine: pdflatex
     keep_tex: true
+    includes:
+      in_header: preamble.tex
     extra_dependencies:
       - xcolor
-      - colortbl 
+      - colortbl
       - array
       - booktabs
       - longtable
@@ -142,9 +144,10 @@ theme_details <- data.frame(
   Theme = available_themes,
   Description = c(
     "Console - Basic monospace output for development",
-    "NEJM - New England Journal of Medicine styling with authentic cream striping", 
+    "NEJM - New England Journal of Medicine styling with authentic cream striping",
     "Lancet - Clean minimal formatting matching The Lancet",
     "JAMA - Journal of American Medical Association styling",
+    "BMJ - British Medical Journal styling",
     "Simple - Clean general-purpose theme for reports"
   ),
   stringsAsFactors = FALSE

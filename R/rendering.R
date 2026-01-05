@@ -183,6 +183,12 @@ render_latex <- function(blueprint, theme = NULL) {
 
   output_lines <- character(0)
 
+  # Add theme-specific color definitions at the start
+  theme_setup <- generate_latex_theme_setup(theme)
+  if (length(theme_setup) > 0) {
+    output_lines <- c(output_lines, theme_setup)
+  }
+
   # Use pipeline for common rendering
   pipeline_output <- render_pipeline(blueprint, theme, "latex", "nejm")
   output_lines <- c(output_lines, pipeline_output)

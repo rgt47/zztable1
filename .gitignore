@@ -17,4 +17,4 @@ dev-scripts/
 ~$*
 
 # Documentation build artifacts
-docs/
+docs/.Rprofile.local

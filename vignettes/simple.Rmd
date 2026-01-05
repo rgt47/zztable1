@@ -2,12 +2,15 @@
 title: "Table 1 Examples with Built-in R Datasets"
 author: "zztable1_nextgen"
 date: "`r Sys.Date()`"
-output: 
+output:
   pdf_document:
     toc: true
     keep_tex: true
-    # toc_float: true
-    # code_folding: show
+    includes:
+      in_header: preamble.tex
+    extra_dependencies:
+      - xcolor
+      - colortbl
 vignette: >
   %\VignetteIndexEntry{Table 1 Examples with Built-in R Datasets}
   %\VignetteEngine{knitr::rmarkdown}

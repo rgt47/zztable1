@@ -2,15 +2,17 @@
 title: "zztable1_nextgen: Advanced Publication-Ready Summary Tables"
 author: "zztable1_nextgen Development Team"
 date: "`r Sys.Date()`"
-output: 
+output:
   pdf_document:
     toc: true
     toc_depth: 3
     number_sections: true
     latex_engine: pdflatex
+    includes:
+      in_header: preamble.tex
     extra_dependencies:
       - xcolor
-      - colortbl 
+      - colortbl
       - array
       - booktabs
       - longtable

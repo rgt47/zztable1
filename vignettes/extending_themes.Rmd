@@ -8,6 +8,8 @@ output:
     toc_depth: 3
     number_sections: true
     latex_engine: pdflatex
+    includes:
+      in_header: preamble.tex
     extra_dependencies:
       - xcolor
       - colortbl
@@ -90,25 +92,22 @@ cat("- CSS class:", my_theme$css_class, "\n")
 
 ## Advanced Custom Theme
 
-For more control, create a theme from scratch with custom CSS properties:
+For more control, create a theme from scratch with individual property parameters:
 
 ```{r custom-theme-advanced}
-# Create a highly customized theme
+# Create a highly customized theme using individual parameters
 corporate_theme <- create_custom_theme(
   name = "Corporate",
   base_theme = "console",
   decimal_places = 1,
-  css_properties = list(
-    font_family = "Arial, sans-serif",
-    font_size = "11pt",
-    header_background = "#003366",
-    header_text_color = "white",
-    row_stripe_color = "#e8f4f8"
-  )
+  font_family = "Arial, sans-serif",
+  font_size = "11pt",
+  background_color = "#e8f4f8",
+  border_color = "#003366"
 )
 
 cat("Corporate theme created with custom properties:\n")
-str(corporate_theme[c("name", "decimal_places", "css_properties")])
+str(corporate_theme[c("name", "decimal_places")])
 ```
 
 ## Modifying Existing Themes
@@ -256,11 +255,8 @@ publication_theme <- create_custom_theme(
   name = "Publication",
   base_theme = "nejm",
   decimal_places = 1,
-  css_properties = list(
-    # HTML-specific
-    font_family = "Georgia, serif",
-    row_stripe_color = "#fefcf0"
-  )
+  font_family = "Georgia, serif",
+  background_color = "#fefcf0"
 )
 
 # This theme works across all formats automatically
