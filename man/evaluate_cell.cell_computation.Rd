@@ -20,6 +20,8 @@
 \item{env}{Evaluation environment}
 
 \item{force_recalc}{Force cache invalidation}
+
+\item{blueprint}{Blueprint object (optional)}
 }
 \value{
 Computed result as character string
@@ -27,4 +29,3 @@ Computed result as character string
 \description{
 S3 method for evaluating cells that perform computations.
 }
-\keyword{internal}

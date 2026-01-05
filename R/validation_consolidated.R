@@ -11,6 +11,7 @@
 #' @param data Data frame
 #' @param strata Optional stratification variable
 #' @param theme Theme specification
+#' @param footnotes Optional footnotes list
 #' @param ... Other parameters
 #'
 #' @return TRUE if valid, otherwise stops with error

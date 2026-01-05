@@ -414,7 +414,7 @@ safe_eval <- function(expr, fallback = "[Error]") {
 #' @return Character string with unique cache key
 #'
 #' @details
-#' Cache key format: "var_{variable}_strat_{stratum}_test_{test_type}"
+#' Cache key format: \code{"var_\{variable\}_strat_\{stratum\}_test_\{test_type\}"}
 #' where stratum defaults to "none" if NULL.
 #'
 #' @examples

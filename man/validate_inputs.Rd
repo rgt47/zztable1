@@ -22,6 +22,8 @@ validate_inputs(
 
 \item{theme}{Theme specification}
 
+\item{footnotes}{Optional footnotes list}
+
 \item{...}{Other parameters}
 }
 \value{

@@ -21,4 +21,6 @@ Suggests:
     parallel,
     devtools,
     pkgload,
-    rlang (>= 1.0.0)
+    rlang (>= 1.0.0),
+    htmltools,
+    kableExtra

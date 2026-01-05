@@ -3,19 +3,6 @@ title: "zztable1_nextgen: Advanced Publication-Ready Summary Tables"
 author: "zztable1_nextgen Development Team"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    latex_engine: pdflatex
-    extra_dependencies:
-      - xcolor
-      - colortbl
-      - array
-      - booktabs
-      - longtable
-      - float
-      - threeparttable
   html_document:
     toc: true
     toc_depth: 3
@@ -23,9 +10,6 @@ output:
     theme: flatly
     highlight: tango
     code_folding: show
-header-includes:
-  - \definecolor{nejmstripe}{HTML}{fefcf0}
-  - \definecolor{nejmtext}{HTML}{333333}
 vignette: >
   %\VignetteIndexEntry{zztable1_nextgen: Advanced Publication-Ready Summary Tables}
   %\VignetteEngine{knitr::rmarkdown}

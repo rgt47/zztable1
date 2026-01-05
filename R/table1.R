@@ -1123,7 +1123,7 @@ populate_numeric_variable_stratified <- function(blueprint, var_name, stratum_da
 
           # Use theme-specific formatting
           if (!is.null(theme_name) && theme_name == "nejm") {
-            content <- paste0(mean_val, " ± ", sd_val)
+            content <- paste0(mean_val, " \u00b1 ", sd_val)
           } else {
             content <- paste0(mean_val, " (", sd_val, ")")
           }

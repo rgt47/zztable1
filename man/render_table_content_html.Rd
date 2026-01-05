@@ -6,6 +6,15 @@
 \usage{
 render_table_content_html(blueprint, theme)
 }
+\arguments{
+\item{blueprint}{Table1Blueprint object}
+
+\item{theme}{Theme configuration}
+}
+\value{
+Character vector with formatted content
+}
 \description{
 Placeholder for HTML content rendering
 }
+\keyword{internal}

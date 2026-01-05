@@ -122,7 +122,7 @@ var_name_from_expr <- function(x) {
 #' @return Invisible NULL if valid
 #'
 #' @keywords internal
-validate_formula_structure <- function(formula, context = "formula") {
+validate_formula_enhanced <- function(formula, context = "formula") {
   if (!inherits(formula, "formula")) {
     msg <- sprintf(
       "%s must be a formula, not %s",

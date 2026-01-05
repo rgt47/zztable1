@@ -363,12 +363,20 @@ format_latex_table_row <- function(row_data, row_index, theme, row_type = "data"
 }
 
 #' Placeholder for console content rendering
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @return Character vector with formatted content
+#' @keywords internal
 render_table_content_console <- function(blueprint, theme) {
   # Simplified placeholder - would need full implementation
   character(0)
 }
 
 #' Placeholder for HTML content rendering
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @return Character vector with formatted content
+#' @keywords internal
 render_table_content_html <- function(blueprint, theme) {
   # Simplified placeholder - would need full implementation
   character(0)
@@ -486,7 +494,9 @@ format_content_for_output <- function(content, format, row, col, theme) {
 #' @param row_content Character vector of cell contents
 #' @param format Output format
 #' @param theme Theme configuration
+#' @param row_index Row index for context-specific formatting
 #' @return Single character string for the row
+#' @keywords internal
 combine_row_content <- function(row_content, format, theme, row_index = 1) {
   switch(format,
     "console" = {

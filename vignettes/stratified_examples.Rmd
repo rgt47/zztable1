@@ -3,26 +3,10 @@ title: "Stratified Table 1 Analysis Examples"
 author: "zztable1_nextgen"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    latex_engine: pdflatex
-    extra_dependencies:
-      - xcolor
-      - colortbl
-      - array
-      - booktabs
-      - longtable
-      - float
-      - threeparttable
   html_document:
     toc: true
     toc_float: true
     code_folding: show
-header-includes:
-  - \definecolor{nejmstripe}{HTML}{fefcf0}
-  - \definecolor{nejmtext}{HTML}{333333}
 vignette: >
   %\VignetteIndexEntry{Stratified Table 1 Analysis Examples}
   %\VignetteEngine{knitr::rmarkdown}

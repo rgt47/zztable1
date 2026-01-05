@@ -20,6 +20,8 @@
 \item{env}{Evaluation environment (not used)}
 
 \item{force_recalc}{Force recalculation (not used)}
+
+\item{blueprint}{Blueprint object (optional)}
 }
 \value{
 Cell content as character string
@@ -27,4 +29,3 @@ Cell content as character string
 \description{
 S3 method for evaluating content cells containing static text.
 }
-\keyword{internal}

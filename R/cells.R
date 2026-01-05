@@ -180,7 +180,14 @@ validate_cell_inputs <- function(type, content, data_subset, computation,
 #' This eliminates memory waste by only storing relevant fields.
 #'
 #' @param type Cell type
-#' @param ... All other parameters
+#' @param content Cell content
+#' @param data_subset Data subset expression
+#' @param computation Computation expression
+#' @param dependencies Dependencies vector
+#' @param format Format list
+#' @param cached_result Cached result
+#' @param footnote_number Footnote number
+#' @param footnote_text Footnote text
 #'
 #' @return Optimized cell data list
 #' @keywords internal
@@ -310,6 +317,7 @@ validate_cell_by_type <- function(x, strict) {
 #' @param data Data frame for computation context
 #' @param env Evaluation environment
 #' @param force_recalc Logical to force cache invalidation
+#' @param blueprint Table1Blueprint object for caching context (optional)
 #'
 #' @return Evaluated cell result
 #'
@@ -342,10 +350,12 @@ evaluate_cell <- function(cell, data, env = parent.frame(),
 #' @param data Data frame (not used for content cells)
 #' @param env Evaluation environment (not used)
 #' @param force_recalc Force recalculation (not used)
+#' @param blueprint Blueprint object (optional)
 #'
 #' @return Cell content as character string
 #'
-#' @keywords internal
+#' @method evaluate_cell cell_content
+#' @export
 evaluate_cell.cell_content <- function(cell, data, env = parent.frame(),
                                        force_recalc = FALSE, blueprint = NULL) {
   cell$content %||% ""
@@ -359,10 +369,12 @@ evaluate_cell.cell_content <- function(cell, data, env = parent.frame(),
 #' @param data Data frame for computation context
 #' @param env Evaluation environment
 #' @param force_recalc Force cache invalidation
+#' @param blueprint Blueprint object (optional)
 #'
 #' @return Computed result as character string
 #'
-#' @keywords internal
+#' @method evaluate_cell cell_computation
+#' @export
 evaluate_cell.cell_computation <- function(cell, data, env = parent.frame(),
                                            force_recalc = FALSE, blueprint = NULL) {
   evaluate_computation_cell(cell, data, env, force_recalc, blueprint)
@@ -376,10 +388,12 @@ evaluate_cell.cell_computation <- function(cell, data, env = parent.frame(),
 #' @param data Data frame (not used)
 #' @param env Evaluation environment (not used)
 #' @param force_recalc Force recalculation (not used)
+#' @param blueprint Blueprint object (optional)
 #'
 #' @return Separator string
 #'
-#' @keywords internal
+#' @method evaluate_cell cell_separator
+#' @export
 evaluate_cell.cell_separator <- function(cell, data, env = parent.frame(),
                                          force_recalc = FALSE, blueprint = NULL) {
   cell$content %||% "|"
@@ -393,10 +407,12 @@ evaluate_cell.cell_separator <- function(cell, data, env = parent.frame(),
 #' @param data Data frame (not used)
 #' @param env Evaluation environment (not used)
 #' @param force_recalc Force recalculation (not used)
+#' @param blueprint Blueprint object (optional)
 #'
 #' @return Error indicator string
 #'
-#' @keywords internal
+#' @method evaluate_cell default
+#' @export
 evaluate_cell.default <- function(cell, data, env = parent.frame(),
                                   force_recalc = FALSE, blueprint = NULL) {
   "[Unknown Cell Type]"
@@ -594,11 +610,8 @@ evaluate_cells_vectorized <- function(cells, data, parallel = FALSE) {
   }
 }
 
-#' Safe NULL-coalescing operator
-#'
-#' @param x First value
-#' @param y Second value (used if x is NULL)
-#' @keywords internal
+# Safe NULL-coalescing operator (defined in themes.R)
+# Kept here for backward compatibility but no roxygen docs to avoid duplicate Rd
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
 #' Format Footnote Marker

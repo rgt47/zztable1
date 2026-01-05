@@ -3,22 +3,10 @@ title: "ToothGrowth Analysis: A Complete Table 1 Example"
 author: "zztable1_nextgen"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
+  html_document:
     toc: true
-    toc_depth: 3
-    number_sections: true
-    latex_engine: pdflatex
-    extra_dependencies:
-      - xcolor
-      - colortbl
-      - array
-      - booktabs
-      - longtable
-      - float
-      - threeparttable
-header-includes:
-  - \definecolor{nejmstripe}{HTML}{fefcf0}
-  - \definecolor{nejmtext}{HTML}{333333}
+    toc_float: true
+    code_folding: show
 vignette: >
   %\VignetteIndexEntry{ToothGrowth Analysis: A Complete Table 1 Example}
   %\VignetteEngine{knitr::rmarkdown}

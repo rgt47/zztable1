@@ -13,6 +13,7 @@
 #
 
 # Null coalescing operator (needed for theme defaults)
+# @noRd to prevent Rd file generation (pipe character in name causes issues)
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
 # ============================================================================
@@ -126,7 +127,7 @@ create_theme <- function(name, decimal_places = 1, variable_indent = 2,
       ),
       rendering_rules = list(
         format_numeric = function(x, digits = 1) {
-          paste0(round(mean(x, na.rm = TRUE), digits), " ± ",
+          paste0(round(mean(x, na.rm = TRUE), digits), " \u00b1 ",
                  round(sd(x, na.rm = TRUE), digits))
         },
         format_categorical = function(x, total = NULL) {

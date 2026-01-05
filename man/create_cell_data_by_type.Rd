@@ -19,7 +19,21 @@ create_cell_data_by_type(
 \arguments{
 \item{type}{Cell type}
 
-\item{...}{All other parameters}
+\item{content}{Cell content}
+
+\item{data_subset}{Data subset expression}
+
+\item{computation}{Computation expression}
+
+\item{dependencies}{Dependencies vector}
+
+\item{format}{Format list}
+
+\item{cached_result}{Cached result}
+
+\item{footnote_number}{Footnote number}
+
+\item{footnote_text}{Footnote text}
 }
 \value{
 Optimized cell data list

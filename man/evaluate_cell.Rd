@@ -20,6 +20,8 @@ evaluate_cell(
 \item{env}{Evaluation environment}
 
 \item{force_recalc}{Logical to force cache invalidation}
+
+\item{blueprint}{Table1Blueprint object for caching context (optional)}
 }
 \value{
 Evaluated cell result

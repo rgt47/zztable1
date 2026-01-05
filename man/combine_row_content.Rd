@@ -12,6 +12,8 @@ combine_row_content(row_content, format, theme, row_index = 1)
 \item{format}{Output format}
 
 \item{theme}{Theme configuration}
+
+\item{row_index}{Row index for context-specific formatting}
 }
 \value{
 Single character string for the row
@@ -19,3 +21,4 @@ Single character string for the row
 \description{
 Combine Row Content
 }
+\keyword{internal}
