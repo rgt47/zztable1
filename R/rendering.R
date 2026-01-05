@@ -583,7 +583,7 @@ render_footnotes <- function(blueprint, theme, format) {
       # Then, general footnotes (no numbers, just bullets or dashes)
       if (length(footnotes) > n_with_markers) {
         for (i in (n_with_markers + 1):length(footnotes)) {
-          output_lines <- c(output_lines, paste0("• ", footnotes[[i]]))
+          output_lines <- c(output_lines, paste0("\u2022 ", footnotes[[i]]))
         }
       }
     },
@@ -594,18 +594,18 @@ render_footnotes <- function(blueprint, theme, format) {
     },
     "html" = {
       output_lines <- c(output_lines, "<div class=\"footnotes\">")
-      
-      # Numbered footnotes 
+
+      # Numbered footnotes
       if (n_with_markers > 0) {
         for (i in 1:min(n_with_markers, length(footnotes))) {
           output_lines <- c(output_lines, paste0("<p><sup>", i, "</sup> ", footnotes[[i]], "</p>"))
         }
       }
-      
+
       # General footnotes without numbers
       if (length(footnotes) > n_with_markers) {
         for (i in (n_with_markers + 1):length(footnotes)) {
-          output_lines <- c(output_lines, paste0("<p>• ", footnotes[[i]], "</p>"))
+          output_lines <- c(output_lines, paste0("<p>\u2022 ", footnotes[[i]], "</p>"))
         }
       }
       
@@ -638,10 +638,10 @@ escape_latex <- function(text) {
   text <- gsub("}", "\\}", text, fixed = TRUE)
   
   # Handle Unicode characters with math mode (after other escaping, before $ escaping)
-  text <- gsub("±", "$\\pm$", text, fixed = TRUE)          # Plus-minus symbol
-  text <- gsub("×", "$\\times$", text, fixed = TRUE)       # Multiplication symbol  
-  text <- gsub("•", "$\\bullet$", text, fixed = TRUE)      # Bullet symbol
-  text <- gsub("⋅", "$\\cdot$", text, fixed = TRUE)        # Dot operator
+  text <- gsub("\u00b1", "$\\pm$", text, fixed = TRUE)
+  text <- gsub("\u00d7", "$\\times$", text, fixed = TRUE)
+  text <- gsub("\u2022", "$\\bullet$", text, fixed = TRUE)
+  text <- gsub("\u22c5", "$\\cdot$", text, fixed = TRUE)
   
   # Now escape remaining $ symbols (but not the ones we just added for math)
   # This is tricky - let's use a placeholder approach
@@ -684,19 +684,19 @@ escape_html <- function(text) {
   }
 
   # First, preserve allowed HTML tags by temporarily replacing them with placeholders
-  text <- gsub("<sup>", "§SUP_START§", text, fixed = TRUE)
-  text <- gsub("</sup>", "§SUP_END§", text, fixed = TRUE)
-  
+  text <- gsub("<sup>", "SUPSTART_PLACEHOLDER", text, fixed = TRUE)
+  text <- gsub("</sup>", "SUPEND_PLACEHOLDER", text, fixed = TRUE)
+
   # Now escape general HTML characters
   text <- gsub("&", "&amp;", text, fixed = TRUE)
   text <- gsub("<", "&lt;", text, fixed = TRUE)
   text <- gsub(">", "&gt;", text, fixed = TRUE)
   text <- gsub("\"", "&quot;", text, fixed = TRUE)
   text <- gsub("'", "&#39;", text, fixed = TRUE)
-  
+
   # Restore the allowed HTML tags
-  text <- gsub("§SUP_START§", "<sup>", text, fixed = TRUE)
-  text <- gsub("§SUP_END§", "</sup>", text, fixed = TRUE)
+  text <- gsub("SUPSTART_PLACEHOLDER", "<sup>", text, fixed = TRUE)
+  text <- gsub("SUPEND_PLACEHOLDER", "</sup>", text, fixed = TRUE)
 
   text
 }

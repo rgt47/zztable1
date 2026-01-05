@@ -611,8 +611,9 @@ evaluate_cells_vectorized <- function(cells, data, parallel = FALSE) {
 #' @return Formatted marker string
 #' @keywords internal
 format_footnote_marker <- function(number, format = "console") {
-  # Unicode superscript characters for 1-9
-  superscripts <- c("¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹")
+  # Unicode superscript characters for 1-9 (using escape sequences for portability)
+  superscripts <- c("\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075",
+                    "\u2076", "\u2077", "\u2078", "\u2079")
   
   switch(format,
     "console" = if (number <= 9) superscripts[number] else sprintf("(%d)", number),
