@@ -55,10 +55,7 @@ Cell(
   dependencies = c("data", "age", "group")
 )
 
-# Footnote cell
-Cell(
-  type = "footnote", footnote_number = 1,
-  footnote_text = "Age measured at baseline"
-)
+# Separator cell
+Cell(type = "separator", content = "")
 
 }
