@@ -8,8 +8,6 @@ output:
     toc_depth: 3
     number_sections: true
     latex_engine: pdflatex
-    includes:
-      in_header: preamble.tex
     extra_dependencies:
       - xcolor
       - colortbl
@@ -22,6 +20,9 @@ output:
     toc: true
     toc_float: true
     code_folding: show
+header-includes:
+  - \definecolor{nejmstripe}{HTML}{fefcf0}
+  - \definecolor{nejmtext}{HTML}{333333}
 vignette: >
   %\VignetteIndexEntry{Extending the Theme System}
   %\VignetteEngine{knitr::rmarkdown}

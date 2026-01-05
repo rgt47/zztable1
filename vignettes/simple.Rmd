@@ -6,11 +6,13 @@ output:
   pdf_document:
     toc: true
     keep_tex: true
-    includes:
-      in_header: preamble.tex
     extra_dependencies:
       - xcolor
       - colortbl
+      - threeparttable
+header-includes:
+  - \definecolor{nejmstripe}{HTML}{fefcf0}
+  - \definecolor{nejmtext}{HTML}{333333}
 vignette: >
   %\VignetteIndexEntry{Table 1 Examples with Built-in R Datasets}
   %\VignetteEngine{knitr::rmarkdown}

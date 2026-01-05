@@ -9,8 +9,6 @@ output:
     number_sections: true
     latex_engine: pdflatex
     keep_tex: true
-    includes:
-      in_header: preamble.tex
     extra_dependencies:
       - xcolor
       - colortbl
@@ -25,6 +23,9 @@ output:
     theme: flatly
     highlight: tango
     code_folding: show
+header-includes:
+  - \definecolor{nejmstripe}{HTML}{fefcf0}
+  - \definecolor{nejmtext}{HTML}{333333}
 vignette: >
   %\VignetteIndexEntry{Comprehensive Theme Showcase: Table 1 Examples}
   %\VignetteEngine{knitr::rmarkdown}

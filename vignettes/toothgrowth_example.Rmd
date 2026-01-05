@@ -8,8 +8,6 @@ output:
     toc_depth: 3
     number_sections: true
     latex_engine: pdflatex
-    includes:
-      in_header: preamble.tex
     extra_dependencies:
       - xcolor
       - colortbl
@@ -18,6 +16,9 @@ output:
       - longtable
       - float
       - threeparttable
+header-includes:
+  - \definecolor{nejmstripe}{HTML}{fefcf0}
+  - \definecolor{nejmtext}{HTML}{333333}
 vignette: >
   %\VignetteIndexEntry{ToothGrowth Analysis: A Complete Table 1 Example}
   %\VignetteEngine{knitr::rmarkdown}

@@ -8,8 +8,6 @@ output:
     toc_depth: 3
     number_sections: true
     latex_engine: pdflatex
-    includes:
-      in_header: preamble.tex
     extra_dependencies:
       - xcolor
       - colortbl
@@ -25,6 +23,9 @@ output:
     theme: flatly
     highlight: tango
     code_folding: show
+header-includes:
+  - \definecolor{nejmstripe}{HTML}{fefcf0}
+  - \definecolor{nejmtext}{HTML}{333333}
 vignette: >
   %\VignetteIndexEntry{zztable1_nextgen: Advanced Publication-Ready Summary Tables}
   %\VignetteEngine{knitr::rmarkdown}
