@@ -728,7 +728,7 @@ escape_html <- function(text) {
 #' \dontrun{
 #' data(mtcars)
 #' mtcars$transmission <- factor(ifelse(mtcars$am == 1, "Manual", "Auto"))
-#' blueprint <- table1_nextgen(transmission ~ mpg + hp, data = mtcars)
+#' blueprint <- table1(transmission ~ mpg + hp, data = mtcars)
 #' display_table(blueprint, mtcars)
 #' }
 #'

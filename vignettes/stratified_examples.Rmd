@@ -1,6 +1,6 @@
 ---
 title: "Stratified Table 1 Analysis Examples"
-author: "zztable1_nextgen"
+author: "zztable1"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -94,7 +94,7 @@ create_table <- function(formula, data, strata = NULL, ...) {
 
 # Introduction
 
-Stratified analysis is a crucial component of epidemiological and clinical research. This vignette demonstrates how to create stratified Table 1 analyses using the `zztable1_nextgen` package. Stratified tables allow you to examine patterns within subgroups of your data, revealing important differences that might be obscured in overall analyses.
+Stratified analysis is a crucial component of epidemiological and clinical research. This vignette demonstrates how to create stratified Table 1 analyses using the `zztable1` package. Stratified tables allow you to examine patterns within subgroups of your data, revealing important differences that might be obscured in overall analyses.
 
 # Clinical Trial Data Example
 
@@ -357,4 +357,4 @@ strata_vars <- data.frame(
 knitr::kable(strata_vars, caption = "Available Stratification Variables")
 ```
 
-The stratified analysis capabilities of `zztable1_nextgen` provide powerful tools for understanding complex clinical trial data. By examining baseline characteristics within meaningful subgroups, researchers can better assess treatment allocation, identify potential confounders, and plan appropriate statistical analyses.
+The stratified analysis capabilities of `zztable1` provide powerful tools for understanding complex clinical trial data. By examining baseline characteristics within meaningful subgroups, researchers can better assess treatment allocation, identify potential confounders, and plan appropriate statistical analyses.

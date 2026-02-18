@@ -1,6 +1,6 @@
 ---
 title: "Extending the Theme System"
-author: "zztable1_nextgen"
+author: "zztable1"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -37,11 +37,11 @@ cat("\n</style>")
 
 # Introduction
 
-The theme system in zztable1_nextgen allows you to customize the appearance of your Table 1 output for different formats (console, LaTeX, HTML). This vignette demonstrates how to create custom themes and extend the theme system for your specific needs.
+The theme system in zztable1 allows you to customize the appearance of your Table 1 output for different formats (console, LaTeX, HTML). This vignette demonstrates how to create custom themes and extend the theme system for your specific needs.
 
 ## Built-in Themes
 
-zztable1_nextgen comes with several pre-configured themes for major medical journals:
+zztable1 comes with several pre-configured themes for major medical journals:
 
 ```{r list-themes}
 available_themes <- list_available_themes()
@@ -349,6 +349,6 @@ With these tools, you can create professional tables tailored to your publicatio
 
 See also:
 - `vignette("theming_system")` - Built-in theme demonstrations
-- `vignette("zztable1_nextgen_guide")` - Package overview
+- `vignette("zztable1_guide")` - Package overview
 - `?create_custom_theme` - Function documentation
 - `?apply_theme` - Theme application

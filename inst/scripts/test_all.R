@@ -1,5 +1,5 @@
 # ============================================================================
-# Comprehensive Test Suite for zztable1_nextgen
+# Comprehensive Test Suite for zztable1
 # ============================================================================
 #
 # This file runs both the testthat test suite and integration tests.
@@ -20,10 +20,10 @@
 
 # Load the package functions for testing
 # During R CMD check, the package is already installed and loaded
-if (!exists("table1_nextgen")) {
+if (!exists("table1")) {
   # Try loading from package installation
-  if (requireNamespace("zztable1nextgen", quietly = TRUE)) {
-    library(zztable1nextgen)
+  if (requireNamespace("zztable1", quietly = TRUE)) {
+    library(zztable1)
   } else if (require(devtools, quietly = TRUE)) {
     devtools::load_all("..")
   } else if (require(pkgload, quietly = TRUE)) {
@@ -95,7 +95,7 @@ test_data <- prepare_test_data()
 mtcars_data <- test_data$mtcars
 clinical_data <- test_data$clinical
 
-cat("=== zztable1_nextgen Comprehensive Test Suite ===\n\n")
+cat("=== zztable1 Comprehensive Test Suite ===\n\n")
 
 # ============================================================================
 # 1. BASIC FUNCTIONALITY TESTS

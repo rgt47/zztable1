@@ -1,6 +1,6 @@
 ---
 title: "ToothGrowth Analysis: A Complete Table 1 Example"
-author: "zztable1_nextgen"
+author: "zztable1"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -118,7 +118,7 @@ The `ToothGrowth` dataset contains the results of an experiment studying the eff
 - **Supplement type**: Vitamin C (VC) vs Orange juice (OJ) 
 - **Dose level**: 0.5, 1.0, or 2.0 mg/day
 
-The response variable is tooth length measured in microns. This example showcases how `zztable1_nextgen` can effectively present clinical trial data with proper formatting and statistical context.
+The response variable is tooth length measured in microns. This example showcases how `zztable1` can effectively present clinical trial data with proper formatting and statistical context.
 
 ## Dataset Overview
 
@@ -360,7 +360,7 @@ create_table(
 
 ## Conclusion
 
-The `ToothGrowth` example demonstrates the versatility of `zztable1_nextgen` for presenting clinical research data:
+The `ToothGrowth` example demonstrates the versatility of `zztable1` for presenting clinical research data:
 
 - **Multiple themes** adapt to different journal requirements
 - **Flexible footnoting** provides essential study context  

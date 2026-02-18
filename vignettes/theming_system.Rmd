@@ -1,6 +1,6 @@
 ---
 title: "Theming System Demonstration"
-author: "zztable1_nextgen"
+author: "zztable1"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -97,7 +97,7 @@ create_table <- function(formula, data, ...) {
 
 # Introduction
 
-The `zztable1_nextgen` package includes a comprehensive theming system that allows you to format tables according to different journal standards. This vignette demonstrates three major medical journal themes: NEJM, Lancet, and JAMA.
+The `zztable1` package includes a comprehensive theming system that allows you to format tables according to different journal standards. This vignette demonstrates three major medical journal themes: NEJM, Lancet, and JAMA.
 
 # Sample Data Setup
 

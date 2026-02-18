@@ -1,6 +1,6 @@
 ---
 title: "Table 1 Examples with Built-in R Datasets"
-author: "zztable1_nextgen"
+author: "zztable1"
 date: "`r Sys.Date()`"
 output:
   html_document:

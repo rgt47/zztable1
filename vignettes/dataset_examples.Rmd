@@ -1,6 +1,6 @@
 ---
 title: "Comprehensive Theme Showcase: Table 1 Examples with Built-in R Datasets"
-author: "zztable1_nextgen"
+author: "zztable1"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -116,7 +116,7 @@ create_table <- function(formula, data, ...) {
 
 # Introduction
 
-This comprehensive vignette showcases **all available themes** in `zztable1_nextgen` using carefully selected built-in R datasets. Each theme is designed to match specific publication standards, from medical journals to general statistical reports.
+This comprehensive vignette showcases **all available themes** in `zztable1` using carefully selected built-in R datasets. Each theme is designed to match specific publication standards, from medical journals to general statistical reports.
 
 ## Available Themes
 
@@ -138,7 +138,7 @@ theme_details <- data.frame(
 )
 
 knitr::kable(theme_details, 
-             caption = "Available Themes in zztable1nextgen",
+             caption = "Available Themes in zztable1",
              escape = FALSE, 
              format = if(knitr::is_latex_output()) "latex" else "html") %>%
   kableExtra::kable_styling()
@@ -583,7 +583,7 @@ The package includes `r length(available_themes)` built-in themes optimized for 
 
 # Conclusion
 
-The `zztable1_nextgen` package provides a flexible and efficient way to create publication-ready "Table 1" summaries. The examples in this vignette demonstrate:
+The `zztable1` package provides a flexible and efficient way to create publication-ready "Table 1" summaries. The examples in this vignette demonstrate:
 
 - **Parameter Flexibility**: `strata`, `missing`, `pvalue`, `totals`, and `footnotes` parameters
 - **Theme Variety**: All 5 built-in themes with authentic journal formatting

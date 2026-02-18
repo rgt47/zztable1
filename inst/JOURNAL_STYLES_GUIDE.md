@@ -1,6 +1,6 @@
 # Journal Style System Guide
 
-The zztable1_nextgen package includes an extensible journal style system that allows precise formatting for different medical and scientific journals. Each journal has unique requirements for table formatting, and this system accommodates these differences systematically.
+The zztable1 package includes an extensible journal style system that allows precise formatting for different medical and scientific journals. Each journal has unique requirements for table formatting, and this system accommodates these differences systematically.
 
 ## Overview
 

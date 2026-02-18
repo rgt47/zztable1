@@ -1,6 +1,6 @@
 ---
-title: "Customizing Statistics and Tests in zztable1_nextgen"
-author: "zztable1_nextgen"
+title: "Customizing Statistics and Tests in zztable1"
+author: "zztable1"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -26,7 +26,7 @@ header-includes:
   - \definecolor{nejmstripe}{HTML}{fefcf0}
   - \definecolor{nejmtext}{HTML}{333333}
 vignette: >
-  %\VignetteIndexEntry{Customizing Statistics and Tests in zztable1_nextgen}
+  %\VignetteIndexEntry{Customizing Statistics and Tests in zztable1}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -89,7 +89,7 @@ create_table <- function(formula, data, ...) {
 
 # Introduction
 
-The `zztable1_nextgen` package provides powerful customization options for both **summary statistics** and **statistical tests** used in Table 1 generation. This vignette demonstrates how to:
+The `zztable1` package provides powerful customization options for both **summary statistics** and **statistical tests** used in Table 1 generation. This vignette demonstrates how to:
 
 - Customize numeric summary statistics with built-in and custom functions
 - Select appropriate statistical tests for different data types
@@ -670,7 +670,7 @@ create_table(
 
 # Conclusion
 
-The `zztable1_nextgen` package provides comprehensive customization options that allow you to:
+The `zztable1` package provides comprehensive customization options that allow you to:
 
 1. **Adapt to different data types** using appropriate summary statistics
 2. **Choose statistically appropriate tests** for your study design

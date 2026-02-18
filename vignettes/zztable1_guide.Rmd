@@ -1,6 +1,6 @@
 ---
-title: "zztable1_nextgen: Advanced Publication-Ready Summary Tables"
-author: "zztable1_nextgen Development Team"
+title: "zztable1: Advanced Publication-Ready Summary Tables"
+author: "zztable1 Development Team"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -11,7 +11,7 @@ output:
     highlight: tango
     code_folding: show
 vignette: >
-  %\VignetteIndexEntry{zztable1_nextgen: Advanced Publication-Ready Summary Tables}
+  %\VignetteIndexEntry{zztable1: Advanced Publication-Ready Summary Tables}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -80,7 +80,7 @@ create_table <- function(formula, data, ...) {
 
 # Introduction
 
-The `zztable1_nextgen` package provides a next-generation architecture for
+The `zztable1` package provides a next-generation architecture for
 creating publication-ready summary tables (commonly called "Table 1") used
 in biomedical research and clinical trials. This vignette demonstrates the
 key features and capabilities of the package.
@@ -102,10 +102,10 @@ key features and capabilities of the package.
 
 ```{r install, eval=FALSE}
 # Development version (when available)
-# devtools::install_github("user/zztable1_nextgen")
+# devtools::install_github("user/zztable1")
 
 # For this vignette, source the development file
-source("zztable1_nextgen.R")
+source("zztable1.R")
 ```
 
 # Basic Usage
@@ -517,7 +517,7 @@ tryCatch({
 
 # Conclusion
 
-The `zztable1_nextgen` package provides a powerful, flexible system for
+The `zztable1` package provides a powerful, flexible system for
 creating publication-ready summary tables. Key advantages include:
 
 - **Performance**: Lazy evaluation for fast blueprint creation

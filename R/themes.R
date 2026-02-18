@@ -2,7 +2,7 @@
 # Unified Theme System (Consolidated)
 # ============================================================================
 #
-# Manages all theme definitions and configuration for the table1_nextgen package.
+# Manages all theme definitions and configuration for the table1 package.
 # Themes control formatting for different output formats and medical journals.
 #
 # Architecture:

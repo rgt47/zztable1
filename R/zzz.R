@@ -29,7 +29,7 @@
 
   # Optional: Startup message (disabled by default to avoid clutter)
   # Uncomment to show startup message:
-  # packageStartupMessage("zztable1nextgen ",
+  # packageStartupMessage("zztable1 ",
   #                      utils::packageVersion(pkgname),
   #                      " loaded successfully")
 }

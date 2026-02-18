@@ -7,9 +7,9 @@
 ^docs$
 ^_pkgdown\.yml$
 ^reference\.pdf$
-^zztable1nextgen_.*\.tar\.gz$
+^zztable1_.*\.tar\.gz$
 ^vignettes/testing\.Rmd$
-^vignettes/dataset_examples_backup\.Rmd$
+^zztable1nextgen\.Rcheck$
 ^CLAUDE\.md$
 ^.*\.Rproj$
 ^\.Rprofile$
