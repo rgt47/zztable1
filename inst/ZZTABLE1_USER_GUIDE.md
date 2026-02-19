@@ -1,10 +1,15 @@
+---
+title: "ZZTABLE1 User Guide"
+subtitle: "Publication-Ready Summary Tables for Clinical Research"
+author: "Ronald G. Thomas"
+date: "February 2025"
+---
+
 # ZZTABLE1 User Guide
 
 Publication-Ready Summary Tables for Clinical Research
 
 Version 0.1.0
-
----
 
 ## Table of Contents
 
