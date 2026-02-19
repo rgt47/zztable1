@@ -1,0 +1,343 @@
+## ----setup, include=FALSE-----------------------------------------------------
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE,
+  results = 'asis'
+)
+
+# Load required libraries
+library(htmltools)
+library(kableExtra)
+
+# Source all required files
+source("../R/table1.R")
+source("../R/blueprint.R")
+source("../R/validation_consolidated.R")
+source("../R/dimensions.R")
+source("../R/cells.R")
+source("../R/themes.R")
+source("../R/rendering.R")
+source("../R/utils.R")
+
+## ----helper-functions, include=FALSE------------------------------------------
+# Helper function for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+# Helper function to create tables with appropriate format
+create_table <- function(formula, data, ...) {
+  # Extract theme from arguments
+  args <- list(...)
+  theme_arg <- args$theme %||% "console"
+
+  # Handle both theme names and custom theme objects
+  if (is.character(theme_arg)) {
+    theme <- get_theme(theme_arg)
+  } else if (is.list(theme_arg)) {
+    theme <- theme_arg
+  } else {
+    theme <- get_theme("console")
+  }
+
+  bp <- table1(formula = formula, data = data, ...)
+
+  # Detect output format and render appropriately
+  if (knitr::is_latex_output()) {
+    output <- render_latex(bp, theme)
+  } else if (knitr::is_html_output()) {
+    output <- render_html(bp, theme)
+  } else {
+    # Default to console for unknown formats
+    output <- render_console(bp, theme)
+  }
+
+  return(knitr::asis_output(paste(output, collapse = "\n")))
+}
+
+## ----install, eval=FALSE------------------------------------------------------
+# # Development version (when available)
+# # devtools::install_github("user/zztable1")
+# 
+# # For this vignette, source the development file
+# source("zztable1.R")
+
+## ----basic_example------------------------------------------------------------
+# Prepare data
+data(mtcars)
+mtcars$transmission <- factor(
+  ifelse(mtcars$am == 1, "Manual", "Automatic"),
+  levels = c("Automatic", "Manual")
+)
+mtcars$engine_type <- factor(
+  ifelse(mtcars$vs == 1, "V-shaped", "Straight"),
+  levels = c("Straight", "V-shaped")
+)
+
+# Create basic summary table
+create_table(transmission ~ mpg + hp + wt, data = mtcars)
+
+## ----with_pvalues-------------------------------------------------------------
+create_table(transmission ~ mpg + hp + wt,
+             data = mtcars,
+             pvalue = TRUE)
+
+## ----with_totals--------------------------------------------------------------
+create_table(transmission ~ mpg + hp + wt,
+             data = mtcars,
+             pvalue = TRUE,
+             totals = TRUE)
+
+## ----numeric_summaries--------------------------------------------------------
+# Default: Mean (SD)
+cat("Mean (SD) format:\n")
+create_table(transmission ~ mpg + hp, data = mtcars)
+
+# Median [IQR]
+cat("\nMedian [IQR] format:\n")
+create_table(transmission ~ mpg + hp, data = mtcars,
+             numeric_summary = "median_iqr")
+
+# Mean +/- SE
+cat("\nMean +/- SE format:\n")
+create_table(transmission ~ mpg + hp, data = mtcars,
+             numeric_summary = "mean_se")
+
+## ----custom_summary-----------------------------------------------------------
+# Custom function: Median (Min-Max)
+custom_summary <- function(x) {
+  med <- round(median(x, na.rm = TRUE), 1)
+  min_val <- round(min(x, na.rm = TRUE), 1)
+  max_val <- round(max(x, na.rm = TRUE), 1)
+  paste0(med, " (", min_val, "-", max_val, ")")
+}
+
+cat("Custom Median (Min-Max) format:\n")
+create_table(transmission ~ mpg + hp, data = mtcars,
+             numeric_summary = custom_summary)
+
+## ----stratified---------------------------------------------------------------
+# Create stratification variable
+mtcars$cylinder_group <- factor(
+  ifelse(mtcars$cyl <= 4, "4-cylinder",
+  ifelse(mtcars$cyl <= 6, "6-cylinder", "8-cylinder")),
+  levels = c("4-cylinder", "6-cylinder", "8-cylinder")
+)
+
+# Stratified analysis
+create_table(transmission ~ mpg + hp,
+             data = mtcars,
+             strata = "cylinder_group",
+             pvalue = TRUE)
+
+## ----list_themes--------------------------------------------------------------
+themes <- list_available_themes()
+print(themes)
+
+## ----theme_default------------------------------------------------------------
+cat("Default Theme:\n")
+create_table(transmission ~ mpg + hp, data = mtcars,
+             theme = "default")
+
+## ----theme_nejm---------------------------------------------------------------
+cat("NEJM Theme (1 decimal place):\n")
+create_table(transmission ~ mpg + hp, data = mtcars,
+             theme = "nejm")
+
+## ----theme_jama---------------------------------------------------------------
+cat("JAMA Theme (2 decimal places):\n")
+create_table(transmission ~ mpg + hp, data = mtcars,
+             theme = "jama")
+
+## ----theme_lancet-------------------------------------------------------------
+cat("Lancet Theme:\n")
+create_table(transmission ~ mpg + hp, data = mtcars,
+             theme = "lancet")
+
+## ----footnotes_variables------------------------------------------------------
+create_table(transmission ~ mpg + hp + wt,
+             data = mtcars,
+             theme = "nejm",
+             footnotes = list(
+               variables = list(
+                 mpg = "EPA fuel economy rating in miles per gallon",
+                 hp = "Gross horsepower measured at crankshaft",
+                 wt = "Vehicle weight in thousands of pounds"
+               )
+             ))
+
+## ----footnotes_columns--------------------------------------------------------
+create_table(transmission ~ mpg + hp,
+             data = mtcars,
+             theme = "nejm",
+             pvalue = TRUE,
+             footnotes = list(
+               columns = list(
+                 "p.value" = "Two-tailed t-test, alpha = 0.05"
+               )
+             ))
+
+## ----footnotes_comprehensive--------------------------------------------------
+create_table(transmission ~ mpg + hp,
+             data = mtcars,
+             theme = "nejm",
+             pvalue = TRUE,
+             footnotes = list(
+               variables = list(
+                 mpg = "EPA fuel economy standard",
+                 hp = "Gross horsepower"
+               ),
+               columns = list(
+                 "p.value" = "Statistical significance testing"
+               ),
+               general = list(
+                 "Data source: Henderson and Velleman (1981)",
+                 "Missing values excluded from analysis"
+               )
+             ))
+
+## ----clinical_trial_data------------------------------------------------------
+set.seed(123)
+n <- 200
+
+# Generate clinical trial data
+trial_data <- data.frame(
+  patient_id = 1:n,
+  treatment = factor(
+    sample(c("Placebo", "Drug A", "Drug B"), n, replace = TRUE),
+    levels = c("Placebo", "Drug A", "Drug B")
+  ),
+  age = round(rnorm(n, 65, 12)),
+  sex = factor(sample(c("Male", "Female"), n, replace = TRUE)),
+  race = factor(
+    sample(c("White", "Black", "Hispanic", "Asian", "Other"), 
+           n, replace = TRUE, prob = c(0.6, 0.2, 0.1, 0.08, 0.02)),
+    levels = c("White", "Black", "Hispanic", "Asian", "Other")
+  ),
+  baseline_bmi = round(rnorm(n, 28, 5), 1),
+  diabetes = factor(sample(c("No", "Yes"), n, replace = TRUE, prob = c(0.7, 0.3))),
+  hypertension = factor(sample(c("No", "Yes"), n, replace = TRUE, prob = c(0.6, 0.4))),
+  center = factor(sample(paste("Center", 1:4), n, replace = TRUE))
+)
+
+# Preview the data
+head(trial_data, 10)
+
+## ----clinical_basic-----------------------------------------------------------
+create_table(treatment ~ age + sex + race + baseline_bmi +
+             diabetes + hypertension,
+             data = trial_data,
+             theme = "nejm",
+             pvalue = TRUE)
+
+## ----clinical_advanced--------------------------------------------------------
+create_table(treatment ~ age + sex + race + baseline_bmi +
+             diabetes + hypertension,
+             data = trial_data,
+             strata = "center",
+             theme = "nejm",
+             pvalue = TRUE,
+             footnotes = list(
+               variables = list(
+                 age = "Age at enrollment (years)",
+                 baseline_bmi = "Body mass index at baseline (kg/m²)",
+                 diabetes = "Type 2 diabetes mellitus diagnosis",
+                 hypertension = "Hypertension diagnosis"
+               ),
+               columns = list(
+                 "p.value" = "ANOVA for continuous, chi-squared for categorical"
+               ),
+               general = list(
+                 "Data are mean (SD) or n (%)",
+                 "ITT population (N=200)"
+               )
+             ))
+
+## ----format_console-----------------------------------------------------------
+create_table(transmission ~ mpg + hp, data = mtcars, theme = "nejm")
+
+## ----format_latex-------------------------------------------------------------
+bp_latex <- table1(transmission ~ mpg + hp, data = mtcars,
+                   layout = "latex", theme = "nejm")
+
+# Note: LaTeX output would contain LaTeX markup
+cat("LaTeX theme config:\n")
+cat("Font size:", bp_latex$metadata$theme$latex$font_size, "\n")
+cat("Packages:", paste(bp_latex$metadata$theme$latex$packages, collapse = ", "), "\n")
+
+## ----format_html--------------------------------------------------------------
+bp_html <- table1(transmission ~ mpg + hp, data = mtcars,
+                  layout = "html", theme = "nejm")
+
+# Note: HTML output would contain HTML markup
+cat("HTML theme ready for web display\n")
+
+## ----performance_demo---------------------------------------------------------
+# Large dataset simulation
+large_data <- data.frame(
+  group = factor(sample(c("A", "B", "C"), 10000, replace = TRUE)),
+  var1 = rnorm(10000),
+  var2 = rnorm(10000),
+  var3 = rnorm(10000),
+  var4 = rnorm(10000),
+  var5 = rnorm(10000)
+)
+
+# Fast blueprint creation (no computations yet)
+system.time({
+  bp_large <- table1(group ~ var1 + var2 + var3 + var4 + var5, 
+                     data = large_data)
+})
+
+# Computations happen only during display
+cat("Blueprint created instantly. Computations happen during display.\n")
+cat("Blueprint dimensions:", dim(bp_large), "\n")
+
+## ----memory_demo--------------------------------------------------------------
+# Blueprint object structure
+bp_small <- table1(transmission ~ mpg, data = mtcars)
+
+cat("Blueprint components:\n")
+cat("- Cells: ", length(bp_small$cells), "\n")
+cat("- Dimensions: ", dim(bp_small), "\n")
+cat("- Metadata keys: ", names(bp_small$metadata), "\n")
+
+## ----best_practices-----------------------------------------------------------
+# Standard clinical trial baseline table
+create_baseline_table <- function(data, treatment_var, theme = "nejm") {
+  formula_str <- paste(treatment_var, "~ .")
+  bp <- table1(as.formula(formula_str), 
+               data = data,
+               theme = theme,
+               pvalue = TRUE,
+               footnotes = list(
+                 general = list(
+                   "Data are mean (SD) or n (%)",
+                   "P-values from ANOVA or chi-squared test"
+                 )
+               ))
+  return(bp)
+}
+
+# Example usage
+# bp_standard <- create_baseline_table(trial_data, "treatment")
+cat("Utility function created for standardized baseline tables\n")
+
+## ----error_handling, error=TRUE-----------------------------------------------
+try({
+# Example of error handling
+tryCatch({
+  # This will cause an error - variable doesn't exist
+  bp_error <- table1(nonexistent_var ~ mpg, data = mtcars)
+}, error = function(e) {
+  cat("Error caught:", e$message, "\n")
+  cat("Solution: Check that all variables in formula exist in data\n")
+})
+})
+
+## ----session_info-------------------------------------------------------------
+sessionInfo()
+

@@ -1,0 +1,183 @@
+---
+title: "Quickstart Guide: zztable1"
+author: "Ronald (Ryy) G. Thomas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Quickstart Guide: zztable1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+
+**zztable1** is a next-generation R package for creating publication-quality
+summary tables (Table 1) with a flexible blueprint-based architecture. The
+package features lazy evaluation, sparse storage, and medical journal themes
+(NEJM, Lancet, JAMA).
+
+## Installation
+
+```{r install}
+# Install from GitHub
+devtools::install_github("rgt47/zztable1")
+```
+
+```{r load}
+library(zztable1)
+```
+
+## Basic Usage
+
+Create a Table 1 using a formula interface:
+
+```{r basic}
+# Formula: grouping_variable ~ variables_to_summarize
+table1(arm ~ age + sex + bmi, data = trial_data)
+```
+
+### Example with mtcars
+
+```{r mtcars-example}
+# Create grouping variable
+mtcars$transmission <- factor(mtcars$am, labels = c("Automatic", "Manual"))
+
+# Generate Table 1
+table1(transmission ~ mpg + hp + wt + cyl, data = mtcars)
+```
+
+## Key Features
+
+### Medical Journal Themes
+
+Publication-ready themes matching actual journal formatting:
+
+```{r themes}
+# New England Journal of Medicine
+table1(arm ~ age + sex, data = data, theme = "nejm")
+
+# The Lancet
+table1(arm ~ age + sex, data = data, theme = "lancet")
+
+# JAMA
+table1(arm ~ age + sex, data = data, theme = "jama")
+
+# Console (default)
+table1(arm ~ age + sex, data = data, theme = "console")
+```
+
+### Statistical Tests
+
+Automatic p-value calculation with configurable tests:
+
+```{r tests}
+# Default tests (t-test for continuous, chi-square for categorical)
+table1(arm ~ age + sex, data = data, test = TRUE)
+
+# Specify test types
+table1(arm ~ age + sex, data = data,
+       continuous_test = "kruskal",
+       categorical_test = "fisher")
+```
+
+Available tests:
+
+- Continuous: `"ttest"`, `"anova"`, `"welch"`, `"kruskal"`
+- Categorical: `"chisq"`, `"fisher"`
+
+### Numeric Summary Options
+
+```{r summaries}
+# Mean (SD) - default
+table1(arm ~ age, data = data, numeric_summary = "mean_sd")
+
+# Median [IQR]
+table1(arm ~ age, data = data, numeric_summary = "median_iqr")
+
+# Mean (95% CI)
+table1(arm ~ age, data = data, numeric_summary = "mean_ci")
+
+# Median (range)
+table1(arm ~ age, data = data, numeric_summary = "median_range")
+```
+
+### Stratified Analysis
+
+Multi-center or multi-site stratification:
+
+```{r stratified}
+table1(arm ~ age + sex, data = data, strata = "site")
+```
+
+### Missing Data
+
+Display missing value counts:
+
+```{r missing}
+table1(arm ~ age + sex, data = data, missing = TRUE)
+```
+
+## Output Formats
+
+### Console Output
+
+```{r console}
+tbl <- table1(arm ~ age + sex, data = data)
+print(tbl)
+```
+### HTML Output
+
+```{r html}
+tbl <- table1(arm ~ age + sex, data = data)
+render_html(tbl)
+```
+
+### LaTeX Output
+
+```{r latex}
+tbl <- table1(arm ~ age + sex, data = data)
+render_latex(tbl)
+```
+
+## Function Reference
+
+| Function | Purpose |
+|:---------|:--------|
+| `table1()` | Create Table 1 blueprint |
+| `print()` | Console output |
+| `render_html()` | HTML output |
+| `render_latex()` | LaTeX output |
+| `list_available_themes()` | Show available themes |
+
+## Quick Reference
+
+### Formula Syntax
+
+```
+grouping_variable ~ var1 + var2 + var3
+```
+
+### Key Parameters
+
+| Parameter | Description | Default |
+|:----------|:------------|:--------|
+| `theme` | Journal theme | "console" |
+| `test` | Include p-values | FALSE |
+| `missing` | Show missing counts | FALSE |
+| `numeric_summary` | Summary type | "mean_sd" |
+| `strata` | Stratification variable | NULL |
+
+## Next Steps
+
+- `vignette("theming_system")` - Medical journal themes
+- `vignette("customizing_statistics")` - Custom summary functions
+- `vignette("stratified_examples")` - Multi-center analyses
+- `vignette("dataset_examples")` - Complete examples

@@ -1,0 +1,547 @@
+## ----setup, include=FALSE-----------------------------------------------------
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  results = 'asis',
+  collapse = TRUE,
+  comment = "#>"
+)
+
+# Source all required files
+source("../R/table1.R")
+source("../R/blueprint.R")
+source("../R/validation_consolidated.R") 
+source("../R/dimensions.R")
+source("../R/cells.R")
+source("../R/themes.R")
+source("../R/rendering.R")
+source("../R/utils.R")
+
+## ----helper-functions, echo=FALSE---------------------------------------------
+# Helper function for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+# Helper function to create tables with appropriate format
+create_table <- function(formula, data, ...) {
+  # Extract theme from arguments
+  args <- list(...)
+  theme_arg <- args$theme %||% "console"
+  
+  # Handle both theme names and custom theme objects
+  if (is.character(theme_arg)) {
+    theme <- get_theme(theme_arg)
+  } else if (is.list(theme_arg)) {
+    theme <- theme_arg
+  } else {
+    theme <- get_theme("console")
+  }
+  
+  bp <- table1(formula = formula, data = data, ...)
+  
+  # Detect output format and render appropriately
+  if (knitr::is_latex_output()) {
+    output <- render_latex(bp, theme)
+  } else if (knitr::is_html_output()) {
+    output <- render_html(bp, theme)
+  } else {
+    # Default to console for unknown formats
+    output <- render_console(bp, theme)
+  }
+  
+  return(knitr::asis_output(paste(output, collapse = "\n")))
+}
+
+## ----data-setup---------------------------------------------------------------
+# Create comprehensive clinical trial dataset
+set.seed(123)
+n_per_group <- 40
+
+clinical_data <- data.frame(
+  # Treatment groups
+  treatment = factor(rep(c("Placebo", "Low Dose", "High Dose"), each = n_per_group)),
+  
+  # Patient characteristics
+  age = c(
+    rnorm(n_per_group, mean = 65, sd = 12),    # Placebo
+    rnorm(n_per_group, mean = 63, sd = 10),    # Low Dose  
+    rnorm(n_per_group, mean = 67, sd = 15)     # High Dose
+  ),
+  
+  # Primary efficacy endpoint (with treatment effect)
+  efficacy_score = c(
+    rnorm(n_per_group, mean = 20, sd = 8),     # Placebo: lower scores
+    rnorm(n_per_group, mean = 28, sd = 9),     # Low Dose: moderate improvement
+    rnorm(n_per_group, mean = 35, sd = 7)      # High Dose: best improvement
+  ),
+  
+  # Safety endpoint (non-normal distribution)
+  biomarker_level = c(
+    rexp(n_per_group, rate = 0.1),             # Placebo: exponential distribution
+    rexp(n_per_group, rate = 0.08),            # Low Dose
+    rexp(n_per_group, rate = 0.12)             # High Dose
+  ),
+  
+  # Binary outcomes
+  response = factor(c(
+    sample(c("Responder", "Non-responder"), n_per_group, replace = TRUE, prob = c(0.3, 0.7)),
+    sample(c("Responder", "Non-responder"), n_per_group, replace = TRUE, prob = c(0.6, 0.4)),
+    sample(c("Responder", "Non-responder"), n_per_group, replace = TRUE, prob = c(0.8, 0.2))
+  )),
+  
+  # Categorical safety outcome
+  safety_grade = factor(c(
+    sample(c("None", "Mild", "Moderate", "Severe"), n_per_group, replace = TRUE, prob = c(0.4, 0.4, 0.15, 0.05)),
+    sample(c("None", "Mild", "Moderate", "Severe"), n_per_group, replace = TRUE, prob = c(0.3, 0.45, 0.2, 0.05)),
+    sample(c("None", "Mild", "Moderate", "Severe"), n_per_group, replace = TRUE, prob = c(0.2, 0.5, 0.25, 0.05))
+  ), levels = c("None", "Mild", "Moderate", "Severe"))
+)
+
+# Display sample data
+knitr::kable(head(clinical_data), 
+             caption = "Sample of Clinical Trial Dataset")
+
+## ----builtin-summaries--------------------------------------------------------
+cat("**Available Built-in Summary Statistics:**\n\n")
+cat("- `mean_sd`: Mean +/- SD (default, most common)\n")
+cat("- `median_iqr`: Median [Q1-Q3] (for non-normal data)\n") 
+cat("- `median_range`: Median (min-max) (for small samples)\n")
+cat("- `mean_se`: Mean +/- SE (for experimental data)\n")
+cat("- `mean_ci`: Mean (95% CI) (for effect estimates)\n\n")
+
+## ----summary-comparison-------------------------------------------------------
+cat("### Mean +/- SD (Default Clinical Standard)\n")
+create_table(
+  treatment ~ age + efficacy_score + biomarker_level,
+  data = clinical_data,
+  numeric_summary = "mean_sd",
+  pvalue = TRUE,
+  theme = "nejm"
+)
+
+cat("\n### Median [IQR] (For Non-Normal Data)\n")
+create_table(
+  treatment ~ age + efficacy_score + biomarker_level,
+  data = clinical_data,
+  numeric_summary = "median_iqr", 
+  pvalue = TRUE,
+  theme = "nejm"
+)
+
+cat("\n### Median (Range) (For Small Samples)\n")
+create_table(
+  treatment ~ age + efficacy_score + biomarker_level,
+  data = clinical_data,
+  numeric_summary = "median_range",
+  pvalue = TRUE, 
+  theme = "nejm"
+)
+
+cat("\n### Mean +/- SE (For Experimental Data)\n")
+create_table(
+  treatment ~ age + efficacy_score,
+  data = clinical_data,
+  numeric_summary = "mean_se",
+  pvalue = TRUE,
+  theme = "nejm"
+)
+
+## ----custom-summaries---------------------------------------------------------
+# Example 1: Bootstrap confidence intervals
+bootstrap_ci_summary <- function(x) {
+  if (all(is.na(x))) return("N/A")
+  
+  # Bootstrap 95% CI for mean
+  set.seed(42)  # For reproducibility in vignette
+  n_boot <- 1000
+  boot_means <- replicate(n_boot, {
+    sample_data <- sample(x[!is.na(x)], replace = TRUE)
+    mean(sample_data)
+  })
+  
+  mean_est <- round(mean(x, na.rm = TRUE), 1)
+  ci_lower <- round(quantile(boot_means, 0.025), 1)
+  ci_upper <- round(quantile(boot_means, 0.975), 1)
+  
+  paste0(mean_est, " (", ci_lower, "-", ci_upper, ")")
+}
+
+# Example 2: Robust statistics (median with MAD)
+robust_summary <- function(x) {
+  if (all(is.na(x))) return("N/A")
+  
+  med <- round(median(x, na.rm = TRUE), 1)
+  mad_val <- round(mad(x, na.rm = TRUE), 1)
+  
+  paste0(med, " [+/-", mad_val, "]")
+}
+
+# Example 3: Multi-line detailed summary
+detailed_summary <- function(x) {
+  if (all(is.na(x))) return("N/A")
+  
+  mean_val <- round(mean(x, na.rm = TRUE), 1)
+  median_val <- round(median(x, na.rm = TRUE), 1)
+  sd_val <- round(sd(x, na.rm = TRUE), 1)
+  
+  paste0(mean_val, " +/- ", sd_val, "\n", "(median: ", median_val, ")")
+}
+
+cat("### Custom Summary: Bootstrap 95% CI\n")
+create_table(
+  treatment ~ efficacy_score,
+  data = clinical_data,
+  numeric_summary = bootstrap_ci_summary,
+  pvalue = TRUE,
+  theme = "jama"
+)
+
+cat("\n### Custom Summary: Robust Statistics (Median +/- MAD)\n")
+create_table(
+  treatment ~ biomarker_level,
+  data = clinical_data,
+  numeric_summary = robust_summary,
+  pvalue = TRUE,
+  theme = "jama"
+)
+
+cat("\n### Custom Summary: Multi-line Detailed\n")
+create_table(
+  treatment ~ efficacy_score,
+  data = clinical_data,
+  numeric_summary = detailed_summary,
+  pvalue = TRUE,
+  theme = "console"
+)
+
+## ----available-tests----------------------------------------------------------
+cat("**Continuous Variable Tests:**\n")
+cat("- `ttest`: Linear model t-test (default, robust for multiple groups)\n")
+cat("- `anova`: Traditional ANOVA F-test\n") 
+cat("- `welch`: Welch's t-test (unequal variances, two groups only)\n")
+cat("- `kruskal`: Kruskal-Wallis test (non-parametric)\n\n")
+
+cat("**Categorical Variable Tests:**\n")
+cat("- `fisher`: Fisher's exact test (default, conservative)\n")
+cat("- `chisq`: Chi-square test (requires adequate cell counts)\n\n")
+
+## ----test-comparison----------------------------------------------------------
+cat("### Default Tests (ttest + fisher)\n")
+create_table(
+  treatment ~ efficacy_score + response + safety_grade,
+  data = clinical_data,
+  pvalue = TRUE,
+  theme = "console"
+)
+
+cat("\n### ANOVA + Chi-square\n")
+create_table(
+  treatment ~ efficacy_score + response + safety_grade,
+  data = clinical_data,
+  pvalue = TRUE,
+  continuous_test = "anova",
+  categorical_test = "chisq",
+  theme = "console"
+)
+
+cat("\n### Non-parametric Approach (Kruskal-Wallis + Fisher)\n")
+create_table(
+  treatment ~ efficacy_score + biomarker_level + response,
+  data = clinical_data,
+  pvalue = TRUE,
+  continuous_test = "kruskal",
+  categorical_test = "fisher",
+  theme = "console"
+)
+
+## ----manual-verification------------------------------------------------------
+cat("**Manual Statistical Test Verification:**\n\n")
+
+# Test efficacy_score with different methods
+lm_result <- lm(efficacy_score ~ treatment, data = clinical_data)
+aov_result <- aov(efficacy_score ~ treatment, data = clinical_data)  
+kw_result <- kruskal.test(efficacy_score ~ treatment, data = clinical_data)
+
+cat("Efficacy Score Tests:\n")
+cat("- Linear model p-value:", round(summary(lm_result)$coefficients[2, 4], 4), "\n")
+cat("- ANOVA p-value:        ", round(summary(aov_result)[[1]]["treatment", "Pr(>F)"], 4), "\n")
+cat("- Kruskal-Wallis p-value:", round(kw_result$p.value, 4), "\n\n")
+
+# Test categorical data
+response_table <- table(clinical_data$treatment, clinical_data$response)
+fisher_result <- fisher.test(response_table)
+chisq_result <- chisq.test(response_table)
+
+cat("Response Rate Tests:\n")
+print(response_table)
+cat("- Fisher's exact p-value:", round(fisher_result$p.value, 4), "\n")
+cat("- Chi-square p-value:    ", round(chisq_result$p.value, 4), "\n")
+
+## ----two-group-comparison-----------------------------------------------------
+# Create two-group subset
+two_group_data <- clinical_data[clinical_data$treatment %in% c("Placebo", "High Dose"), ]
+two_group_data$treatment <- factor(two_group_data$treatment)
+
+cat("### Two-Group Comparison: Welch's t-test vs Standard t-test\n")
+
+cat("**Welch's t-test (unequal variances assumed):**\n")
+create_table(
+  treatment ~ age + efficacy_score + biomarker_level,
+  data = two_group_data,
+  pvalue = TRUE,
+  continuous_test = "welch",
+  theme = "nejm"
+)
+
+cat("\n**Standard linear model t-test:**\n")
+create_table(
+  treatment ~ age + efficacy_score + biomarker_level,
+  data = two_group_data,
+  pvalue = TRUE,
+  continuous_test = "ttest",
+  theme = "nejm"
+)
+
+# Manual verification
+cat("\n**Manual Verification for Efficacy Score:**\n")
+welch_test <- t.test(efficacy_score ~ treatment, data = two_group_data, var.equal = FALSE)
+standard_test <- t.test(efficacy_score ~ treatment, data = two_group_data, var.equal = TRUE)
+
+cat("- Welch's t-test p-value: ", round(welch_test$p.value, 4), "\n")
+cat("- Standard t-test p-value:", round(standard_test$p.value, 4), "\n")
+
+## ----dose-escalation----------------------------------------------------------
+# Simulate dose-escalation data with safety focus
+set.seed(456)
+dose_data <- data.frame(
+  dose_level = factor(c("Cohort 1 (1mg)", "Cohort 2 (3mg)", "Cohort 3 (10mg)", "Cohort 4 (30mg)"), 
+                     levels = c("Cohort 1 (1mg)", "Cohort 2 (3mg)", "Cohort 3 (10mg)", "Cohort 4 (30mg)")),
+  # Efficacy increases with dose
+  efficacy = c(rnorm(8, 15, 5), rnorm(8, 25, 6), rnorm(8, 35, 8), rnorm(8, 40, 10)),
+  # Safety events increase with dose  
+  dlt_grade = c(rexp(8, 2), rexp(8, 1.5), rexp(8, 1), rexp(8, 0.8)),
+  # Binary DLT outcome
+  dlt = factor(c(
+    sample(c("Yes", "No"), 8, replace = TRUE, prob = c(0.1, 0.9)),
+    sample(c("Yes", "No"), 8, replace = TRUE, prob = c(0.2, 0.8)),
+    sample(c("Yes", "No"), 8, replace = TRUE, prob = c(0.4, 0.6)),
+    sample(c("Yes", "No"), 8, replace = TRUE, prob = c(0.6, 0.4))
+  ))
+)
+
+dose_footnotes <- list(
+  variables = list(
+    efficacy = "Efficacy endpoint measured on 0-50 scale",
+    dlt_grade = "Dose-limiting toxicity severity score", 
+    dlt = "Dose-limiting toxicity occurrence (binary)"
+  ),
+  general = c(
+    "Phase I dose-escalation study with 3+3 design",
+    "Non-parametric tests used due to small sample sizes",
+    "Median with IQR preferred for safety data"
+  )
+)
+
+cat("### Phase I Dose-Escalation Study Analysis\n")
+create_table(
+  dose_level ~ efficacy + dlt_grade + dlt,
+  data = dose_data,
+  numeric_summary = "median_iqr",
+  continuous_test = "kruskal",
+  categorical_test = "fisher",
+  pvalue = TRUE,
+  footnotes = dose_footnotes,
+  theme = "nejm"
+)
+
+## ----bioequivalence-----------------------------------------------------------
+# Simulate crossover bioequivalence data
+set.seed(789)
+be_data <- data.frame(
+  formulation = factor(rep(c("Reference", "Test"), each = 24)),
+  # Primary PK parameters
+  cmax = c(
+    rnorm(24, mean = 100, sd = 20),    # Reference
+    rnorm(24, mean = 105, sd = 18)     # Test (slight difference)
+  ),
+  auc = c(
+    rnorm(24, mean = 500, sd = 80),    # Reference  
+    rnorm(24, mean = 495, sd = 75)     # Test
+  ),
+  tmax = c(
+    rexp(24, rate = 0.5) + 1,          # Reference (non-normal)
+    rexp(24, rate = 0.6) + 1           # Test
+  )
+)
+
+# Custom summary for bioequivalence (geometric mean +/- %CV)
+geometric_mean_summary <- function(x) {
+  if (all(is.na(x))) return("N/A")
+  
+  # Remove zeros and negative values for log transformation
+  x_pos <- x[x > 0 & !is.na(x)]
+  if (length(x_pos) == 0) return("N/A")
+  
+  geom_mean <- round(exp(mean(log(x_pos))), 1)
+  cv_percent <- round(100 * sqrt(exp(sd(log(x_pos))^2) - 1), 1)
+  
+  paste0(geom_mean, " (", cv_percent, "%CV)")
+}
+
+be_footnotes <- list(
+  variables = list(
+    cmax = "Maximum plasma concentration (ng/mL)",
+    auc = "Area under concentration-time curve (ng*h/mL)",
+    tmax = "Time to maximum concentration (hours)"
+  ),
+  general = c(
+    "Randomized crossover bioequivalence study",
+    "Geometric mean and %CV shown for PK parameters",
+    "Non-parametric tests used for tmax (non-normal distribution)"
+  )
+)
+
+cat("### Bioequivalence Study Analysis\n")
+create_table(
+  formulation ~ cmax + auc,
+  data = be_data,
+  numeric_summary = geometric_mean_summary,
+  continuous_test = "welch",
+  pvalue = TRUE,
+  footnotes = be_footnotes,
+  theme = "jama"
+)
+
+cat("\n### Non-parametric Analysis for Tmax\n")
+create_table(
+  formulation ~ tmax,
+  data = be_data,
+  numeric_summary = "median_iqr",
+  continuous_test = "kruskal",  # Non-parametric for non-normal tmax
+  pvalue = TRUE,
+  theme = "jama"
+)
+
+## ----multicenter--------------------------------------------------------------
+# Simulate multi-center data
+set.seed(101112)
+center_data <- data.frame(
+  center = factor(paste("Center", rep(1:4, each = 30))),
+  treatment = factor(rep(rep(c("Active", "Control"), each = 15), 4)),
+  # Primary endpoint with center effects
+  primary_endpoint = c(
+    # Center 1
+    rnorm(15, mean = 75, sd = 12), rnorm(15, mean = 65, sd = 15),
+    # Center 2  
+    rnorm(15, mean = 78, sd = 10), rnorm(15, mean = 68, sd = 12),
+    # Center 3
+    rnorm(15, mean = 72, sd = 14), rnorm(15, mean = 62, sd = 18),
+    # Center 4
+    rnorm(15, mean = 76, sd = 11), rnorm(15, mean = 66, sd = 13)
+  ),
+  # Secondary binary endpoint
+  response = factor(c(
+    # Center 1: Active vs Control
+    sample(c("Success", "Failure"), 15, replace = TRUE, prob = c(0.7, 0.3)),
+    sample(c("Success", "Failure"), 15, replace = TRUE, prob = c(0.4, 0.6)),
+    # Center 2
+    sample(c("Success", "Failure"), 15, replace = TRUE, prob = c(0.75, 0.25)),
+    sample(c("Success", "Failure"), 15, replace = TRUE, prob = c(0.35, 0.65)),
+    # Center 3
+    sample(c("Success", "Failure"), 15, replace = TRUE, prob = c(0.65, 0.35)),
+    sample(c("Success", "Failure"), 15, replace = TRUE, prob = c(0.45, 0.55)),
+    # Center 4
+    sample(c("Success", "Failure"), 15, replace = TRUE, prob = c(0.8, 0.2)),
+    sample(c("Success", "Failure"), 15, replace = TRUE, prob = c(0.3, 0.7))
+  ))
+)
+
+multicenter_footnotes <- list(
+  variables = list(
+    primary_endpoint = "Primary efficacy endpoint (0-100 scale)",
+    response = "Binary treatment response (success/failure)"
+  ),
+  general = c(
+    "Multi-center randomized controlled trial",
+    "ANOVA used to account for treatment and center effects", 
+    "Chi-square test for categorical outcomes (adequate sample size)"
+  )
+)
+
+cat("### Multi-center Trial: Overall Treatment Comparison\n")
+create_table(
+  treatment ~ primary_endpoint + response,
+  data = center_data,
+  continuous_test = "anova",      # ANOVA for multi-center
+  categorical_test = "chisq",     # Chi-square for large samples
+  pvalue = TRUE,
+  totals = TRUE,
+  footnotes = multicenter_footnotes,
+  theme = "lancet"
+)
+
+cat("\n### Multi-center Trial: Stratified by Center\n")
+create_table(
+  treatment ~ primary_endpoint + response,
+  data = center_data,
+  strata = "center",
+  continuous_test = "anova",
+  categorical_test = "chisq",
+  pvalue = TRUE,
+  theme = "lancet"
+)
+
+## ----best-practices, results='markup'-----------------------------------------
+cat("### Summary Statistic Selection Guidelines:\n\n")
+cat("**Mean +/- SD:** Use when data is approximately normal and for most clinical trials\n")
+cat("- Standard for continuous endpoints in medical literature\n")
+cat("- Allows readers to assess both central tendency and variability\n\n")
+
+cat("**Median [IQR]:** Use for non-normal data or when outliers are present\n") 
+cat("- Biomarker levels, time-to-event data, cost data\n")
+cat("- More robust to extreme values\n\n")
+
+cat("**Median (range):** Use for small samples or ordinal data\n")
+cat("- Phase I studies with small cohorts\n")
+cat("- When full range of values is important\n\n")
+
+cat("**Mean +/- SE:** Use when emphasizing precision of the estimate\n")
+cat("- Experimental studies where precision matters\n")
+cat("- Generally not recommended for descriptive Table 1\n\n")
+
+cat("### Statistical Test Selection Guidelines:\n\n")
+cat("**Continuous Variables:**\n")
+cat("- `ttest` (default): Robust, works well for most scenarios\n")
+cat("- `anova`: Traditional choice, equivalent to ttest for multiple groups\n")
+cat("- `welch`: Two groups with potentially unequal variances\n") 
+cat("- `kruskal`: Non-parametric alternative for non-normal data\n\n")
+
+cat("**Categorical Variables:**\n")
+cat("- `fisher` (default): Conservative, exact test, works with small samples\n")
+cat("- `chisq`: Requires adequate cell counts (rule of thumb: all cells >= 5)\n\n")
+
+## ----theme-integration--------------------------------------------------------
+cat("### NEJM Theme with Custom Bootstrap CI Summary\n")
+create_table(
+  treatment ~ efficacy_score + response,
+  data = clinical_data,
+  numeric_summary = bootstrap_ci_summary,
+  continuous_test = "anova",
+  categorical_test = "fisher",
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "nejm"
+)
+
+cat("\n### JAMA Theme with Robust Statistics\n")
+create_table(
+  treatment ~ biomarker_level + safety_grade,
+  data = clinical_data,
+  numeric_summary = robust_summary,
+  continuous_test = "kruskal",
+  categorical_test = "chisq",
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "jama"
+)
+

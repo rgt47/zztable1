@@ -1,0 +1,40 @@
+## ----setup, include = FALSE---------------------------------------------------
+library(zztable1)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  results = 'asis'
+)
+
+# Load required libraries
+library(htmltools)
+
+# Load the package functions in correct dependency order
+source("../R/validation_consolidated.R")
+source("../R/error_handling.R")
+source("../R/cells.R")
+source("../R/utils.R")
+source("../R/blueprint.R")
+source("../R/themes.R")
+source("../R/dimensions.R")
+source("../R/rendering.R")
+source("../R/table1.R")
+
+## -----------------------------------------------------------------------------
+library(zztable1)
+
+# Create a sample dataset
+set.seed(123)
+trial_data <- data.frame(
+  arm = factor(rep(c("Treatment", "Placebo"), each = 50)),
+  age = rnorm(100, mean = 45, sd = 15),
+  sex = factor(sample(c("Male", "Female"), 100, replace = TRUE)),
+  bmi = rnorm(100, mean = 26, sd = 5)
+)
+
+# Create a basic summary table
+# zztable1::table1(form = arm ~ age + sex + bmi, data = trial_data)
+table1(form = arm ~ age + sex + bmi, data = trial_data)
+
