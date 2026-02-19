@@ -21,3 +21,5 @@ dev-scripts/
 # Documentation build artifacts
 docs/.Rprofile.local
 CLAUDE.md
+/doc/
+/Meta/
