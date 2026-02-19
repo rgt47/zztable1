@@ -1,59 +1,37 @@
+# zzcollab framework files
 ^renv$
 ^renv\.lock$
+^zzcollab\.yaml$
+^Makefile$
+^Dockerfile$
+^\.Rprofile$
+^\.Rprofile\.local$
+
+# IDE and editor files
 ^\.claude$
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^\.RData$
-^docs$
-^_pkgdown\.yml$
-^reference\.pdf$
-^zztable1_.*\.tar\.gz$
-^vignettes/testing\.Rmd$
-^zztable1nextgen\.Rcheck$
-^CLAUDE\.md$
 ^.*\.Rproj$
-^\.Rprofile$
-^\.Rprofile\.local$
+^vignettes/\.claude$
+
+# GitHub
 ^\.github$
-^\.\.Rcheck$
-^analysis$
-^advanced_custom_functions\.R$
-^API_REFERENCE\.md$
-^Blueprint_Construction_Guide\.md$
-^Blueprint_Construction_Guide\.pdf$
-^COMPETITIVE_ANALYSIS_GT\.md$
-^COMPETITIVE_ANALYSIS_GT\.pdf$
-^competitive_analysis\.md$
-^competitive_analysis\.pdf$
-^comprehensive_test\.R$
-^CRITICAL_FIXES_COMPLETED\.md$
-^debug_.*\.R$
-^Makefile$
-^Dockerfile$
-^DEVELOPER_GUIDE\.md$
-^DOCUMENTATION_INDEX\.md$
-^FINAL_COMPLETION_SUMMARY\.txt$
-^GEMINI\.md$
-^IMPLEMENTATION_SUMMARY\.md$
-^OPTIMIZATION_REPORT\.md$
-^PACKAGE_OVERVIEW\.md$
-^PERFORMANCE_ANALYSIS\.md$
-^PHASE.*\.md$
-^PROJECT_STATUS\.md$
-^SESSION_SUMMARY.*\.md$
-^TECHNICAL_DOCUMENTATION\.md$
-^TROUBLESHOOTING\.md$
+
+# Development
 ^dev-scripts$
-^enhanced_clinical_example\.R$
-^explore_custom_functions\.R$
-^improve\.md$
+^analysis$
+
+# Build artifacts
+^docs$
+^.*\.tar\.gz$
+^.*\.Rcheck$
+
+# Documentation (not part of package)
+^CLAUDE\.md$
 ^.*\.pdf$
-^jama\.ppt$
-^render_vignettes.*\.R$
-^statistical_tests_demo\.R$
+
+# Temporary and test files
 ^test_.*\.R$
 ^test_.*\.Rmd$
-^test_.*\.pdf$
-^validate_documentation\.R$
-^vignettes/\.zzvim_r_temp\.R$
-^vignettes/\.claude$
+^debug_.*\.R$
