@@ -103,7 +103,7 @@ validate_inputs <- function(formula, data, strata = NULL, theme = "console", foo
 
   # Theme validation with optional rlang warnings
   if (is.character(theme)) {
-    valid_themes <- c("console", "nejm", "lancet", "jama", "bmj")
+    valid_themes <- c("console", "nejm", "lancet", "jama", "bmj", "simple")
     if (!theme %in% valid_themes) {
       msg <- sprintf("Unknown theme '%s', using 'console'", theme)
       if (requireNamespace("rlang", quietly = TRUE)) {

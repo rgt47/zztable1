@@ -70,8 +70,8 @@ table1(arm ~ age + sex, data = data, theme = "lancet")
 # JAMA
 table1(arm ~ age + sex, data = data, theme = "jama")
 
-# Minimal (default)
-table1(arm ~ age + sex, data = data, theme = "minimal")
+# Console (default)
+table1(arm ~ age + sex, data = data, theme = "console")
 ```
 
 ### Statistical Tests
@@ -169,7 +169,7 @@ grouping_variable ~ var1 + var2 + var3
 
 | Parameter | Description | Default |
 |:----------|:------------|:--------|
-| `theme` | Journal theme | "minimal" |
+| `theme` | Journal theme | "console" |
 | `test` | Include p-values | FALSE |
 | `missing` | Show missing counts | FALSE |
 | `numeric_summary` | Summary type | "mean_sd" |
