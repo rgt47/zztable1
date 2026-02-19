@@ -30,7 +30,7 @@ Version 0.1.0
 15. [Troubleshooting](#troubleshooting)
 16. [Function Reference](#function-reference)
 
----
+***
 
 ## Introduction
 
@@ -63,7 +63,7 @@ zztable1 uses a blueprint-based architecture with lazy evaluation:
 This architecture provides memory efficiency (60-80% reduction) and
 flexibility in output format selection.
 
----
+***
 
 ## Installation
 
@@ -83,7 +83,7 @@ devtools::install_github("rgt47/zztable1")
 library(zztable1)
 ```
 
----
+***
 
 ## Quick Start
 
@@ -116,7 +116,7 @@ bp <- table1(
 render_html(bp)
 ```
 
----
+***
 
 ## Core Concepts
 
@@ -173,7 +173,7 @@ The blueprint contains:
 - Metadata (theme, options, footnotes)
 - Sparse storage environment for efficiency
 
----
+***
 ## The table1() Function
 
 ### Syntax
@@ -226,7 +226,7 @@ Returns a `table1_blueprint` S3 object with:
 - `$col_names`: Column labels
 - `$metadata`: List of options and computed information
 
----
+***
 
 ## Output Formats
 
@@ -270,7 +270,7 @@ display_table(bp, mtcars, format = "html")
 display_table(bp, mtcars, format = "latex")
 ```
 
----
+***
 
 ## Journal Themes
 
@@ -313,7 +313,7 @@ theme <- get_theme("nejm")
 print(theme)
 ```
 
----
+***
 
 ## Statistical Tests
 
@@ -358,7 +358,7 @@ bp <- table1(
 bp <- table1(arm ~ age + sex, data = trial_data, pvalue = FALSE)
 ```
 
----
+***
 
 ## Numeric Summaries
 
@@ -406,7 +406,7 @@ bp <- table1(
 )
 ```
 
----
+***
 
 ## Stratified Analysis
 
@@ -448,7 +448,7 @@ bp <- table1(
 render_html(bp)
 ```
 
----
+***
 
 ## Footnotes
 
@@ -496,7 +496,7 @@ Different themes render footnotes differently:
 - **Lancet**: Symbols (*, dagger, etc.)
 - **Console**: Bracketed numbers
 
----
+***
 
 ## Missing Data
 
@@ -524,7 +524,7 @@ Lab Value         ...          ...         ...
   Missing         15 (10.0%)   12 (8.0%)
 ```
 
----
+***
 
 ## R Markdown Integration
 
@@ -591,7 +591,7 @@ display_auto <- function(bp) {
 }
 ```
 
----
+***
 
 ## Advanced Usage
 
@@ -636,7 +636,7 @@ For large tables, clear the computation cache to free memory:
 clear_cell_cache(bp)
 ```
 
----
+***
 
 ## Troubleshooting
 
@@ -700,7 +700,7 @@ For tables with many variables or large datasets:
 list_available_themes()
 ```
 
----
+***
 
 ## Function Reference
 
@@ -730,7 +730,7 @@ list_available_themes()
 | `clear_cell_cache()` | Clear computation cache |
 | `validate_inputs()` | Validate table1 inputs |
 
----
+***
 
 ## Examples
 
@@ -802,7 +802,7 @@ bp <- table1(
 render_html(bp)
 ```
 
----
+***
 
 ## Version History
 
@@ -813,7 +813,7 @@ render_html(bp)
   - Stratified analysis
   - Footnote system
 
----
+***
 
 ## License
 
@@ -830,6 +830,6 @@ Thomas RG (2024). zztable1: Publication-Ready Summary Tables for
 Clinical Research. R package version 0.1.0.
 ```
 
----
+***
 
 *Document generated: February 2025*
