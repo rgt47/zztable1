@@ -22,9 +22,19 @@ knitr::opts_chunk$set(
   results = 'asis'
 )
 
-# Load package
-library(devtools)
-load_all()
+# Load required libraries
+library(htmltools)
+
+# Source all required files
+source("../R/table1.R")
+source("../R/blueprint.R")
+source("../R/validation_consolidated.R")
+source("../R/dimensions.R")
+source("../R/cells.R")
+source("../R/themes.R")
+source("../R/theme_registry.R")
+source("../R/rendering.R")
+source("../R/utils.R")
 ```
 
 ```{r theme-css, results='asis', echo=FALSE}
@@ -51,6 +61,7 @@ cat("Available themes:", paste(available_themes, collapse = ", "), "\n")
 nejm_theme <- get_theme("nejm")
 cat("\nNEJM Theme Details:\n")
 cat("- Name:", nejm_theme$name, "\n")
+cat("- Theme key:", nejm_theme$theme_name, "\n")
 cat("- Decimal places:", nejm_theme$decimal_places, "\n")
 cat("- CSS class:", nejm_theme$css_class, "\n")
 ```
@@ -62,7 +73,6 @@ cat("- CSS class:", nejm_theme$css_class, "\n")
 The simplest way to create a custom theme is using `create_custom_theme()`, which creates a theme based on an existing theme:
 
 ```{r custom-theme-basic}
-# Create a custom theme starting from NEJM
 my_theme <- create_custom_theme(
   name = "MyCustom",
   base_theme = "nejm",
@@ -171,7 +181,8 @@ cat("- name:", nejm_theme$name, "\n")
 cat("- theme_name:", nejm_theme$theme_name, "\n")
 cat("- decimal_places:", nejm_theme$decimal_places, "\n")
 cat("- css_class:", nejm_theme$css_class, "\n")
-cat("- header_separator:", nejm_theme$header_separator, "\n")
+cat("- stratum_separator:", nejm_theme$stratum_separator, "\n")
+cat("- factor_separator:", nejm_theme$factor_separator, "\n")
 cat("\nCSS Properties:\n")
 for (prop in names(nejm_theme$css_properties)) {
   cat("  -", prop, ":", nejm_theme$css_properties[[prop]], "\n")

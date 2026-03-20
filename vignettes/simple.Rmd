@@ -1,18 +1,17 @@
 ---
-title: "Table 1 Examples with Built-in R Datasets"
+title: "Simple Table 1 Example"
 author: "zztable1"
 date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{Table 1 Examples with Built-in R Datasets}
+  %\VignetteIndexEntry{Simple Table 1 Example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
-library(zztable1)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -25,29 +24,73 @@ knitr::opts_chunk$set(
 library(htmltools)
 
 # Load the package functions in correct dependency order
+source("../R/themes.R")
 source("../R/validation_consolidated.R")
 source("../R/error_handling.R")
 source("../R/cells.R")
 source("../R/utils.R")
 source("../R/blueprint.R")
-source("../R/themes.R")
 source("../R/dimensions.R")
 source("../R/rendering.R")
 source("../R/table1.R")
 ```
-```{r }
-library(zztable1)
 
-# Create a sample dataset
+```{r theme-css, results='asis', echo=FALSE}
+theme_css <- generate_theme_css()
+cat("<style>\n")
+cat(theme_css)
+cat("\n</style>")
+```
+
+```{r helper-functions, include=FALSE}
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+create_table <- function(formula, data, ...) {
+  args <- list(...)
+  theme_arg <- args$theme %||% "console"
+
+  if (is.character(theme_arg)) {
+    theme <- get_theme(theme_arg)
+  } else if (is.list(theme_arg)) {
+    theme <- theme_arg
+  } else {
+    theme <- get_theme("console")
+  }
+
+  bp <- table1(formula = formula, data = data, ...)
+
+  if (knitr::is_latex_output()) {
+    output <- render_latex(bp, theme)
+  } else if (knitr::is_html_output()) {
+    output <- render_html(bp, theme)
+  } else {
+    output <- render_console(bp, theme)
+  }
+
+  knitr::asis_output(paste(output, collapse = "\n"))
+}
+```
+
+# A Simple Example
+
+This vignette demonstrates the most basic usage of `zztable1`
+with a small simulated clinical trial dataset.
+
+```{r simple-example}
 set.seed(123)
 trial_data <- data.frame(
   arm = factor(rep(c("Treatment", "Placebo"), each = 50)),
   age = rnorm(100, mean = 45, sd = 15),
-  sex = factor(sample(c("Male", "Female"), 100, replace = TRUE)),
+  sex = factor(
+    sample(c("Male", "Female"), 100, replace = TRUE)
+  ),
   bmi = rnorm(100, mean = 26, sd = 5)
 )
 
-# Create a basic summary table
-# zztable1::table1(form = arm ~ age + sex + bmi, data = trial_data)
-table1(form = arm ~ age + sex + bmi, data = trial_data)
+create_table(
+  formula = arm ~ age + sex + bmi,
+  data = trial_data,
+  theme = "nejm",
+  pvalue = TRUE
+)
 ```

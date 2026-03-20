@@ -79,8 +79,8 @@ table1(arm ~ age + sex, data = data, theme = "console")
 Automatic p-value calculation with configurable tests:
 
 ```{r tests}
-# Default tests (t-test for continuous, chi-square for categorical)
-table1(arm ~ age + sex, data = data, test = TRUE)
+# Include p-values (t-test for continuous, Fisher's exact for categorical)
+table1(arm ~ age + sex, data = data, pvalue = TRUE)
 
 # Specify test types
 table1(arm ~ age + sex, data = data,
@@ -101,6 +101,9 @@ table1(arm ~ age, data = data, numeric_summary = "mean_sd")
 
 # Median [IQR]
 table1(arm ~ age, data = data, numeric_summary = "median_iqr")
+
+# Mean +/- SE
+table1(arm ~ age, data = data, numeric_summary = "mean_se")
 
 # Mean (95% CI)
 table1(arm ~ age, data = data, numeric_summary = "mean_ci")
@@ -153,9 +156,12 @@ render_latex(tbl)
 |:---------|:--------|
 | `table1()` | Create Table 1 blueprint |
 | `print()` | Console output |
+| `render_console()` | Rendered console output |
 | `render_html()` | HTML output |
 | `render_latex()` | LaTeX output |
+| `display_table()` | Auto-detect format and display |
 | `list_available_themes()` | Show available themes |
+| `create_custom_theme()` | Create custom theme |
 
 ## Quick Reference
 
@@ -170,10 +176,13 @@ grouping_variable ~ var1 + var2 + var3
 | Parameter | Description | Default |
 |:----------|:------------|:--------|
 | `theme` | Journal theme | "console" |
-| `test` | Include p-values | FALSE |
+| `pvalue` | Include p-values | TRUE |
+| `totals` | Include totals column | FALSE |
 | `missing` | Show missing counts | FALSE |
 | `numeric_summary` | Summary type | "mean_sd" |
 | `strata` | Stratification variable | NULL |
+| `continuous_test` | Test for continuous vars | "ttest" |
+| `categorical_test` | Test for categorical vars | "fisher" |
 
 ## Next Steps
 

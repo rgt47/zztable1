@@ -124,16 +124,17 @@ The package includes **`r length(list_available_themes())`** built-in themes:
 
 ```{r theme-list, echo=FALSE}
 available_themes <- list_available_themes()
+theme_descriptions <- c(
+  bmj = "BMJ - British Medical Journal styling",
+  console = "Console - Basic monospace output for development",
+  jama = "JAMA - Journal of American Medical Association styling",
+  lancet = "Lancet - Clean minimal formatting matching The Lancet",
+  nejm = "NEJM - New England Journal of Medicine styling with authentic cream striping",
+  simple = "Simple - Clean general-purpose theme for reports"
+)
 theme_details <- data.frame(
   Theme = available_themes,
-  Description = c(
-    "Console - Basic monospace output for development",
-    "NEJM - New England Journal of Medicine styling with authentic cream striping",
-    "Lancet - Clean minimal formatting matching The Lancet",
-    "JAMA - Journal of American Medical Association styling",
-    "BMJ - British Medical Journal styling",
-    "Simple - Clean general-purpose theme for reports"
-  ),
+  Description = theme_descriptions[available_themes],
   stringsAsFactors = FALSE
 )
 
@@ -586,7 +587,7 @@ The package includes `r length(available_themes)` built-in themes optimized for 
 The `zztable1` package provides a flexible and efficient way to create publication-ready "Table 1" summaries. The examples in this vignette demonstrate:
 
 - **Parameter Flexibility**: `strata`, `missing`, `pvalue`, `totals`, and `footnotes` parameters
-- **Theme Variety**: All 5 built-in themes with authentic journal formatting
+- **Theme Variety**: All 6 built-in themes with authentic journal formatting
 - **Footnote Support**: Both numbered (NEJM, Simple) and lettered (JAMA, Lancet) footnote styles
 - **Missing Data Handling**: Comprehensive missing value reporting when `missing=TRUE`
 - **Stratified Analysis**: Multi-group comparisons using the `strata` parameter

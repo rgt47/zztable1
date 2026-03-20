@@ -43,7 +43,7 @@ NULL
 #' @param layout Output format ("console", "latex", "html")
 #' @param numeric_summary Summary type for numeric variables
 #' @param footnotes Footnote specifications
-#' @param theme Journal theme ("default", "nejm", "lancet", "jama", "bmj")
+#' @param theme Journal theme ("console", "nejm", "lancet", "jama", "bmj", "simple")
 #' @param continuous_test Statistical test for continuous variables ("ttest", "anova", "welch", "kruskal")
 #' @param categorical_test Statistical test for categorical variables ("fisher", "chisq")
 #' @param ... Additional arguments for future extensibility
