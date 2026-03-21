@@ -101,11 +101,8 @@ key features and capabilities of the package.
 ## Installation and Setup
 
 ```{r install, eval=FALSE}
-# Development version (when available)
-# devtools::install_github("user/zztable1")
-
-# For this vignette, source the development file
-source("zztable1.R")
+# Development version
+devtools::install_github("rgt47/zztable1")
 ```
 
 # Basic Usage
@@ -225,12 +222,12 @@ print(themes)
 
 ## Theme Comparison
 
-### Default Theme
+### Console Theme (Default)
 
 ```{r theme_default}
-cat("Default Theme:\n")
+cat("Console Theme:\n")
 create_table(transmission ~ mpg + hp, data = mtcars,
-             theme = "default")
+             theme = "console")
 ```
 
 ### NEJM Theme (1 decimal place)
@@ -241,7 +238,7 @@ create_table(transmission ~ mpg + hp, data = mtcars,
              theme = "nejm")
 ```
 
-### JAMA Theme (2 decimal places)
+### JAMA Theme (1 decimal place)
 
 ```{r theme_jama}
 cat("JAMA Theme (2 decimal places):\n")

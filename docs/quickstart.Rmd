@@ -2,7 +2,10 @@
 title: "Quickstart Guide: zztable1"
 author: "Ronald (Ryy) G. Thomas"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    toc: true
+    toc_float: true
 vignette: >
   %\VignetteIndexEntry{Quickstart Guide: zztable1}
   %\VignetteEngine{knitr::rmarkdown}
@@ -13,79 +16,202 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE
+  warning = FALSE,
+  message = FALSE,
+  results = 'asis'
 )
+
+library(htmltools)
+
+source("../R/table1.R")
+source("../R/blueprint.R")
+source("../R/validation_consolidated.R")
+source("../R/dimensions.R")
+source("../R/cells.R")
+source("../R/themes.R")
+source("../R/rendering.R")
+source("../R/utils.R")
+```
+
+```{r theme-css, results='asis', echo=FALSE}
+theme_css <- generate_theme_css()
+cat("<style>\n")
+cat(theme_css)
+cat("\n</style>")
+```
+
+```{r helper-functions, include=FALSE}
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+create_table <- function(formula, data, ...) {
+  args <- list(...)
+  theme_arg <- args$theme %||% "console"
+
+  if (is.character(theme_arg)) {
+    theme <- get_theme(theme_arg)
+  } else if (is.list(theme_arg)) {
+    theme <- theme_arg
+  } else {
+    theme <- get_theme("console")
+  }
+
+  bp <- table1(formula = formula, data = data, ...)
+
+  if (knitr::is_latex_output()) {
+    output <- render_latex(bp, theme)
+  } else if (knitr::is_html_output()) {
+    output <- render_html(bp, theme)
+  } else {
+    output <- render_console(bp, theme)
+  }
+
+  knitr::asis_output(paste(output, collapse = "\n"))
+}
 ```
 
 ## Overview
 
-**zztable1** is a next-generation R package for creating publication-quality
-summary tables (Table 1) with a flexible blueprint-based architecture. The
-package features lazy evaluation, sparse storage, and medical journal themes
-(NEJM, Lancet, JAMA).
+**zztable1** is a next-generation R package for creating
+publication-quality summary tables (Table 1) with a flexible
+blueprint-based architecture. The package features lazy evaluation,
+sparse storage, and medical journal themes (NEJM, Lancet, JAMA).
 
 ## Installation
 
-```{r install}
-# Install from GitHub
+```{r install, eval=FALSE}
 devtools::install_github("rgt47/zztable1")
+library(zztable1)
 ```
 
-```{r load}
-library(zztable1)
+## Sample Data
+
+All examples below use a small simulated clinical trial dataset:
+
+```{r data-setup}
+set.seed(42)
+n <- 120
+
+trial <- data.frame(
+  arm = factor(
+    sample(c("Placebo", "Treatment"), n, replace = TRUE),
+    levels = c("Placebo", "Treatment")
+  ),
+  age = round(rnorm(n, 62, 14)),
+  sex = factor(
+    sample(c("Male", "Female"), n, replace = TRUE)
+  ),
+  bmi = round(rnorm(n, 27, 5), 1),
+  diabetes = factor(
+    sample(c("No", "Yes"), n, replace = TRUE,
+           prob = c(0.7, 0.3))
+  ),
+  site = factor(
+    sample(paste("Site", LETTERS[1:3]), n,
+           replace = TRUE)
+  )
+)
+
+trial$bmi[sample(seq_len(n), 5)] <- NA
 ```
 
 ## Basic Usage
 
-Create a Table 1 using a formula interface:
+The formula interface: `grouping_variable ~ var1 + var2 + ...`
 
 ```{r basic}
-# Formula: grouping_variable ~ variables_to_summarize
-table1(arm ~ age + sex + bmi, data = trial_data)
+create_table(
+  arm ~ age + sex + bmi + diabetes,
+  data = trial,
+  theme = "nejm"
+)
 ```
 
-### Example with mtcars
+## Adding P-values and Totals
 
-```{r mtcars-example}
-# Create grouping variable
-mtcars$transmission <- factor(mtcars$am, labels = c("Automatic", "Manual"))
-
-# Generate Table 1
-table1(transmission ~ mpg + hp + wt + cyl, data = mtcars)
+```{r pvalue-totals}
+create_table(
+  arm ~ age + sex + bmi + diabetes,
+  data = trial,
+  pvalue = TRUE,
+  totals = TRUE,
+  theme = "nejm"
+)
 ```
 
-## Key Features
+## Medical Journal Themes
 
-### Medical Journal Themes
+### NEJM
 
-Publication-ready themes matching actual journal formatting:
-
-```{r themes}
-# New England Journal of Medicine
-table1(arm ~ age + sex, data = data, theme = "nejm")
-
-# The Lancet
-table1(arm ~ age + sex, data = data, theme = "lancet")
-
-# JAMA
-table1(arm ~ age + sex, data = data, theme = "jama")
-
-# Console (default)
-table1(arm ~ age + sex, data = data, theme = "console")
+```{r theme-nejm}
+create_table(
+  arm ~ age + sex + bmi,
+  data = trial,
+  pvalue = TRUE,
+  theme = "nejm"
+)
 ```
 
-### Statistical Tests
+### Lancet
 
-Automatic p-value calculation with configurable tests:
+```{r theme-lancet}
+create_table(
+  arm ~ age + sex + bmi,
+  data = trial,
+  pvalue = TRUE,
+  theme = "lancet"
+)
+```
+
+### JAMA
+
+```{r theme-jama}
+create_table(
+  arm ~ age + sex + bmi,
+  data = trial,
+  pvalue = TRUE,
+  theme = "jama"
+)
+```
+
+## Numeric Summary Options
+
+```{r summary-mean-sd}
+cat("### Mean (SD) -- default\n")
+create_table(
+  arm ~ age + bmi, data = trial,
+  numeric_summary = "mean_sd", theme = "console"
+)
+```
+
+```{r summary-median-iqr}
+cat("\n### Median [IQR]\n")
+create_table(
+  arm ~ age + bmi, data = trial,
+  numeric_summary = "median_iqr", theme = "console"
+)
+```
+
+```{r summary-mean-ci}
+cat("\n### Mean (95% CI)\n")
+create_table(
+  arm ~ age + bmi, data = trial,
+  numeric_summary = "mean_ci", theme = "console"
+)
+```
+
+## Statistical Tests
+
+Default: t-test for continuous, Fisher's exact for categorical.
 
 ```{r tests}
-# Default tests (t-test for continuous, chi-square for categorical)
-table1(arm ~ age + sex, data = data, test = TRUE)
-
-# Specify test types
-table1(arm ~ age + sex, data = data,
-       continuous_test = "kruskal",
-       categorical_test = "fisher")
+create_table(
+  arm ~ age + sex + diabetes,
+  data = trial,
+  pvalue = TRUE,
+  continuous_test = "kruskal",
+  categorical_test = "chisq",
+  theme = "console"
+)
 ```
 
 Available tests:
@@ -93,58 +219,34 @@ Available tests:
 - Continuous: `"ttest"`, `"anova"`, `"welch"`, `"kruskal"`
 - Categorical: `"chisq"`, `"fisher"`
 
-### Numeric Summary Options
-
-```{r summaries}
-# Mean (SD) - default
-table1(arm ~ age, data = data, numeric_summary = "mean_sd")
-
-# Median [IQR]
-table1(arm ~ age, data = data, numeric_summary = "median_iqr")
-
-# Mean (95% CI)
-table1(arm ~ age, data = data, numeric_summary = "mean_ci")
-
-# Median (range)
-table1(arm ~ age, data = data, numeric_summary = "median_range")
-```
-
-### Stratified Analysis
-
-Multi-center or multi-site stratification:
+## Stratified Analysis
 
 ```{r stratified}
-table1(arm ~ age + sex, data = data, strata = "site")
+create_table(
+  arm ~ age + sex + bmi,
+  data = trial,
+  strata = "site",
+  pvalue = TRUE,
+  theme = "lancet"
+)
 ```
 
-### Missing Data
+## Missing Data
 
-Display missing value counts:
-
-```{r missing}
-table1(arm ~ age + sex, data = data, missing = TRUE)
+```{r missing-data}
+create_table(
+  arm ~ age + sex + bmi,
+  data = trial,
+  missing = TRUE,
+  pvalue = TRUE,
+  theme = "jama"
+)
 ```
 
-## Output Formats
+## Available Themes
 
-### Console Output
-
-```{r console}
-tbl <- table1(arm ~ age + sex, data = data)
-print(tbl)
-```
-### HTML Output
-
-```{r html}
-tbl <- table1(arm ~ age + sex, data = data)
-render_html(tbl)
-```
-
-### LaTeX Output
-
-```{r latex}
-tbl <- table1(arm ~ age + sex, data = data)
-render_latex(tbl)
+```{r list-themes}
+cat(paste(list_available_themes(), collapse = ", "), "\n")
 ```
 
 ## Function Reference
@@ -153,31 +255,35 @@ render_latex(tbl)
 |:---------|:--------|
 | `table1()` | Create Table 1 blueprint |
 | `print()` | Console output |
+| `render_console()` | Rendered console output |
 | `render_html()` | HTML output |
 | `render_latex()` | LaTeX output |
+| `display_table()` | Auto-detect format and display |
 | `list_available_themes()` | Show available themes |
+| `create_custom_theme()` | Create custom theme |
 
-## Quick Reference
+## Key Parameters
 
-### Formula Syntax
+| Parameter | Description | Default |
+|:----------|:------------|:--------|
+| `theme` | Journal theme | "console" |
+| `pvalue` | Include p-values | TRUE |
+| `totals` | Include totals column | FALSE |
+| `missing` | Show missing counts | FALSE |
+| `numeric_summary` | Summary type | "mean_sd" |
+| `strata` | Stratification variable | NULL |
+| `continuous_test` | Test for continuous vars | "ttest" |
+| `categorical_test` | Test for categorical vars | "fisher" |
+
+## Formula Syntax
 
 ```
 grouping_variable ~ var1 + var2 + var3
 ```
 
-### Key Parameters
-
-| Parameter | Description | Default |
-|:----------|:------------|:--------|
-| `theme` | Journal theme | "console" |
-| `test` | Include p-values | FALSE |
-| `missing` | Show missing counts | FALSE |
-| `numeric_summary` | Summary type | "mean_sd" |
-| `strata` | Stratification variable | NULL |
-
 ## Next Steps
 
-- `vignette("theming_system")` - Medical journal themes
-- `vignette("customizing_statistics")` - Custom summary functions
-- `vignette("stratified_examples")` - Multi-center analyses
-- `vignette("dataset_examples")` - Complete examples
+- `vignette("theming_system")` -- Medical journal themes
+- `vignette("customizing_statistics")` -- Custom summary functions
+- `vignette("stratified_examples")` -- Multi-center analyses
+- `vignette("dataset_examples")` -- Complete examples
