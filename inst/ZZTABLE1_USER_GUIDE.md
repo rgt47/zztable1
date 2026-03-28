@@ -46,7 +46,7 @@ with support for multiple journal formatting styles.
 - Multiple output formats (console, HTML, LaTeX)
 - Configurable statistical tests
 - Stratified (subgroup) analysis
-- Flexible footnote system
+- Configurable footnote system
 - Missing data reporting
 - Lazy evaluation architecture for efficiency
 
@@ -61,7 +61,7 @@ zztable1 uses a blueprint-based architecture with lazy evaluation:
    evaluates the blueprint and produces formatted output
 
 This architecture provides memory efficiency (60-80% reduction) and
-flexibility in output format selection.
+support for multiple output formats.
 
 ***
 
@@ -391,7 +391,7 @@ bp <- table1(
 
 ### Custom Summary Functions
 
-You can provide a custom function for numeric summaries:
+Custom functions may be provided for numeric summaries:
 
 ```r
 # Custom function returning formatted string

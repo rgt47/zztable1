@@ -21,14 +21,14 @@
 * Configurable statistical tests for continuous and categorical variables
 * Support for t-test, ANOVA, Welch, Kruskal-Wallis tests
 * Fisher's exact and chi-squared tests for categorical data
-* Flexible numeric summary options (mean_sd, median_iqr, mean_ci)
+* Configurable numeric summary options (mean_sd, median_iqr, mean_ci)
 
 ### Advanced Capabilities
 
 * Stratified analysis support for multi-center trials
 * Missing data handling with per-variable missing rows
 * Custom summary function support
-* Comprehensive footnote system
+* Multi-level footnote system
 
 ### Documentation
 

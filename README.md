@@ -1,6 +1,6 @@
 # zztable1
 
-## Next-Generation Publication-Ready Summary Tables
+## Publication-Ready Summary Tables for Biomedical Research
 
 [![R](https://img.shields.io/badge/R-3.5+-blue.svg)](https://www.r-project.org/)
 [![Status](https://img.shields.io/badge/Status-Development-orange.svg)]()
@@ -8,7 +8,7 @@
 
 ### Overview
 
-`zztable1` provides a next-generation architecture for creating
+`zztable1` provides an architecture for creating
 publication-ready summary tables (Table 1) commonly used in biomedical
 research and clinical trials. The package maintains full compatibility 
 with the original `zztable1` interface while providing enhanced features
@@ -16,15 +16,15 @@ through a lazy evaluation blueprint system.
 
 ### Key Features
 
-- **🚀 Lazy Evaluation**: Fast blueprint creation with computation on demand
-- **📊 Journal Theming**: NEJM, Lancet, JAMA, BMJ formatting styles
-- **📝 Advanced Footnotes**: Variable-specific, targeted footnote system
-- **📋 Multiple Formats**: Console, LaTeX, and HTML output with proper column headers
-- **⚡ High Performance**: Efficient handling of large datasets
-- **🔧 Flexible Statistics**: Built-in and custom summary functions
-- **📈 Stratified Analysis**: Subgroup analysis support
-- **✅ Full Compatibility**: Same interface as original zztable1
-- **📄 R Markdown Ready**: Automatic format detection for seamless document integration
+- **Lazy Evaluation**: Deferred blueprint creation with computation on demand
+- **Journal Theming**: NEJM, Lancet, JAMA, BMJ formatting styles
+- **Advanced Footnotes**: Variable-specific, targeted footnote system
+- **Multiple Formats**: Console, LaTeX, and HTML output with proper column headers
+- **Performance**: Efficient handling of large datasets
+- **Configurable Statistics**: Built-in and custom summary functions
+- **Stratified Analysis**: Subgroup analysis support
+- **Full Compatibility**: Same interface as original zztable1
+- **R Markdown Ready**: Automatic format detection for integrated document support
 
 ### Installation
 
@@ -70,7 +70,7 @@ display_table(bp_nejm, mtcars)
 
 ### Architecture
 
-The package uses a revolutionary **lazy evaluation blueprint** approach:
+The package uses a **lazy evaluation blueprint** approach:
 
 1. **Formula Analysis** → Determines table dimensions and structure
 2. **Blueprint Creation** → Stores computation metadata (no calculations)
@@ -79,7 +79,7 @@ The package uses a revolutionary **lazy evaluation blueprint** approach:
 
 ```r
 # Blueprint creation is instant (no computations)
-bp <- table1(group ~ var1 + var2 + var3, data = large_dataset)  # Fast!
+bp <- table1(group ~ var1 + var2 + var3, data = large_dataset)
 
 # Calculations happen during display
 display_table(bp, large_dataset)    # Computes on demand
@@ -125,7 +125,7 @@ custom_summary <- function(x) {
 table1(group ~ var, data = data, numeric_summary = custom_summary)
 ```
 
-#### Sophisticated Footnotes
+#### Targeted Footnotes
 
 ```r
 table1(group ~ var1 + var2, data = data,
@@ -236,7 +236,7 @@ display_table(baseline_table, trial_data)
 
 ### Performance
 
-The lazy evaluation architecture provides excellent performance:
+The lazy evaluation architecture provides deferred computation:
 
 ```r
 # Large dataset (10,000 rows × 50 variables)
@@ -292,7 +292,7 @@ Current test results: **91.9% pass rate** (34/37 tests)
 
 ### Documentation
 
-- **Vignette**: `vignettes/zztable1_guide.Rmd` - Comprehensive guide
+- **Vignette**: `vignettes/zztable1_guide.Rmd` - Package guide
 - **Help Files**: All functions have detailed documentation with examples
 - **Tests**: `tests/test_all.R` - Complete test suite
 
@@ -315,7 +315,7 @@ This is a research/development project. Key areas for contribution:
 
 1. **Additional Journal Themes** - More publication styles
 2. **Export Functions** - Direct LaTeX/HTML/Word export
-3. **Advanced Statistics** - More sophisticated statistical tests
+3. **Advanced Statistics** - Additional statistical tests
 4. **Error Handling** - Enhanced input validation
 5. **Performance** - Further optimization for very large datasets
 
@@ -335,7 +335,7 @@ This is a research/development project. Key areas for contribution:
 
 ```bibtex
 @software{zztable1,
-  title = {zztable1: Next-Generation Publication-Ready Summary Tables},
+  title = {zztable1: Publication-Ready Summary Tables for Biomedical Research},
   author = {Development Team},
   year = {2024},
   note = {R package version 0.9.0},
@@ -351,5 +351,4 @@ This is a research/development project. Key areas for contribution:
 
 ---
 
-**zztable1** - Because publication-ready tables should be both
-powerful and elegant. 🚀📊
+zztable1 -- A formula-based framework for generating publication-ready summary tables.

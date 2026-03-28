@@ -9,7 +9,7 @@ The journal style system provides:
 - **LaTeX formatting**: Precise control over fonts, colors, spacing, and layout for PDF output
 - **HTML/CSS styling**: Web-compatible formatting with responsive design
 - **Statistical formatting**: Journal-specific conventions for p-values, confidence intervals, etc.
-- **Extensibility**: Easy addition of new journal styles
+- **Extensibility**: Support for adding new journal styles
 
 ## Available Journal Styles
 
@@ -88,7 +88,7 @@ bp_nature <- table1(group ~ vars, data, theme = "nature")
 
 ### Step 1: Use the Template
 
-Copy `inst/journal_style_template.R` and modify for your target journal:
+Copy `inst/journal_style_template.R` and modify for the target journal:
 
 ```r
 get_your_journal_style <- function() {
@@ -204,7 +204,7 @@ html_config = html_config(
 
 ### Step 5: Integration
 
-Add your style to the system:
+Add the new style to the system:
 
 1. Add the function to `R/journal_styles.R`
 2. Update `get_all_journal_styles()`:
@@ -373,4 +373,4 @@ To contribute new journal styles:
 4. Submit a pull request with documentation
 5. Include example output demonstrating accuracy
 
-The goal is comprehensive coverage of major medical and scientific journals with pixel-perfect formatting accuracy.
+The goal is broad coverage of major medical and scientific journals with accurate formatting.
