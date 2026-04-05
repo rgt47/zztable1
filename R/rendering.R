@@ -80,8 +80,8 @@ render_pipeline <- function(blueprint, theme = NULL, format, default_theme = "co
 #' @keywords internal
 get_format_setup <- function(theme, format) {
   switch(format,
-    "latex" = generate_latex_theme_setup(theme),
-    "html" = character(0),  # HTML setup handled in render_html
+    "latex" = character(0),  # LaTeX setup handled in render_latex
+    "html" = character(0),   # HTML setup handled in render_html
     "console" = character(0),
     character(0)
   )
@@ -183,38 +183,21 @@ render_latex <- function(blueprint, theme = NULL) {
 
   output_lines <- character(0)
 
-  # Add theme-specific color definitions at the start
-  theme_setup <- generate_latex_theme_setup(theme)
-  if (length(theme_setup) > 0) {
-    output_lines <- c(output_lines, theme_setup)
-  }
-
-  # Use pipeline for common rendering
+  # Use pipeline for common rendering (headers + content)
   pipeline_output <- render_pipeline(blueprint, theme, "latex", "nejm")
-  output_lines <- c(output_lines, pipeline_output)
 
-  # Insert LaTeX table environment setup (before headers if added by pipeline)
+  # Insert LaTeX table environment setup
   col_spec <- generate_latex_column_spec(blueprint$ncols, theme)
   table_env <- get_latex_table_environment(theme)
-
-  # Insert table environment start after title (if present)
-  title_end <- if (!is.null(blueprint$metadata$title)) 1 else 0
   table_start <- paste0("\\begin{", table_env, "}{", col_spec, "}")
   top_rule <- get_latex_rule(theme, "top")
-
-  # Safely split output lines
-  pre_content <- if (title_end > 0) output_lines[1:title_end] else character(0)
-  post_content <- if (title_end < length(output_lines)) {
-    output_lines[(title_end + 1):length(output_lines)]
-  } else {
-    character(0)
-  }
+  theme_setup <- generate_latex_theme_setup(theme)
 
   output_lines <- c(
-    pre_content,
+    theme_setup,
     table_start,
     top_rule,
-    post_content
+    pipeline_output
   )
 
   # Add bottom rule before table end
