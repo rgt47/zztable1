@@ -17,7 +17,7 @@ test_that("P-values are calculated correctly", {
   )
   
   expect_s3_class(bp, "table1_blueprint")
-  expect_true("p.value" %in% bp$col_names)
+  expect_true("P value" %in% bp$col_names)
   expect_true(bp$ncols >= 3)  # At least 2 groups + p-value
 })
 

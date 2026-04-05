@@ -546,14 +546,14 @@ generate_row_names <- function(analyses) {
 #' @return Character vector of column names
 #' @keywords internal
 generate_col_names <- function(analyses, totals, pvalue) {
-  col_names <- c("variables", analyses$groups$levels)
+  col_names <- c("Variable", analyses$groups$levels)
 
   if (totals) {
     col_names <- c(col_names, "Total")
   }
 
   if (pvalue) {
-    col_names <- c(col_names, "p.value")
+    col_names <- c(col_names, "P value")
   }
 
   return(col_names)

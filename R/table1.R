@@ -82,7 +82,7 @@ NULL
 #'
 #' @export
 table1 <- function(formula, data, strata = NULL, block = NULL,
-                   missing = FALSE, pvalue = TRUE, size = TRUE,
+                   missing = NULL, pvalue = TRUE, size = TRUE,
                    totals = FALSE, fname = "table1", layout = "console",
                    numeric_summary = "mean_sd", footnotes = NULL,
                    theme = "console", 
@@ -92,6 +92,12 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
   formula_strata <- extract_formula_strata(formula)
   if (!is.null(formula_strata) && is.null(strata)) {
     strata <- formula_strata
+  }
+
+  # Resolve missing default from theme (NULL = theme decides)
+  if (is.null(missing)) {
+    theme_obj <- if (is.character(theme)) get_theme(theme) else theme
+    missing <- isTRUE(theme_obj$show_missing %||% TRUE)
   }
 
   # Step 1: Input validation (simplified)
