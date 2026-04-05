@@ -50,6 +50,8 @@ source("../R/cells.R")
 source("../R/themes.R")
 source("../R/rendering.R")
 source("../R/utils.R")
+source("../R/spanners.R")
+source("../R/summary_rows.R")
 ```
 
 ```{r helper-functions, echo=FALSE}

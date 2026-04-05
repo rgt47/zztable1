@@ -93,6 +93,8 @@ list(
 - `R/dimensions.R` - Dynamic table dimension calculation
 - `R/utils.R` - Statistical computation utilities
 - `R/validation_consolidated.R` - Input validation and error handling
+- `R/spanners.R` - Hierarchical column spanner system
+- `R/summary_rows.R` - Per-group and grand summary row system
 
 ### Medical Journal Themes:
 - **NEJM Theme**: Authentic light yellow/cream striping (#fefcf0), minimal borders, ± format
@@ -105,10 +107,20 @@ list(
 - `vignettes/theming_system.Rmd` - Medical journal theme demonstrations
 - `vignettes/stratified_examples.Rmd` - Multi-center trial stratified analysis
 - `vignettes/dataset_examples.Rmd` - Built-in R dataset examples (rewritten for current functions)
+- `vignettes/spanners_and_summaries.Rmd` - Column spanners and summary rows demo
+- `vignettes/gt_features.Rmd` - gt package feature comparison examples
 
 ## Recent Updates
 
-### PDF Rendering Quality Assurance (Latest)
+### Column Spanners and Summary Rows (Latest)
+- **Column spanners**: `add_spanner()` groups columns under hierarchical headers. Supports single-level, multi-level (nested), and delimiter-based spanners via `add_spanner_delim()`. Renders to all three output formats (HTML: colspan th, LaTeX: \multicolumn + \cmidrule, console: centered labels).
+- **Summary rows**: `add_summary_rows()` computes per-group aggregations at group boundaries. `add_grand_summary_rows()` computes table-wide totals. Both accept arbitrary aggregation functions and support top/bottom placement.
+- **Environment-based storage**: Both features use environment stores (`spanner_store`, `summary_store`) in blueprint metadata for reference semantics, enabling in-place modification without reassignment.
+- **Architecture**: New modules `R/spanners.R` and `R/summary_rows.R`. Rendering integrated into `render_table_headers()` (spanners) and `render_table_content()` via `inject_summary_rows()` (summaries).
+- **Backward compatible**: All existing vignettes and 564 tests pass without modification.
+- **gt comparison**: `docs/gt-comparison.md` documents the capability gap between zztable1 and the gt package.
+
+### PDF Rendering Quality Assurance
 - **Complete vignette PDF testing**: Systematically tested all 6 main vignettes for PDF rendering quality
 - **Fixed footnote rendering error**: Resolved `integerOneIndex` error in `render_footnotes()` function by adding proper bounds checking when no footnote markers present
 - **Unicode character compatibility**: Replaced LaTeX-incompatible Unicode characters (±, α, χ²) with ASCII equivalents (+/-, alpha, chi-squared)

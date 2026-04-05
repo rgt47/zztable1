@@ -127,7 +127,9 @@ new_table1_blueprint <- function(nrows, ncols,
                                    data_info = list(),
                                    cell_count = 0L,
                                    created = Sys.time(),
-                                   stat_cache = new.env(hash = TRUE, parent = emptyenv())
+                                   stat_cache = new.env(hash = TRUE, parent = emptyenv()),
+                                   spanner_store = new.env(hash = TRUE, parent = emptyenv()),
+                                   summary_store = new.env(hash = TRUE, parent = emptyenv())
                                  )) {
   blueprint <- structure(
     list(

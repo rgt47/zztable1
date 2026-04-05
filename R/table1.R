@@ -305,7 +305,11 @@ create_metadata <- function(formula, options, data_info, dimensions) {
     theme = NULL,
 
     # Caching infrastructure (Phase 5.2)
-    stat_cache = new.env(hash = TRUE, parent = emptyenv())
+    stat_cache = new.env(hash = TRUE, parent = emptyenv()),
+
+    # Extension stores (environment-based for reference semantics)
+    spanner_store = new.env(hash = TRUE, parent = emptyenv()),
+    summary_store = new.env(hash = TRUE, parent = emptyenv())
   )
 }
 

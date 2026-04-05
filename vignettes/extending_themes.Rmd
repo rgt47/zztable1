@@ -35,6 +35,8 @@ source("../R/themes.R")
 source("../R/theme_registry.R")
 source("../R/rendering.R")
 source("../R/utils.R")
+source("../R/spanners.R")
+source("../R/summary_rows.R")
 ```
 
 ```{r theme-css, results='asis', echo=FALSE}

@@ -102,6 +102,8 @@ get_format_cleanup <- function(theme, format) {
 #' Render Table Headers (Format-Agnostic)
 #'
 #' Renders column headers with proper footnote markers for the specified format.
+#' When column spanners are defined, emits spanner rows above the column
+#' headers to produce multi-level hierarchical headings.
 #'
 #' @param blueprint Table1Blueprint object
 #' @param theme Theme configuration
@@ -124,13 +126,14 @@ render_table_headers <- function(blueprint, theme, format) {
                                            format)
   }
 
+  # Build spanner rows (if any)
+  spanner_lines <- render_spanner_rows(blueprint, theme, format)
+
   # Format headers based on output format
-  switch(format,
+  header_lines <- switch(format,
     "latex" = {
       formatted_headers <- apply_latex_header_formatting(col_headers, theme)
       header_line <- paste0(paste(formatted_headers, collapse = " & "), " \\\\")
-
-      # Add middle rule after headers
       mid_rule <- get_latex_rule(theme, "middle")
       c(header_line, mid_rule)
     },
@@ -140,11 +143,111 @@ render_table_headers <- function(blueprint, theme, format) {
       c(header_line)
     },
     "console" = {
-      # Console headers are handled by render_table_content
       character(0)
     },
     character(0)
   )
+
+  c(spanner_lines, header_lines)
+}
+
+#' Render Spanner Rows
+#'
+#' Produces output lines for column spanners in the appropriate format.
+#' Spanner rows appear above the column headers, from highest level
+#' (outermost grouping) down to level 1.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @param format Output format
+#' @return Character vector with spanner header lines
+#' @keywords internal
+render_spanner_rows <- function(blueprint, theme, format) {
+  spanner_rows <- build_spanner_rows(blueprint)
+  if (length(spanner_rows) == 0) return(character(0))
+
+  ncols <- blueprint$ncols
+  output <- character(0)
+
+  for (sr in spanner_rows) {
+    switch(format,
+      "latex" = {
+        parts <- character(0)
+        ci <- 1L
+        cmidrule_parts <- character(0)
+        while (ci <= ncols) {
+          if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
+            span <- sr$spans[ci]
+            parts <- c(parts,
+              paste0("\\multicolumn{", span, "}{c}{\\textbf{",
+                     escape_latex(sr$cells[ci]), "}}"))
+            cmidrule_parts <- c(cmidrule_parts,
+              paste0("\\cmidrule(lr){", ci, "-", ci + span - 1L, "}"))
+            ci <- ci + span
+          } else if (sr$covered[ci]) {
+            ci <- ci + 1L
+            next
+          } else {
+            parts <- c(parts, "")
+            ci <- ci + 1L
+          }
+        }
+        row_line <- paste0(paste(parts, collapse = " & "), " \\\\")
+        output <- c(output, row_line, paste(cmidrule_parts, collapse = " "))
+      },
+      "html" = {
+        cells <- character(0)
+        ci <- 1L
+        while (ci <= ncols) {
+          if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
+            span <- sr$spans[ci]
+            cells <- c(cells,
+              paste0("  <th colspan=\"", span,
+                     "\" style=\"text-align:center; border-bottom:1px solid #999;\">",
+                     escape_html(sr$cells[ci]), "</th>"))
+            ci <- ci + span
+          } else if (sr$covered[ci]) {
+            ci <- ci + 1L
+            next
+          } else {
+            cells <- c(cells, "  <th></th>")
+            ci <- ci + 1L
+          }
+        }
+        output <- c(output,
+          paste0("<tr>\n", paste(cells, collapse = "\n"), "\n</tr>"))
+      },
+      "console" = {
+        row_text <- character(ncols)
+        ci <- 1L
+        while (ci <= ncols) {
+          if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
+            span <- sr$spans[ci]
+            total_width <- span * 10
+            label <- sr$cells[ci]
+            pad <- max(0, total_width - nchar(label))
+            left_pad <- floor(pad / 2)
+            row_text[ci] <- paste0(
+              strrep(" ", left_pad), label,
+              strrep(" ", pad - left_pad))
+            if (span > 1) {
+              for (k in seq_len(span - 1)) {
+                row_text[ci + k] <- ""
+              }
+            }
+            ci <- ci + span
+          } else {
+            row_text[ci] <- strrep(" ", 10)
+            ci <- ci + 1L
+          }
+        }
+        row_text <- row_text[nchar(row_text) > 0 | seq_along(row_text) == 1]
+        output <- c(output, paste(row_text, collapse = ""))
+      }
+    )
+  }
+
+  output
 }
 
 #' Render Blueprint to Console
@@ -446,15 +549,156 @@ render_table_content <- function(blueprint, theme, format) {
 
   # Add separators if needed (after initial lines are generated)
   if (format == "console" && blueprint$nrows > 0 && !is.null(theme$header_separator)) {
-    # Calculate width based on the header row for accurate alignment
     header_width <- nchar(output_lines[[1]])
     sep_line <- strrep(theme$header_separator, header_width)
-    # Insert the separator line after the header
     final_lines <- c(output_lines[[1]], sep_line, unlist(output_lines[-1], use.names = FALSE))
-    return(final_lines)
+    return(inject_summary_rows(final_lines, content_matrix, blueprint, format, theme))
   }
 
-  return(unlist(output_lines, use.names = FALSE))
+  base_lines <- unlist(output_lines, use.names = FALSE)
+  inject_summary_rows(base_lines, content_matrix, blueprint, format, theme)
+}
+
+#' Inject Summary Rows Into Rendered Output
+#'
+#' After the base table content is rendered, this function inserts
+#' per-group summary rows at group boundaries and grand summary rows
+#' at the table end.
+#'
+#' @param lines Character vector of rendered table rows
+#' @param content_matrix Character matrix of evaluated cell content
+#' @param blueprint Table1Blueprint object
+#' @param format Output format
+#' @param theme Theme configuration
+#' @return Character vector with summary rows injected
+#' @keywords internal
+inject_summary_rows <- function(lines, content_matrix, blueprint,
+                                format, theme) {
+  store <- blueprint$metadata$summary_store
+  if (is.null(store) || length(ls(store, all.names = TRUE)) == 0) {
+    return(lines)
+  }
+
+  all_defs <- as.list(store)
+  group_defs <- Filter(function(d) d$type == "group", all_defs)
+  grand_defs <- Filter(function(d) d$type == "grand", all_defs)
+
+  ncols <- ncol(content_matrix)
+
+  if (length(group_defs) > 0) {
+    groups <- detect_row_groups(content_matrix, blueprint)
+    if (length(groups) > 0) {
+      for (sdef in group_defs) {
+        insertion_offset <- 0L
+        for (g in groups) {
+          if (!is.null(sdef$groups) &&
+              !(g$name %in% sdef$groups)) next
+          row_range <- g$start_row:g$end_row
+          summary_vals <- evaluate_summary_for_group(
+            blueprint, row_range, sdef, ncols
+          )
+          summary_lines <- format_summary_lines(
+            summary_vals, format, theme, type = "group"
+          )
+          if (sdef$side == "bottom") {
+            insert_pos <- g$end_row + insertion_offset
+            lines <- append(lines, summary_lines, after = insert_pos)
+            insertion_offset <- insertion_offset + length(summary_lines)
+          } else {
+            insert_pos <- g$start_row - 1L + insertion_offset
+            lines <- append(lines, summary_lines, after = insert_pos)
+            insertion_offset <- insertion_offset + length(summary_lines)
+          }
+        }
+      }
+    }
+  }
+
+  if (length(grand_defs) > 0) {
+    all_rows <- seq_len(nrow(content_matrix))
+    for (gdef in grand_defs) {
+      summary_vals <- evaluate_summary_for_group(
+        blueprint, all_rows, gdef, ncols
+      )
+      summary_lines <- format_summary_lines(
+        summary_vals, format, theme, type = "grand"
+      )
+      if (gdef$side == "bottom") {
+        lines <- c(lines, summary_lines)
+      } else {
+        lines <- c(summary_lines, lines)
+      }
+    }
+  }
+
+  lines
+}
+
+#' Format Summary Row Values Into Output Lines
+#'
+#' @param summary_vals List of named character vectors from
+#'   evaluate_summary_for_group
+#' @param format Output format
+#' @param theme Theme configuration
+#' @param type "group" or "grand"
+#' @return Character vector of formatted summary lines
+#' @keywords internal
+format_summary_lines <- function(summary_vals, format, theme,
+                                 type = "group") {
+  lines <- character(0)
+
+  for (fn_name in names(summary_vals)) {
+    row_vals <- summary_vals[[fn_name]]
+
+    switch(format,
+      "console" = {
+        max_widths <- pmax(nchar(row_vals), 8)
+        formatted <- mapply(function(content, width) {
+          format(content, width = width, justify = "left")
+        }, row_vals, max_widths)
+        prefix <- if (type == "grand") ">>> " else "  > "
+        line <- paste0(prefix, paste(formatted, collapse = "  "))
+        lines <- c(lines, line)
+      },
+      "latex" = {
+        escaped <- vapply(row_vals, escape_latex, character(1))
+        if (type == "grand") {
+          escaped[1] <- paste0("\\textbf{", escaped[1], "}")
+        } else {
+          escaped[1] <- paste0("\\textit{", escaped[1], "}")
+        }
+        row_line <- paste0(paste(escaped, collapse = " & "), " \\\\")
+        if (type == "grand") {
+          lines <- c(lines, "\\midrule", row_line)
+        } else {
+          lines <- c(lines, row_line)
+        }
+      },
+      "html" = {
+        css_class <- if (type == "grand") {
+          "table1-grand-summary"
+        } else {
+          "table1-group-summary"
+        }
+        cells <- character(length(row_vals))
+        for (i in seq_along(row_vals)) {
+          cell_style <- ""
+          if (i == 1 && type == "grand") {
+            cell_style <- " style=\"font-weight:bold;\""
+          } else if (i == 1 && type == "group") {
+            cell_style <- " style=\"font-style:italic;\""
+          }
+          cells[i] <- paste0("  <td", cell_style, ">",
+                             escape_html(row_vals[i]), "</td>")
+        }
+        line <- paste0("<tr class=\"", css_class, "\">\n",
+                       paste(cells, collapse = "\n"), "\n</tr>")
+        lines <- c(lines, line)
+      }
+    )
+  }
+
+  lines
 }
 
 #' Format Content for Output Format
