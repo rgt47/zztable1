@@ -50,8 +50,8 @@ validate_inputs <- function(formula, data, strata = NULL, theme = "console", foo
     )
   }
 
-  # Formula validation
-  all_vars <- all.vars(formula)
+  # Formula validation (dot is expanded later, not a real variable)
+  all_vars <- setdiff(all.vars(formula), ".")
   missing_vars <- setdiff(all_vars, colnames(data))
   if (length(missing_vars) > 0) {
     available_vars <- paste(colnames(data), collapse = ", ")

@@ -88,6 +88,12 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
                    theme = "console", 
                    continuous_test = "ttest", categorical_test = "fisher",
                    ...) {
+  # Step 0: Extract strata from formula if present (| operator)
+  formula_strata <- extract_formula_strata(formula)
+  if (!is.null(formula_strata) && is.null(strata)) {
+    strata <- formula_strata
+  }
+
   # Step 1: Input validation (simplified)
   validate_inputs(formula, data, strata, theme, footnotes)
 
@@ -191,34 +197,54 @@ finalize_blueprint <- function(blueprint, data, dimensions, theme) {
 #' @return List with parsed formula components
 #' @keywords internal
 parse_formula <- function(formula, data, totals, pvalue) {
-  # Extract variables efficiently
   all_vars <- all.vars(formula)
+  strata_var <- NULL
 
-  # Determine formula type and extract components
   if (length(formula) == 3) {
-    # Two-sided formula: group ~ variables
     grp_var <- deparse(formula[[2]])
-    x_vars <- all.vars(formula[[3]])
+    rhs <- formula[[3]]
     has_groups <- TRUE
 
-    # Validate grouping variable
     if (length(all.vars(formula[[2]])) != 1) {
       stop("Grouping part must be a single variable, not: ",
         deparse(formula[[2]]),
         call. = FALSE
       )
     }
+
+    # Detect stratification via | operator: group ~ vars | strata
+    if (is.call(rhs) && identical(rhs[[1]], as.name("|"))) {
+      strata_var <- deparse(rhs[[3]])
+      if (length(all.vars(rhs[[3]])) != 1) {
+        stop("Stratification must be a single variable, not: ",
+          deparse(rhs[[3]]),
+          call. = FALSE
+        )
+      }
+      vars_expr <- rhs[[2]]
+      exclude <- c(grp_var, strata_var)
+      x_vars <- expand_rhs_vars(vars_expr, data, exclude)
+    } else {
+      exclude <- grp_var
+      x_vars <- expand_rhs_vars(rhs, data, exclude)
+    }
   } else if (length(formula) == 2) {
-    # One-sided formula: ~ variables
-    x_vars <- all_vars
+    rhs <- formula[[2]]
     has_groups <- FALSE
 
-    # Create dummy grouping variable for totals-only tables
+    # Detect stratification in one-sided formula: ~ vars | strata
+    if (is.call(rhs) && identical(rhs[[1]], as.name("|"))) {
+      strata_var <- deparse(rhs[[3]])
+      vars_expr <- rhs[[2]]
+      x_vars <- expand_rhs_vars(vars_expr, data, strata_var)
+    } else {
+      x_vars <- expand_rhs_vars(rhs, data, character(0))
+    }
+
     if (!totals) {
       stop("One-sided formula requires totals = TRUE", call. = FALSE)
     }
 
-    # Generate unique dummy variable name
     dummy_name <- generate_dummy_variable_name(data)
     data[[dummy_name]] <- factor(rep("Total", nrow(data)))
     grp_var <- dummy_name
@@ -226,24 +252,87 @@ parse_formula <- function(formula, data, totals, pvalue) {
     stop("Invalid formula structure", call. = FALSE)
   }
 
-  # Final validation
   if (length(x_vars) == 0) {
     stop("No variables specified for analysis", call. = FALSE)
   }
 
-  # Parameter consistency checks
   if (!has_groups && pvalue) {
-    stop("P-values require grouping variable (use two-sided formula)", call. = FALSE)
+    stop("P-values require grouping variable (use two-sided formula)",
+      call. = FALSE)
   }
 
-  return(list(
+  list(
     x_vars = x_vars,
     grp_var = grp_var,
     has_groups = has_groups,
     all_vars = all_vars,
+    strata_var = strata_var,
     dummy_var = if (!has_groups) grp_var else NULL,
-    data = data # Return modified data
-  ))
+    data = data
+  )
+}
+
+#' Expand RHS Variables with Dot and Minus Support
+#'
+#' Uses \code{terms()} to expand \code{.} (all variables) and
+#' handle \code{-} (variable removal) in the formula RHS.
+#'
+#' @param rhs_expr The RHS expression from the formula
+#' @param data Data frame (needed for dot expansion)
+#' @param exclude Character vector of variable names to exclude
+#'   (grouping variable, strata variable)
+#' @return Character vector of resolved analysis variable names
+#' @keywords internal
+expand_rhs_vars <- function(rhs_expr, data, exclude) {
+  has_dot <- "." %in% all.vars(rhs_expr)
+
+  if (!has_dot) {
+    # No dot -- use terms() to handle minus notation
+    tmp_formula <- reformulate(deparse(rhs_expr), response = NULL)
+    tryCatch({
+      tt <- terms(tmp_formula, data = data)
+      vars <- attr(tt, "term.labels")
+    }, error = function(e) {
+      vars <- all.vars(rhs_expr)
+    })
+    return(vars)
+  }
+
+  # Dot present -- build a temporary formula for terms() expansion
+  # Use a dummy response so terms() can expand . against data columns
+  dummy_resp <- ".table1_y"
+  data[[dummy_resp]] <- 1
+  tmp_formula <- as.formula(
+    paste(dummy_resp, "~", deparse(rhs_expr)),
+    env = environment()
+  )
+  tt <- terms(tmp_formula, data = data)
+  vars <- attr(tt, "term.labels")
+
+  # Remove the excluded variables (group, strata) and the dummy
+  vars <- setdiff(vars, c(exclude, dummy_resp))
+  vars
+}
+
+#' Extract Strata Variable from Formula
+#'
+#' Peeks at the formula's RHS for a \code{|} operator. If found,
+#' returns the stratification variable name. This runs before full
+#' parsing so the \code{strata} parameter can be set early.
+#'
+#' @param formula A formula object
+#' @return Character string (strata variable name) or NULL
+#' @keywords internal
+extract_formula_strata <- function(formula) {
+  if (!inherits(formula, "formula")) return(NULL)
+  rhs <- if (length(formula) == 3) formula[[3]] else formula[[2]]
+  if (is.call(rhs) && identical(rhs[[1]], as.name("|"))) {
+    strata_expr <- rhs[[3]]
+    if (length(all.vars(strata_expr)) == 1) {
+      return(deparse(strata_expr))
+    }
+  }
+  NULL
 }
 
 #' Generate Dummy Variable Name

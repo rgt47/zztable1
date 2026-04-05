@@ -1490,22 +1490,28 @@ border-radius: 0px;
 
 .table1 {
 border-collapse: collapse;
-margin: 20px 0;
-width: 100%;
-max-width: 100%;
+margin: 1em 0;
+font-family: -apple-system, BlinkMacSystemFont,
+'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.4;
+color: #333;
+border-top: 2px solid #5b5b5b;
+border-bottom: 2px solid #5b5b5b;
 }
 .table1 th, .table1 td {
-padding: 8px 12px;
+padding: 4px 10px;
 vertical-align: middle;
-border: 1px solid #ddd;
+border: none;
 }
-.table1 td:not(:first-child) {
-white-space: nowrap;
+.table1 thead {
+border-bottom: 1px solid #5b5b5b;
 }
 .table1 th {
 text-align: center;
-font-weight: bold;
-background-color: #f8f9fa;
+font-weight: 600;
+font-size: 13px;
+padding: 6px 10px;
 }
 .table1 th:first-child {
 text-align: left;
@@ -1515,16 +1521,28 @@ text-align: center;
 }
 .table1 td:first-child {
 text-align: left;
-padding-left: 8px;
-white-space: pre;
-vertical-align: middle;
 }
 
 .table1-indent-variable {
-font-style: italic;
+font-weight: 600;
+font-style: normal;
 }
+
 .table1-indent-level {
+padding-left: 24px !important;
 font-weight: normal;
+}
+
+.table1-group-summary td {
+border-top: 1px solid #d0d0d0;
+font-style: italic;
+font-size: 13px;
+color: #555;
+}
+.table1-grand-summary td {
+border-top: 1px solid #5b5b5b;
+font-weight: 600;
+font-size: 13px;
 }
 
 .table1-onsole {
@@ -1570,11 +1588,6 @@ background-color: #ffffff;
 border-color: #cccccc;
 font-family: 'Arial', sans-serif;
 font-size: 12px;
-}
-.table1-group-summary td { background-color: #f0f0f0; }
-.table1-grand-summary td {
-background-color: #d4e8d4;
-font-weight: bold;
 }
 </style>
 <div id="overview" class="section level2">

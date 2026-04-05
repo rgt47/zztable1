@@ -47,13 +47,7 @@ if (knitr::is_html_output()) {
   theme_css <- generate_theme_css()
   cat("<style>\n")
   cat(theme_css)
-  cat("\n")
-  cat(".table1-group-summary td { background-color: #f0f0f0; }\n")
-  cat(".table1-grand-summary td {
-    background-color: #d4e8d4;
-    font-weight: bold;
-  }\n")
-  cat("</style>")
+  cat("\n</style>")
 }
 ```
 
