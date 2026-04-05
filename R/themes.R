@@ -586,118 +586,203 @@ get_theme_decimal_places <- function(theme_name) {
 #'
 #' @keywords internal
 generate_theme_css <- function(theme = NULL) {
-  # If a specific theme is provided, generate CSS for just that theme
-
   if (!is.null(theme)) {
     return(generate_single_theme_css(theme))
   }
 
-  # Otherwise generate CSS for all themes
-  css_parts <- character()
+  css <- character()
 
-  # Base table styling -- gt-inspired minimal design
-  base_css <- paste0(
-    "/* Base table styling for all themes */\n",
-    ".table1 {\n",
-    "  border-collapse: collapse;\n",
-    "  margin: 1em 0;\n",
-    "  font-family: -apple-system, BlinkMacSystemFont,\n",
-    "    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\n",
-    "  font-size: 14px;\n",
-    "  line-height: 1.4;\n",
-    "  color: #333;\n",
-    "  border-top: 2px solid #5b5b5b;\n",
-    "  border-bottom: 2px solid #5b5b5b;\n",
-    "}\n",
-    "\n",
-    ".table1 th, .table1 td {\n",
-    "  padding: 4px 10px;\n",
-    "  vertical-align: middle;\n",
-    "  border: none;\n",
-    "}\n",
-    "\n",
-    ".table1 thead {\n",
-    "  border-bottom: 1px solid #5b5b5b;\n",
-    "}\n",
-    "\n",
-    ".table1 th {\n",
-    "  text-align: center;\n",
-    "  font-weight: 600;\n",
-    "  font-size: 13px;\n",
-    "  padding: 6px 10px;\n",
-    "}\n",
-    "\n",
-    ".table1 th:first-child {\n",
-    "  text-align: left;\n",
-    "}\n",
-    "\n",
-    ".table1 td {\n",
-    "  text-align: center;\n",
-    "}\n",
-    "\n",
-    ".table1 td:first-child {\n",
-    "  text-align: left;\n",
-    "}\n",
-    "\n",
-    "/* Variable header rows (non-indented first column) */\n",
-    ".table1-indent-variable {\n",
-    "  font-weight: 600;\n",
-    "  font-style: normal;\n",
-    "}\n",
-    "\n",
-    "/* Factor level rows (indented) */\n",
-    ".table1-indent-level {\n",
-    "  padding-left: 24px !important;\n",
-    "  font-weight: normal;\n",
-    "}\n",
-    "\n",
-    "/* Summary row styling */\n",
-    ".table1-group-summary td {\n",
-    "  border-top: 1px solid #d0d0d0;\n",
-    "  font-style: italic;\n",
-    "  font-size: 13px;\n",
-    "  color: #555;\n",
-    "}\n",
-    "\n",
-    ".table1-grand-summary td {\n",
-    "  border-top: 1px solid #5b5b5b;\n",
-    "  font-weight: 600;\n",
-    "  font-size: 13px;\n",
-    "}\n"
-  )
-  css_parts <- c(css_parts, base_css)
+  # -- base styles (all themes inherit these) --------------------------------
+  css <- c(css, "
+.table1 {
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  border-top: 2px solid #5f6368;
+  border-bottom: 2px solid #5f6368;
+}
 
-  # Theme-specific CSS
-  theme_registry <- get_theme_registry()
-  for (theme_name in names(theme_registry)) {
-    theme <- theme_registry[[theme_name]]
-    css_class <- theme$css_class
-    css_props <- theme$css_properties
+.table1 th,
+.table1 td {
+  padding: 5px 12px;
+  vertical-align: middle;
+  border: none;
+}
 
-    if (!is.null(css_class) && !is.null(css_props)) {
-      theme_css <- paste0("/* ", theme$name, " theme */\n")
-      theme_css <- paste0(theme_css, ".", css_class, " {\n")
+/* -- header region -------------------------------------------------------- */
+.table1 thead {
+  border-bottom: 1px solid #5f6368;
+}
 
-      for (prop_name in names(css_props)) {
-        prop_value <- css_props[[prop_name]]
-        css_property <- switch(prop_name,
-          "font_family" = "font-family",
-          "font_size" = "font-size",
-          "background_color" = "background-color",
-          "border_color" = "border-color",
-          "line_height" = "line-height",
-          prop_name
-        )
-        theme_css <- paste0(theme_css, "  ", css_property, ": ",
-                           prop_value, ";\n")
-      }
-      theme_css <- paste0(theme_css, "}\n")
+.table1 th {
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: #333;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  white-space: nowrap;
+}
 
-      css_parts <- c(css_parts, theme_css)
-    }
-  }
+.table1 th:first-child {
+  text-align: left;
+}
 
-  paste(css_parts, collapse = "\n")
+/* -- body region ---------------------------------------------------------- */
+.table1 tbody tr {
+  border-bottom: 1px solid #efefef;
+}
+
+.table1 tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table1 td {
+  text-align: center;
+}
+
+.table1 td:first-child {
+  text-align: left;
+}
+
+/* -- variable header rows ------------------------------------------------- */
+.table1 .table1-indent-variable {
+  font-weight: 600;
+}
+
+/* -- factor level rows (indented) ----------------------------------------- */
+.table1 .table1-indent-level {
+  padding-left: 24px !important;
+  font-weight: 400;
+}
+
+/* -- summary rows --------------------------------------------------------- */
+.table1 .table1-group-summary td {
+  border-top: 1px solid #d0d0d0;
+  border-bottom: none;
+  font-style: italic;
+  font-size: 13px;
+  color: #666;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.table1 .table1-grand-summary td {
+  border-top: 2px solid #5f6368;
+  border-bottom: none;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* -- footnotes ------------------------------------------------------------ */
+.table1 tfoot {
+  border-top: none;
+}
+
+.table1 .footnotes {
+  font-size: 12px;
+  color: #666;
+  text-align: left;
+  padding: 6px 12px 2px;
+}
+
+.table1 .footnotes p {
+  margin: 2px 0;
+}
+")
+
+  # -- NEJM theme ---------------------------------------------------------- */
+  css <- c(css, "
+.table1-nejm {
+  font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.table1-nejm thead {
+  border-bottom: 1px solid #bbb;
+}
+
+.table1-nejm tbody tr:nth-child(even) {
+  background-color: #fefcf0;
+}
+
+.table1-nejm tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.table1-nejm tbody tr {
+  border-bottom: none;
+}
+")
+
+  # -- Lancet theme -------------------------------------------------------- */
+  css <- c(css, "
+.table1-lancet {
+  font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.table1-lancet tbody tr {
+  border-bottom: none;
+}
+
+.table1-lancet thead {
+  border-bottom: 1px solid #999;
+}
+")
+
+  # -- JAMA theme ---------------------------------------------------------- */
+  css <- c(css, "
+.table1-jama {
+  font-family: 'Arial', sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.table1-jama tbody tr {
+  border-bottom: none;
+}
+")
+
+  # -- BMJ theme ----------------------------------------------------------- */
+  css <- c(css, "
+.table1-bmj {
+  font-family: 'Arial', sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  border-top: 3px solid #333;
+  border-bottom: 3px solid #333;
+}
+
+.table1-bmj thead {
+  border-bottom: 2px solid #333;
+}
+
+.table1-bmj th {
+  background-color: #e8f0fe;
+}
+")
+
+  # -- Console theme ------------------------------------------------------- */
+  css <- c(css, "
+.table1-console {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.table1-console tbody tr {
+  border-bottom: 1px solid #eee;
+}
+")
+
+  paste(css, collapse = "\n")
 }
 
 #' Generate CSS for a Single Theme
@@ -708,49 +793,6 @@ generate_theme_css <- function(theme = NULL) {
 #' @return CSS string for the theme
 #' @keywords internal
 generate_single_theme_css <- function(theme) {
-  # Use theme_name for short CSS class if available
-  css_class <- if (!is.null(theme$theme_name)) {
-    paste0("table1-", theme$theme_name)
-  } else {
-    theme$css_class
-  }
-  css_props <- theme$css_properties
-
-  if (is.null(css_class)) {
-    return("")
-  }
-
-  theme_css <- paste0("/* ", theme$name, " theme */\n")
-  theme_css <- paste0(theme_css, ".", css_class, " {\n")
-
-  if (!is.null(css_props)) {
-    for (prop_name in names(css_props)) {
-      prop_value <- css_props[[prop_name]]
-      css_property <- switch(prop_name,
-        "font_family" = "font-family",
-        "font_size" = "font-size",
-        "background_color" = "background-color",
-        "border_color" = "border-color",
-        "line_height" = "line-height",
-        prop_name
-      )
-      theme_css <- paste0(theme_css, "  ", css_property, ": ", prop_value, ";\n")
-    }
-  }
-
-  # Add NEJM-specific striping if this is NEJM theme
-  theme_name <- theme$theme_name %||% theme$name
-  if (theme_name %in% c("nejm", "New England Journal of Medicine")) {
-    theme_css <- paste0(theme_css, "}\n\n")
-    theme_css <- paste0(theme_css, ".", css_class, " tr:nth-child(odd) td {\n")
-    theme_css <- paste0(theme_css, "  background-color: #ffffff;\n")
-    theme_css <- paste0(theme_css, "}\n\n")
-    theme_css <- paste0(theme_css, ".", css_class, " tr:nth-child(even) td {\n")
-    theme_css <- paste0(theme_css, "  background-color: #fefcf0;\n")
-    theme_css <- paste0(theme_css, "}\n")
-  } else {
-    theme_css <- paste0(theme_css, "}\n")
-  }
-
-  theme_css
+  # Single-theme requests get the full stylesheet
+  generate_theme_css(theme = NULL)
 }
