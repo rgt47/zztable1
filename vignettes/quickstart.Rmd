@@ -34,10 +34,12 @@ source("../R/utils.R")
 ```
 
 ```{r theme-css, results='asis', echo=FALSE}
-theme_css <- generate_theme_css()
-cat("<style>\n")
-cat(theme_css)
-cat("\n</style>")
+if (knitr::is_html_output()) {
+  theme_css <- generate_theme_css()
+  cat("<style>\n")
+  cat(theme_css)
+  cat("\n</style>")
+}
 ```
 
 ```{r helper-functions, include=FALSE}
