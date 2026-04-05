@@ -1,0 +1,336 @@
+---
+title: "gt Features Beyond zztable1"
+subtitle: "Column Spanners and Summary Rows"
+author: "Ronald (Ryy) G. Thomas"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+  pdf_document:
+    toc: true
+    extra_dependencies:
+      - booktabs
+      - longtable
+vignette: >
+  %\VignetteIndexEntry{gt Features Beyond zztable1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+library(gt)
+```
+
+## Overview
+
+This vignette demonstrates two gt features that zztable1 does
+not currently support: hierarchical column spanners and summary
+rows with subtotals and grand totals.
+
+## Column Spanners
+
+Column spanners group columns under shared headers. gt supports
+multi-level spanners -- spanners that contain other spanners --
+producing hierarchical column headers.
+
+### Single-level spanners
+
+```{r single-spanner}
+trial_summary <- data.frame(
+  variable = c("Age", "BMI", "SBP"),
+  placebo_mean = c(63.2, 26.8, 132.4),
+  placebo_sd = c(11.5, 4.2, 18.1),
+  treatment_mean = c(61.8, 27.1, 128.9),
+  treatment_sd = c(12.3, 4.8, 16.7),
+  p_value = c(0.403, 0.538, 0.042)
+)
+
+trial_summary |>
+  gt(rowname_col = "variable") |>
+  tab_spanner(
+    label = "Placebo (N=53)",
+    columns = c(placebo_mean, placebo_sd)
+  ) |>
+  tab_spanner(
+    label = "Treatment (N=67)",
+    columns = c(treatment_mean, treatment_sd)
+  ) |>
+  cols_label(
+    placebo_mean = "Mean",
+    placebo_sd = "SD",
+    treatment_mean = "Mean",
+    treatment_sd = "SD",
+    p_value = "P-value"
+  ) |>
+  fmt_number(decimals = 1) |>
+  fmt_number(columns = p_value, decimals = 3) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(
+      columns = p_value,
+      rows = p_value < 0.05
+    )
+  ) |>
+  tab_header(
+    title = "Baseline Characteristics",
+    subtitle = "Single-level column spanners"
+  )
+```
+
+### Multi-level (nested) spanners
+
+Spanners can contain other spanners. Here the top-level spanner
+'Vital Signs' groups two sub-spanners, each of which groups its
+own columns.
+
+```{r nested-spanners}
+vitals <- data.frame(
+  visit = c("Baseline", "Week 4", "Week 8", "Week 12"),
+  sbp_placebo = c(132.4, 131.8, 130.2, 129.5),
+  dbp_placebo = c(84.1, 83.6, 82.9, 82.4),
+  sbp_treatment = c(128.9, 124.3, 120.1, 118.6),
+  dbp_treatment = c(82.7, 80.1, 78.4, 76.9),
+  hr_placebo = c(72.3, 71.8, 72.0, 71.5),
+  hr_treatment = c(73.1, 72.4, 71.8, 71.2)
+)
+
+vitals |>
+  gt(rowname_col = "visit") |>
+  tab_spanner(
+    label = "Placebo",
+    columns = c(sbp_placebo, dbp_placebo),
+    id = "bp_placebo"
+  ) |>
+  tab_spanner(
+    label = "Treatment",
+    columns = c(sbp_treatment, dbp_treatment),
+    id = "bp_treatment"
+  ) |>
+  tab_spanner(
+    label = "Blood Pressure",
+    spanners = c("bp_placebo", "bp_treatment"),
+    id = "bp_top"
+  ) |>
+  tab_spanner(
+    label = "Heart Rate",
+    columns = c(hr_placebo, hr_treatment)
+  ) |>
+  cols_label(
+    sbp_placebo = "SBP",
+    dbp_placebo = "DBP",
+    sbp_treatment = "SBP",
+    dbp_treatment = "DBP",
+    hr_placebo = "Placebo",
+    hr_treatment = "Treatment"
+  ) |>
+  fmt_number(decimals = 1) |>
+  tab_stubhead(label = "Visit") |>
+  tab_header(
+    title = "Vital Signs by Visit",
+    subtitle = "Three-level column hierarchy: "
+  ) |>
+  tab_source_note(
+    "Blood Pressure > Heart Rate > Arm"
+  )
+```
+
+### Delimiter-based spanners
+
+When column names follow a delimiter convention, gt can
+auto-generate the spanner structure.
+
+```{r delim-spanners}
+labs <- data.frame(
+  patient = paste("Patient", 1:5),
+  hematology.wbc = c(6.2, 7.1, 5.8, 8.4, 6.9),
+  hematology.rbc = c(4.5, 4.8, 4.2, 5.1, 4.6),
+  hematology.platelets = c(245, 310, 198, 276, 255),
+  chemistry.glucose = c(98, 112, 95, 140, 103),
+  chemistry.creatinine = c(0.9, 1.1, 0.8, 1.4, 1.0),
+  chemistry.alt = c(22, 35, 18, 48, 26)
+)
+
+labs |>
+  gt(rowname_col = "patient") |>
+  tab_spanner_delim(delim = ".") |>
+  fmt_number(
+    columns = c(
+      hematology.wbc, hematology.rbc,
+      chemistry.creatinine
+    ),
+    decimals = 1
+  ) |>
+  fmt_number(
+    columns = c(
+      hematology.platelets,
+      chemistry.glucose, chemistry.alt
+    ),
+    decimals = 0
+  ) |>
+  tab_stubhead(label = "Patient") |>
+  tab_header(
+    title = "Laboratory Results",
+    subtitle = "Spanners generated from column name delimiters"
+  )
+```
+
+## Summary Rows
+
+gt computes per-group subtotals and table-wide grand totals
+using arbitrary aggregation functions. These summary rows are
+lazy-evaluated at render time.
+
+### Per-group summary rows
+
+```{r group-summaries}
+enrollment <- data.frame(
+  site = c(
+    rep("Site A", 3), rep("Site B", 3), rep("Site C", 3)
+  ),
+  month = rep(c("Jan", "Feb", "Mar"), 3),
+  screened = c(45, 52, 38, 30, 28, 35, 22, 25, 31),
+  enrolled = c(32, 41, 28, 22, 20, 27, 15, 18, 24),
+  excluded = c(13, 11, 10, 8, 8, 8, 7, 7, 7)
+)
+
+enrollment |>
+  gt(
+    rowname_col = "month",
+    groupname_col = "site"
+  ) |>
+  summary_rows(
+    fns = list(
+      Total = ~ sum(.),
+      Mean = ~ round(mean(.), 1)
+    ),
+    side = "bottom"
+  ) |>
+  tab_stubhead(label = "Month") |>
+  tab_header(
+    title = "Enrollment by Site",
+    subtitle = "Per-group totals and means"
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_summary()
+  )
+```
+
+### Grand summary rows
+
+```{r grand-summary}
+enrollment |>
+  gt(
+    rowname_col = "month",
+    groupname_col = "site"
+  ) |>
+  summary_rows(
+    fns = list(`Site Total` = ~ sum(.)),
+    side = "bottom"
+  ) |>
+  grand_summary_rows(
+    fns = list(`Grand Total` = ~ sum(.)),
+    side = "bottom"
+  ) |>
+  tab_header(
+    title = "Enrollment by Site",
+    subtitle = "Subtotals and grand total"
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_summary()
+  ) |>
+  tab_style(
+    style = list(
+      cell_text(weight = "bold"),
+      cell_fill(color = "#e8e8e8")
+    ),
+    locations = cells_grand_summary()
+  )
+```
+
+### Custom aggregation functions
+
+Summary rows accept any function. Here we compute the median
+alongside the sum.
+
+```{r custom-aggregation}
+ae_data <- data.frame(
+  system = c(
+    rep("Gastrointestinal", 4),
+    rep("Neurological", 3),
+    rep("Dermatological", 3)
+  ),
+  event = c(
+    "Nausea", "Vomiting", "Diarrhea", "Abdominal pain",
+    "Headache", "Dizziness", "Insomnia",
+    "Rash", "Pruritus", "Alopecia"
+  ),
+  placebo_n = c(12, 5, 8, 3, 15, 7, 4, 6, 3, 1),
+  treatment_n = c(18, 9, 14, 6, 12, 5, 3, 11, 7, 2)
+)
+
+ae_data |>
+  gt(
+    rowname_col = "event",
+    groupname_col = "system"
+  ) |>
+  cols_label(
+    placebo_n = "Placebo",
+    treatment_n = "Treatment"
+  ) |>
+  summary_rows(
+    fns = list(
+      Total = ~ sum(.),
+      Median = ~ median(.)
+    ),
+    side = "bottom"
+  ) |>
+  grand_summary_rows(
+    fns = list(`All Events` = ~ sum(.)),
+    side = "bottom"
+  ) |>
+  tab_spanner(
+    label = "Number of Events",
+    columns = c(placebo_n, treatment_n)
+  ) |>
+  tab_header(
+    title = "Adverse Events by System Organ Class",
+    subtitle = "Per-group summaries with custom aggregation"
+  ) |>
+  tab_style(
+    style = list(
+      cell_text(weight = "bold"),
+      cell_fill(color = "#d4e8d4")
+    ),
+    locations = cells_grand_summary()
+  )
+```
+
+## Implications for zztable1
+
+These examples illustrate two structural capabilities that
+zztable1's flat blueprint does not currently support:
+
+- **Column spanners** require a tree structure for column
+  headers rather than a flat character vector. Implementing
+  this would require changes to `blueprint$col_names` and the
+  header rendering logic in all three output formats.
+
+- **Summary rows** require the ability to insert computed rows
+  at group boundaries, with aggregation functions that operate
+  on the group's data. This would extend the current row model
+  beyond variable-header and level rows.
+
+Both features could be added to zztable1's blueprint
+architecture. Alternatively, a bridge function that converts an
+evaluated zztable1 blueprint to a gt-compatible data frame would
+give users access to gt's full rendering capabilities without
+reimplementing them.
