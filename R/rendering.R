@@ -116,14 +116,17 @@ render_table_headers <- function(blueprint, theme, format) {
     return(character(0))
   }
 
+  fn_style <- blueprint$metadata$options$footnote_style %||% "numbers"
   col_headers <- character(length(blueprint$col_names))
   for (i in seq_along(blueprint$col_names)) {
     col_name <- blueprint$col_names[i]
     marker_key <- paste0("col_", col_name)
     col_headers[i] <- apply_footnote_marker(col_name, marker_key,
                                            blueprint$metadata$footnote_markers,
-                                           format)
+                                           format, style = fn_style)
   }
+
+  col_headers <- apply_size_labels(col_headers, blueprint, format)
 
   n_levels <- max_spanner_level(blueprint)
 
@@ -173,6 +176,60 @@ render_table_headers <- function(blueprint, theme, format) {
   )
 
   c(spanner_lines, header_lines)
+}
+
+#' Append Group Sizes to Column Headers
+#'
+#' When \code{size = TRUE}, appends \code{(N=XX)} below each group
+#' column header and the totals column header. Skips the first column
+#' (variable names) and the p-value column.
+#'
+#' @param col_headers Character vector of column header labels
+#' @param blueprint Table1Blueprint object
+#' @param format Output format
+#' @return Modified col_headers with size labels
+#' @keywords internal
+apply_size_labels <- function(col_headers, blueprint, format) {
+  if (!isTRUE(blueprint$metadata$options$size)) return(col_headers)
+
+  group_info <- blueprint$metadata$dimensions$group_info
+  if (is.null(group_info)) return(col_headers)
+
+  sizes <- group_info$sizes
+  total_n <- group_info$total_n
+  group_levels <- group_info$levels
+  has_totals <- isTRUE(blueprint$metadata$options$totals)
+  has_pvalue <- isTRUE(blueprint$metadata$options$pvalue)
+
+  ncols <- length(col_headers)
+  pval_col <- if (has_pvalue) ncols else 0L
+
+  for (i in seq_along(col_headers)) {
+    if (i == 1) next
+    if (i == pval_col) next
+
+    col_name <- blueprint$col_names[i]
+    n <- NULL
+
+    if (col_name %in% names(sizes)) {
+      n <- sizes[[col_name]]
+    } else if (col_name == "Total" && has_totals) {
+      n <- total_n
+    }
+
+    if (!is.null(n)) {
+      size_label <- paste0("(N=", n, ")")
+      col_headers[i] <- switch(format,
+        "html" = paste0(col_headers[i],
+                        "<br><span style=\"font-weight:400;\">",
+                        size_label, "</span>"),
+        "latex" = paste0(col_headers[i], " \\\\ ", size_label),
+        paste0(col_headers[i], " ", size_label)
+      )
+    }
+  }
+
+  col_headers
 }
 
 #' Find columns not covered by any spanner at any level
@@ -881,23 +938,19 @@ render_footnotes <- function(blueprint, theme, format) {
 
   footnotes <- blueprint$metadata$footnote_list
   markers <- blueprint$metadata$footnote_markers
+  fn_style <- blueprint$metadata$options$footnote_style %||% "numbers"
   output_lines <- character(0)
 
-  # Determine which footnotes have markers (variable/column) vs general
   n_with_markers <- length(markers)
-  
+
   switch(format,
     "console" = {
-      output_lines <- c(output_lines, "Footnotes:")
-      
-      # First, numbered footnotes (those with markers)
       if (n_with_markers > 0) {
         for (i in 1:min(n_with_markers, length(footnotes))) {
-          output_lines <- c(output_lines, paste0(i, ". ", footnotes[[i]]))
+          sym <- format_footnote_marker(i, "console", style = fn_style)
+          output_lines <- c(output_lines, paste0(sym, " ", footnotes[[i]]))
         }
       }
-      
-      # Then, general footnotes (no numbers, just bullets or dashes)
       if (length(footnotes) > n_with_markers) {
         for (i in (n_with_markers + 1):length(footnotes)) {
           output_lines <- c(output_lines, paste0("\u2022 ", footnotes[[i]]))
@@ -905,27 +958,23 @@ render_footnotes <- function(blueprint, theme, format) {
       }
     },
     "latex" = {
-      # For LaTeX, footnotes are handled separately by render_latex()
-      # to ensure proper placement after \end{tabular} but before \end{threeparttable}
-      # Return empty here to avoid duplicate footnotes
+      # LaTeX footnotes handled by render_latex() threeparttable
     },
     "html" = {
       output_lines <- c(output_lines, "<div class=\"footnotes\">")
-
-      # Numbered footnotes
       if (n_with_markers > 0) {
         for (i in 1:min(n_with_markers, length(footnotes))) {
-          output_lines <- c(output_lines, paste0("<p><sup>", i, "</sup> ", footnotes[[i]], "</p>"))
+          sym <- format_footnote_marker(i, "html", style = fn_style)
+          output_lines <- c(output_lines,
+            paste0("<p>", sym, " ", footnotes[[i]], "</p>"))
         }
       }
-
-      # General footnotes without numbers
       if (length(footnotes) > n_with_markers) {
         for (i in (n_with_markers + 1):length(footnotes)) {
-          output_lines <- c(output_lines, paste0("<p>\u2022 ", footnotes[[i]], "</p>"))
+          output_lines <- c(output_lines,
+            paste0("<p>\u2022 ", footnotes[[i]], "</p>"))
         }
       }
-      
       output_lines <- c(output_lines, "</div>")
     }
   )

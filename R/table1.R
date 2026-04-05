@@ -82,7 +82,7 @@ NULL
 #'
 #' @export
 table1 <- function(formula, data, strata = NULL, block = NULL,
-                   missing = FALSE, pvalue = TRUE, size = FALSE,
+                   missing = FALSE, pvalue = TRUE, size = TRUE,
                    totals = FALSE, fname = "table1", layout = "console",
                    numeric_summary = "mean_sd", footnotes = NULL,
                    theme = "console", 
@@ -175,6 +175,10 @@ finalize_blueprint <- function(blueprint, data, dimensions, theme) {
   } else {
     theme_config <- theme
   }
+
+  # Store footnote style from theme for marker rendering
+  blueprint$metadata$options$footnote_style <-
+    theme_config$footnote_style %||% "numbers"
 
   # Populate cells with theme information
   blueprint <- populate_blueprint(blueprint, data, dimensions, theme_config)
@@ -591,7 +595,8 @@ populate_factor_variable <- function(blueprint, var_name, data,
   var_content <- apply_footnote_marker(
     var_name, paste0("var_", var_name),
     dimensions$footnote_markers,
-    blueprint$metadata$options$layout
+    blueprint$metadata$options$layout,
+    style = blueprint$metadata$options$footnote_style %||% "numbers"
   )
 
   blueprint[start_row, 1] <- Cell(type = "content", content = var_content)
@@ -686,7 +691,8 @@ populate_numeric_variable <- function(blueprint, var_name, data,
   var_content <- apply_footnote_marker(
     var_name, paste0("var_", var_name),
     dimensions$footnote_markers,
-    options$layout
+    options$layout,
+    style = options$footnote_style %||% "numbers"
   )
 
   blueprint[start_row, 1] <- Cell(type = "content", content = var_content)
@@ -779,7 +785,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         tab <- table(data[[var_col]], data[[grp_col]])
         if (min(dim(tab)) >= 2) {
-          round(fisher.test(tab)$p.value, 4)
+          round(fisher.test(tab)$p.value, 3)
         } else {
           NA
         }
@@ -792,7 +798,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         if (length(unique(data[[grp_col]])) >= 2) {
           fit <- lm(data[[var_col]] ~ data[[grp_col]])
-          round(summary(fit)$coefficients[2, 4], 4)
+          round(summary(fit)$coefficients[2, 4], 3)
         } else {
           NA
         }
@@ -805,7 +811,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         if (length(unique(data[[grp_col]])) >= 2) {
           fit <- lm(data[[var_col]] ~ data[[grp_col]])
-          round(anova(fit)$`Pr(>F)`[1], 4)
+          round(anova(fit)$`Pr(>F)`[1], 3)
         } else {
           NA
         }
@@ -819,7 +825,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
         groups <- unique(data[[grp_col]][!is.na(data[[grp_col]])])
         if (length(groups) == 2) {
           t_result <- t.test(data[[var_col]] ~ data[[grp_col]], var.equal = FALSE)
-          round(t_result$p.value, 4)
+          round(t_result$p.value, 3)
         } else {
           NA
         }
@@ -832,7 +838,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         if (length(unique(data[[grp_col]][!is.na(data[[grp_col]])])) >= 2) {
           kw_result <- kruskal.test(data[[var_col]] ~ data[[grp_col]])
-          round(kw_result$p.value, 4)
+          round(kw_result$p.value, 3)
         } else {
           NA
         }
@@ -845,10 +851,10 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         tab <- table(data[[var_col]], data[[grp_col]])
         if (min(dim(tab)) >= 2 && all(tab >= 5)) {
-          round(chisq.test(tab)$p.value, 4)
+          round(chisq.test(tab)$p.value, 3)
         } else {
           # Fall back to Fisher's exact if assumptions not met
-          round(fisher.test(tab)$p.value, 4)
+          round(fisher.test(tab)$p.value, 3)
         }
       },
       list(var_col = var_name, grp_col = grp_var)
@@ -859,7 +865,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         if (length(unique(data[[grp_col]])) >= 2) {
           fit <- lm(data[[var_col]] ~ data[[grp_col]])
-          round(summary(fit)$coefficients[2, 4], 4)
+          round(summary(fit)$coefficients[2, 4], 3)
         } else {
           NA
         }
@@ -963,10 +969,11 @@ get_theme_decimal_places <- function(theme) {
 #' @param layout Output layout
 #' @return Text with marker applied if applicable
 #' @keywords internal
-apply_footnote_marker <- function(text, marker_key, footnote_markers, layout) {
+apply_footnote_marker <- function(text, marker_key, footnote_markers,
+                                   layout, style = "numbers") {
   if (marker_key %in% names(footnote_markers)) {
     marker_num <- footnote_markers[[marker_key]]
-    marker <- format_footnote_marker(marker_num, layout)
+    marker <- format_footnote_marker(marker_num, layout, style = style)
     return(paste0(text, marker))
   }
   return(text)

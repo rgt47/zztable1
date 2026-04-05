@@ -1620,6 +1620,14 @@ border-bottom: 2px solid #333;
 .table1-bmj th {
 background-color: #e8f0fe;
 }
+.table1-simple {
+font-family: 'Georgia', 'Times New Roman', serif;
+font-size: 13px;
+line-height: 1.4;
+}
+.table1-simple tbody tr {
+border-bottom: 1px solid #eee;
+}
 .table1-console {
 font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 font-size: 13px;
@@ -1695,10 +1703,10 @@ p.value
 </tr>
 <tr>
 <th>
-Placebo
+Placebo<br><span style="font-weight:400;">(N=53)</span>
 </th>
 <th>
-Treatment
+Treatment<br><span style="font-weight:400;">(N=67)</span>
 </th>
 </tr>
 </thead>
@@ -1714,7 +1722,7 @@ age
 60.8 ± 13.1
 </td>
 <td>
-0.4031
+0.403
 </td>
 </tr>
 <tr>
@@ -1739,7 +1747,7 @@ Female
 36 (54%)
 </td>
 <td>
-0.4623
+0.462
 </td>
 </tr>
 <tr>
@@ -1766,7 +1774,7 @@ bmi
 27.2 ± 4.6
 </td>
 <td>
-0.4374
+0.437
 </td>
 </tr>
 <tr>
@@ -1791,7 +1799,7 @@ No
 53 (79%)
 </td>
 <td>
-0.3942
+0.394
 </td>
 </tr>
 <tr>
@@ -1845,13 +1853,13 @@ p.value
 </tr>
 <tr>
 <th>
-Placebo
+Placebo<br><span style="font-weight:400;">(N=53)</span>
 </th>
 <th>
-Treatment
+Treatment<br><span style="font-weight:400;">(N=67)</span>
 </th>
 <th>
-Total
+Total<br><span style="font-weight:400;">(N=120)</span>
 </th>
 </tr>
 </thead>
@@ -1870,7 +1878,7 @@ age
 61.7 (12.6)
 </td>
 <td>
-0.4031
+0.403
 </td>
 </tr>
 <tr>
@@ -1900,7 +1908,7 @@ Female
 60 (50%)
 </td>
 <td>
-0.4623
+0.462
 </td>
 </tr>
 <tr>
@@ -1933,7 +1941,7 @@ bmi
 26.9 (4.7)
 </td>
 <td>
-0.4374
+0.437
 </td>
 </tr>
 <tr>
@@ -1963,7 +1971,7 @@ No
 91 (76%)
 </td>
 <td>
-0.3942
+0.394
 </td>
 </tr>
 <tr>
@@ -2028,13 +2036,13 @@ Overall
 </tr>
 <tr>
 <th>
-Placebo
+Placebo<br><span style="font-weight:400;">(N=53)</span>
 </th>
 <th>
-Treatment
+Treatment<br><span style="font-weight:400;">(N=67)</span>
 </th>
 <th>
-Total
+Total<br><span style="font-weight:400;">(N=120)</span>
 </th>
 </tr>
 </thead>
@@ -2053,7 +2061,7 @@ age
 61.7 (12.6)
 </td>
 <td>
-0.4031
+0.403
 </td>
 </tr>
 <tr>
@@ -2083,7 +2091,7 @@ Female
 60 (50%)
 </td>
 <td>
-0.4623
+0.462
 </td>
 </tr>
 <tr>
@@ -2116,7 +2124,7 @@ bmi
 26.9 (4.7)
 </td>
 <td>
-0.4374
+0.437
 </td>
 </tr>
 <tr>
@@ -2146,7 +2154,7 @@ No
 91 (76%)
 </td>
 <td>
-0.3942
+0.394
 </td>
 </tr>
 <tr>
@@ -2197,10 +2205,10 @@ render_bp(bp4)</code></pre>
 variables
 </th>
 <th>
-Placebo
+Placebo<br><span style="font-weight:400;">(N=53)</span>
 </th>
 <th>
-Treatment
+Treatment<br><span style="font-weight:400;">(N=67)</span>
 </th>
 </tr>
 </thead>
@@ -2319,10 +2327,10 @@ render_bp(bp5, &quot;lancet&quot;)</code></pre>
 variables
 </th>
 <th>
-Placebo
+Placebo<br><span style="font-weight:400;">(N=53)</span>
 </th>
 <th>
-Treatment
+Treatment<br><span style="font-weight:400;">(N=67)</span>
 </th>
 <th>
 p.value
@@ -2341,7 +2349,7 @@ age
 60.8 (13.1)
 </td>
 <td>
-0.4031
+0.403
 </td>
 </tr>
 <tr>
@@ -2355,7 +2363,7 @@ bmi
 27.2 (4.6)
 </td>
 <td>
-0.4374
+0.437
 </td>
 </tr>
 <tr class="table1-grand-summary">
@@ -2407,13 +2415,13 @@ render_bp(bp6, &quot;jama&quot;)</code></pre>
 variables
 </th>
 <th>
-Placebo
+Placebo<br><span style="font-weight:400;">(N=53)</span>
 </th>
 <th>
-Treatment
+Treatment<br><span style="font-weight:400;">(N=67)</span>
 </th>
 <th>
-Total
+Total<br><span style="font-weight:400;">(N=120)</span>
 </th>
 <th>
 p.value
@@ -2435,7 +2443,7 @@ age
 61.7 (12.6)
 </td>
 <td>
-0.4031
+0.403
 </td>
 </tr>
 <tr class="table1-group-summary">
@@ -2481,7 +2489,7 @@ Female
 60 (50%)
 </td>
 <td>
-0.4623
+0.462
 </td>
 </tr>
 <tr>
@@ -2530,7 +2538,7 @@ bmi
 26.9 (4.7)
 </td>
 <td>
-0.4374
+0.437
 </td>
 </tr>
 <tr class="table1-group-summary">
@@ -2576,7 +2584,7 @@ No
 91 (76%)
 </td>
 <td>
-0.3942
+0.394
 </td>
 </tr>
 <tr>
@@ -2687,13 +2695,13 @@ All
 </tr>
 <tr>
 <th>
-Placebo
+Placebo<br><span style="font-weight:400;">(N=53)</span>
 </th>
 <th>
-Treatment
+Treatment<br><span style="font-weight:400;">(N=67)</span>
 </th>
 <th>
-Total
+Total<br><span style="font-weight:400;">(N=120)</span>
 </th>
 </tr>
 </thead>
@@ -2712,7 +2720,7 @@ age
 61.7 ± 12.6
 </td>
 <td>
-0.4031
+0.403
 </td>
 </tr>
 <tr class="table1-group-summary">
@@ -2758,7 +2766,7 @@ Female
 60 (50%)
 </td>
 <td>
-0.4623
+0.462
 </td>
 </tr>
 <tr>
@@ -2807,7 +2815,7 @@ bmi
 26.9 ± 4.7
 </td>
 <td>
-0.4374
+0.437
 </td>
 </tr>
 <tr class="table1-group-summary">
@@ -2853,7 +2861,7 @@ No
 91 (76%)
 </td>
 <td>
-0.3942
+0.394
 </td>
 </tr>
 <tr>

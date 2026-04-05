@@ -66,6 +66,9 @@ create_theme <- function(name, decimal_places = 1, variable_indent = 2,
     )
   }
 
+  footnote_style <- dimension_rules$footnote_style %||% "numbers"
+  if (footnote_style == "numbered") footnote_style <- "numbers"
+
   theme <- structure(
     list(
       name = name,
@@ -75,6 +78,7 @@ create_theme <- function(name, decimal_places = 1, variable_indent = 2,
       level_indent = level_indent,
       stratum_separator = stratum_separator,
       factor_separator = factor_separator,
+      footnote_style = footnote_style,
       dimension_rules = dimension_rules,
       rendering_rules = rendering_rules,
       css_properties = css_properties,
@@ -121,7 +125,7 @@ create_theme <- function(name, decimal_places = 1, variable_indent = 2,
         variable_grouping = "compact",
         missing_presentation = "inline",
         summary_style = "combined",
-        footnote_style = "numbered",
+        footnote_style = "symbols",
         strip_empty_rows = TRUE,
         factor_level_grouping = "flat"
       ),
@@ -277,6 +281,7 @@ get_theme <- function(theme_name = "console") {
 
   theme <- theme_registry[[theme_name]]
   theme$theme_name <- theme_name
+  theme$css_class <- paste0("table1-", theme_name)
 
   return(theme)
 }
@@ -766,6 +771,19 @@ generate_theme_css <- function(theme = NULL) {
 
 .table1-bmj th {
   background-color: #e8f0fe;
+}
+")
+
+  # -- Simple theme --------------------------------------------------------- */
+  css <- c(css, "
+.table1-simple {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.table1-simple tbody tr {
+  border-bottom: 1px solid #eee;
 }
 ")
 
