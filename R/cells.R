@@ -623,15 +623,36 @@ evaluate_cells_vectorized <- function(cells, data, parallel = FALSE) {
 #'
 #' @return Formatted marker string
 #' @keywords internal
-format_footnote_marker <- function(number, format = "console") {
-  # Unicode superscript characters for 1-9 (using escape sequences for portability)
-  superscripts <- c("\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075",
-                    "\u2076", "\u2077", "\u2078", "\u2079")
-  
+format_footnote_marker <- function(number, format = "console",
+                                   style = "numbers") {
+  symbol_chars <- c("*", "\u2020", "\u2021", "\u00a7",
+                    "\u00b6", "\u2016")
+  superscripts <- c("\u00b9", "\u00b2", "\u00b3", "\u2074",
+                    "\u2075", "\u2076", "\u2077", "\u2078",
+                    "\u2079")
+
+  if (style == "symbols") {
+    sym <- if (number <= length(symbol_chars)) {
+      symbol_chars[number]
+    } else {
+      paste(rep(symbol_chars[((number - 1) %% length(symbol_chars)) + 1],
+                ((number - 1) %/% length(symbol_chars)) + 1), collapse = "")
+    }
+    return(switch(format,
+      "html" = paste0("<sup>", sym, "</sup>"),
+      "latex" = paste0("\\textsuperscript{", sym, "}"),
+      sym
+    ))
+  }
+
   switch(format,
-    "console" = if (number <= 9) superscripts[number] else sprintf("(%d)", number),
-    "latex" = sprintf("$^{%d}$", number), 
+    "console" = if (number <= 9) {
+      superscripts[number]
+    } else {
+      sprintf("(%d)", number)
+    },
+    "latex" = sprintf("$^{%d}$", number),
     "html" = sprintf("<sup>%d</sup>", number),
-    if (number <= 9) superscripts[number] else sprintf("(%d)", number) # default
+    if (number <= 9) superscripts[number] else sprintf("(%d)", number)
   )
 }
