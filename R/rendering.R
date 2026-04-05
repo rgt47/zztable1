@@ -116,7 +116,6 @@ render_table_headers <- function(blueprint, theme, format) {
     return(character(0))
   }
 
-  # Apply footnote markers to column names
   col_headers <- character(length(blueprint$col_names))
   for (i in seq_along(blueprint$col_names)) {
     col_name <- blueprint$col_names[i]
@@ -126,48 +125,94 @@ render_table_headers <- function(blueprint, theme, format) {
                                            format)
   }
 
-  # Build spanner rows (if any)
-  spanner_lines <- render_spanner_rows(blueprint, theme, format)
+  n_levels <- max_spanner_level(blueprint)
 
-  # Format headers based on output format
+  if (n_levels == 0) {
+    header_lines <- switch(format,
+      "latex" = {
+        fh <- apply_latex_header_formatting(col_headers, theme)
+        c(paste0(paste(fh, collapse = " & "), " \\\\"),
+          get_latex_rule(theme, "middle"))
+      },
+      "html" = {
+        hc <- paste0("  <th>", col_headers, "</th>")
+        c(paste0("<tr>\n", paste(hc, collapse = "\n"), "\n</tr>"))
+      },
+      "console" = character(0),
+      character(0)
+    )
+    return(header_lines)
+  }
+
+  unspanned <- find_unspanned_columns(blueprint)
+  spanner_lines <- render_spanner_rows(blueprint, theme, format,
+                                        unspanned, col_headers)
+
   header_lines <- switch(format,
     "latex" = {
-      formatted_headers <- apply_latex_header_formatting(col_headers, theme)
-      header_line <- paste0(paste(formatted_headers, collapse = " & "), " \\\\")
-      mid_rule <- get_latex_rule(theme, "middle")
-      c(header_line, mid_rule)
+      fh <- apply_latex_header_formatting(col_headers, theme)
+      parts <- character(0)
+      for (ci in seq_along(fh)) {
+        if (ci %in% unspanned) next
+        parts <- c(parts, fh[ci])
+      }
+      c(paste0(paste(parts, collapse = " & "), " \\\\"),
+        get_latex_rule(theme, "middle"))
     },
     "html" = {
-      header_cells <- paste0("  <th>", col_headers, "</th>")
-      header_line <- paste0("<tr>\n", paste(header_cells, collapse = "\n"), "\n</tr>")
-      c(header_line)
+      cells <- character(0)
+      for (ci in seq_along(col_headers)) {
+        if (ci %in% unspanned) next
+        cells <- c(cells,
+          paste0("  <th>", col_headers[ci], "</th>"))
+      }
+      c(paste0("<tr>\n", paste(cells, collapse = "\n"), "\n</tr>"))
     },
-    "console" = {
-      character(0)
-    },
+    "console" = character(0),
     character(0)
   )
 
   c(spanner_lines, header_lines)
 }
 
+#' Find columns not covered by any spanner at any level
+#' @param blueprint A table1_blueprint
+#' @return Integer vector of column indices
+#' @keywords internal
+find_unspanned_columns <- function(blueprint) {
+  spanners <- get_spanners(blueprint)
+  if (length(spanners) == 0) return(seq_len(blueprint$ncols))
+
+  all_covered <- unique(unlist(lapply(spanners, `[[`, "columns")))
+  setdiff(seq_len(blueprint$ncols), all_covered)
+}
+
 #' Render Spanner Rows
 #'
 #' Produces output lines for column spanners in the appropriate format.
 #' Spanner rows appear above the column headers, from highest level
-#' (outermost grouping) down to level 1.
+#' (outermost grouping) down to level 1. Columns not covered by any
+#' spanner receive a \code{rowspan} (HTML) or \code{\\multirow}
+#' (LaTeX) that spans all spanner levels plus the column header row.
 #'
 #' @param blueprint Table1Blueprint object
 #' @param theme Theme configuration
 #' @param format Output format
+#' @param unspanned Integer vector of column indices not in any spanner
+#' @param col_headers Character vector of column header labels
 #' @return Character vector with spanner header lines
 #' @keywords internal
-render_spanner_rows <- function(blueprint, theme, format) {
+render_spanner_rows <- function(blueprint, theme, format,
+                                 unspanned = integer(0),
+                                 col_headers = blueprint$col_names) {
   spanner_rows <- build_spanner_rows(blueprint)
   if (length(spanner_rows) == 0) return(character(0))
 
   ncols <- blueprint$ncols
+  n_levels <- length(spanner_rows)
+  total_header_rows <- n_levels + 1L
   output <- character(0)
+  is_first_row <- TRUE
 
   for (sr in spanner_rows) {
     switch(format,
@@ -176,7 +221,17 @@ render_spanner_rows <- function(blueprint, theme, format) {
         ci <- 1L
         cmidrule_parts <- character(0)
         while (ci <= ncols) {
-          if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
+          if (ci %in% unspanned) {
+            if (is_first_row) {
+              fh <- apply_latex_header_formatting(col_headers[ci], theme)
+              parts <- c(parts,
+                paste0("\\multirow{", total_header_rows,
+                       "}{*}{", fh, "}"))
+            } else {
+              parts <- c(parts, "")
+            }
+            ci <- ci + 1L
+          } else if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
             span <- sr$spans[ci]
             parts <- c(parts,
               paste0("\\multicolumn{", span, "}{c}{\\textbf{",
@@ -193,17 +248,31 @@ render_spanner_rows <- function(blueprint, theme, format) {
           }
         }
         row_line <- paste0(paste(parts, collapse = " & "), " \\\\")
-        output <- c(output, row_line, paste(cmidrule_parts, collapse = " "))
+        if (length(cmidrule_parts) > 0) {
+          output <- c(output, row_line,
+                      paste(cmidrule_parts, collapse = " "))
+        } else {
+          output <- c(output, row_line)
+        }
       },
       "html" = {
         cells <- character(0)
         ci <- 1L
         while (ci <= ncols) {
-          if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
+          if (ci %in% unspanned) {
+            if (is_first_row) {
+              cells <- c(cells,
+                paste0("  <th rowspan=\"", total_header_rows,
+                       "\" style=\"vertical-align:bottom;\">",
+                       escape_html(col_headers[ci]), "</th>"))
+            }
+            ci <- ci + 1L
+          } else if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
             span <- sr$spans[ci]
             cells <- c(cells,
               paste0("  <th colspan=\"", span,
-                     "\" style=\"text-align:center; border-bottom:1px solid #999;\">",
+                     "\" style=\"text-align:center;",
+                     " border-bottom:1px solid #999;\">",
                      escape_html(sr$cells[ci]), "</th>"))
             ci <- ci + span
           } else if (sr$covered[ci]) {
@@ -215,7 +284,8 @@ render_spanner_rows <- function(blueprint, theme, format) {
           }
         }
         output <- c(output,
-          paste0("<tr>\n", paste(cells, collapse = "\n"), "\n</tr>"))
+          paste0("<tr>\n", paste(cells, collapse = "\n"),
+                 "\n</tr>"))
       },
       "console" = {
         row_text <- character(ncols)
@@ -241,10 +311,12 @@ render_spanner_rows <- function(blueprint, theme, format) {
             ci <- ci + 1L
           }
         }
-        row_text <- row_text[nchar(row_text) > 0 | seq_along(row_text) == 1]
+        row_text <- row_text[nchar(row_text) > 0 |
+                               seq_along(row_text) == 1]
         output <- c(output, paste(row_text, collapse = ""))
       }
     )
+    is_first_row <- FALSE
   }
 
   output
@@ -482,13 +554,11 @@ render_html <- function(blueprint, theme = NULL) {
   }
 
   if (is.null(theme)) {
-    # Use theme from blueprint if available, otherwise default to console
     theme <- blueprint$metadata$theme %||% get_theme("console")
   } else if (is.character(theme)) {
     theme <- get_theme(theme)
   }
 
-  # Get HTML table CSS class - prefer theme_name for short class names
   css_class <- if (!is.null(theme$theme_name)) {
     paste("table1", paste0("table1-", theme$theme_name))
   } else if (!is.null(theme$css_class)) {
@@ -497,14 +567,24 @@ render_html <- function(blueprint, theme = NULL) {
     "table1"
   }
 
-  # Start with opening table tag
   output_lines <- c(paste0("<table class=\"", css_class, "\">"))
 
-  # Use pipeline for content (headers, content, footnotes)
-  pipeline_output <- render_pipeline(blueprint, theme, "html", "console")
+  header_lines <- render_table_headers(blueprint, theme, "html")
+  if (length(header_lines) > 0) {
+    output_lines <- c(output_lines, "<thead>", header_lines, "</thead>")
+  }
 
-  # Combine and close table
-  output_lines <- c(output_lines, pipeline_output, "</table>")
+  content_lines <- render_table_content(blueprint, theme, "html")
+  if (length(content_lines) > 0) {
+    output_lines <- c(output_lines, "<tbody>", content_lines, "</tbody>")
+  }
+
+  footnote_lines <- render_footnotes(blueprint, theme, "html")
+  if (length(footnote_lines) > 0) {
+    output_lines <- c(output_lines, "<tfoot>", footnote_lines, "</tfoot>")
+  }
+
+  output_lines <- c(output_lines, "</table>")
 
   output_lines
 }

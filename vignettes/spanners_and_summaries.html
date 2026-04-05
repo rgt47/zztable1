@@ -1629,29 +1629,28 @@ add_spanner(bp, label = &quot;Treatment Arms&quot;,
 
 render_bp(bp)</code></pre>
 <table class="table1 table1-nejm">
+<thead>
 <tr>
-<th>
+<th rowspan="2" style="vertical-align:bottom;">
+variables
 </th>
 <th colspan="2" style="text-align:center; border-bottom:1px solid #999;">
 Treatment Arms
 </th>
-<th>
+<th rowspan="2" style="vertical-align:bottom;">
+p.value
 </th>
 </tr>
 <tr>
-<th>
-variables
-</th>
 <th>
 Placebo
 </th>
 <th>
 Treatment
 </th>
-<th>
-p.value
-</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td class="table1-indent-variable">
 age
@@ -1756,6 +1755,7 @@ Yes
 <td>
 </td>
 </tr>
+</tbody>
 </table>
 </div>
 <div id="multiple-spanners" class="section level3">
@@ -1776,8 +1776,10 @@ add_spanner(bp2, label = &quot;Overall&quot;,
 
 render_bp(bp2, &quot;lancet&quot;)</code></pre>
 <table class="table1 table1-lancet">
+<thead>
 <tr>
-<th>
+<th rowspan="2" style="vertical-align:bottom;">
+variables
 </th>
 <th colspan="2" style="text-align:center; border-bottom:1px solid #999;">
 By Arm
@@ -1785,13 +1787,11 @@ By Arm
 <th colspan="1" style="text-align:center; border-bottom:1px solid #999;">
 Overall
 </th>
-<th>
+<th rowspan="2" style="vertical-align:bottom;">
+p.value
 </th>
 </tr>
 <tr>
-<th>
-variables
-</th>
 <th>
 Placebo
 </th>
@@ -1801,10 +1801,9 @@ Treatment
 <th>
 Total
 </th>
-<th>
-p.value
-</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td>
 age
@@ -1931,6 +1930,7 @@ Yes
 <td>
 </td>
 </tr>
+</tbody>
 </table>
 </div>
 <div id="nested-hierarchical-spanners" class="section level3">
@@ -1954,31 +1954,27 @@ add_spanner(bp3, label = &quot;Patient Characteristics&quot;,
 
 render_bp(bp3, &quot;jama&quot;)</code></pre>
 <table class="table1 table1-jama">
+<thead>
 <tr>
-<th>
+<th rowspan="3" style="vertical-align:bottom;">
+variables
 </th>
 <th colspan="3" style="text-align:center; border-bottom:1px solid #999;">
 Patient Characteristics
 </th>
-<th>
+<th rowspan="3" style="vertical-align:bottom;">
+p.value
 </th>
 </tr>
 <tr>
-<th>
-</th>
 <th colspan="2" style="text-align:center; border-bottom:1px solid #999;">
 By Arm
 </th>
 <th colspan="1" style="text-align:center; border-bottom:1px solid #999;">
 Overall
 </th>
-<th>
-</th>
 </tr>
 <tr>
-<th>
-variables
-</th>
 <th>
 Placebo
 </th>
@@ -1988,10 +1984,9 @@ Treatment
 <th>
 Total
 </th>
-<th>
-p.value
-</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td>
 age
@@ -2118,6 +2113,7 @@ Yes
 <td>
 </td>
 </tr>
+</tbody>
 </table>
 </div>
 </div>
@@ -2143,6 +2139,7 @@ add_summary_rows(bp4,
 
 render_bp(bp4)</code></pre>
 <table class="table1 table1-nejm">
+<thead>
 <tr>
 <th>
 variables
@@ -2154,6 +2151,8 @@ Placebo
 Treatment
 </th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td class="table1-indent-variable">
 age
@@ -2170,10 +2169,10 @@ age
 Group n
 </td>
 <td>
-1.0
+53.0
 </td>
 <td>
-1.0
+67.0
 </td>
 </tr>
 <tr>
@@ -2234,12 +2233,13 @@ bmi
 Group n
 </td>
 <td>
-1.0
+53.0
 </td>
 <td>
-1.0
+67.0
 </td>
 </tr>
+</tbody>
 </table>
 </div>
 <div id="grand-summary" class="section level3">
@@ -2261,6 +2261,7 @@ add_grand_summary_rows(bp5,
 
 render_bp(bp5, &quot;lancet&quot;)</code></pre>
 <table class="table1 table1-lancet">
+<thead>
 <tr>
 <th>
 variables
@@ -2275,6 +2276,8 @@ Treatment
 p.value
 </th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td>
 age
@@ -2316,6 +2319,7 @@ Overall Mean
 <td>
 </td>
 </tr>
+</tbody>
 </table>
 </div>
 <div id="combined-subtotals-and-grand-total" class="section level3">
@@ -2345,6 +2349,7 @@ add_grand_summary_rows(bp6,
 
 render_bp(bp6, &quot;jama&quot;)</code></pre>
 <table class="table1 table1-jama">
+<thead>
 <tr>
 <th>
 variables
@@ -2362,6 +2367,8 @@ Total
 p.value
 </th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td>
 age
@@ -2384,13 +2391,13 @@ age
 Subtotal n
 </td>
 <td>
-1.0
+53.0
 </td>
 <td>
-1.0
+67.0
 </td>
 <td>
-1.0
+120.0
 </td>
 <td>
 </td>
@@ -2479,13 +2486,13 @@ bmi
 Subtotal n
 </td>
 <td>
-1.0
+53.0
 </td>
 <td>
-1.0
+67.0
 </td>
 <td>
-1.0
+120.0
 </td>
 <td>
 </td>
@@ -2557,17 +2564,18 @@ Subtotal n
 Grand Total n
 </td>
 <td>
-6.0
+110.0
 </td>
 <td>
-6.0
+138.0
 </td>
 <td>
-6.0
+244.0
 </td>
 <td>
 </td>
 </tr>
+</tbody>
 </table>
 </div>
 </div>
@@ -2605,31 +2613,27 @@ add_grand_summary_rows(bp7,
 
 render_bp(bp7)</code></pre>
 <table class="table1 table1-nejm">
+<thead>
 <tr>
-<th>
+<th rowspan="3" style="vertical-align:bottom;">
+variables
 </th>
 <th colspan="3" style="text-align:center; border-bottom:1px solid #999;">
 Participants
 </th>
-<th>
+<th rowspan="3" style="vertical-align:bottom;">
+p.value
 </th>
 </tr>
 <tr>
-<th>
-</th>
 <th colspan="2" style="text-align:center; border-bottom:1px solid #999;">
 Randomised Arms
 </th>
 <th colspan="1" style="text-align:center; border-bottom:1px solid #999;">
 All
 </th>
-<th>
-</th>
 </tr>
 <tr>
-<th>
-variables
-</th>
 <th>
 Placebo
 </th>
@@ -2639,10 +2643,9 @@ Treatment
 <th>
 Total
 </th>
-<th>
-p.value
-</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td class="table1-indent-variable">
 age
@@ -2665,13 +2668,13 @@ age
 n obs
 </td>
 <td>
-1.0
+53.0
 </td>
 <td>
-1.0
+67.0
 </td>
 <td>
-1.0
+120.0
 </td>
 <td>
 </td>
@@ -2760,13 +2763,13 @@ bmi
 n obs
 </td>
 <td>
-1.0
+53.0
 </td>
 <td>
-1.0
+67.0
 </td>
 <td>
-1.0
+120.0
 </td>
 <td>
 </td>
@@ -2838,17 +2841,18 @@ n obs
 Total n
 </td>
 <td>
-6.0
+110.0
 </td>
 <td>
-6.0
+138.0
 </td>
 <td>
-6.0
+244.0
 </td>
 <td>
 </td>
 </tr>
+</tbody>
 </table>
 </div>
 <div id="api-reference" class="section level2">
