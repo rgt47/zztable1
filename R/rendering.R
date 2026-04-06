@@ -908,13 +908,13 @@ combine_row_content <- function(row_content, format, theme, row_index = 1) {
         if (i == 1) {
           leading_spaces <- nchar(content) - nchar(sub("^\\s+", "", content))
           content_text <- trimws(content)
-          
-          if (leading_spaces == variable_indent) {
-            css_class <- ' class="table1-indent-variable"'
-          } else if (leading_spaces == level_indent) {
+
+          if (leading_spaces > 0 && nchar(content_text) > 0) {
             css_class <- ' class="table1-indent-level"'
+          } else if (leading_spaces == 0 && nchar(content_text) > 0) {
+            css_class <- ' class="table1-indent-variable"'
           }
-          
+
           content <- content_text
         }
         
@@ -961,21 +961,26 @@ render_footnotes <- function(blueprint, theme, format) {
       # LaTeX footnotes handled by render_latex() threeparttable
     },
     "html" = {
-      output_lines <- c(output_lines, "<div class=\"footnotes\">")
+      ncols <- blueprint$ncols
+      fn_parts <- character(0)
       if (n_with_markers > 0) {
         for (i in 1:min(n_with_markers, length(footnotes))) {
           sym <- format_footnote_marker(i, "html", style = fn_style)
-          output_lines <- c(output_lines,
-            paste0("<p>", sym, " ", footnotes[[i]], "</p>"))
+          fn_parts <- c(fn_parts,
+            paste0(sym, " ", footnotes[[i]]))
         }
       }
       if (length(footnotes) > n_with_markers) {
         for (i in (n_with_markers + 1):length(footnotes)) {
-          output_lines <- c(output_lines,
-            paste0("<p>\u2022 ", footnotes[[i]], "</p>"))
+          fn_parts <- c(fn_parts,
+            paste0("\u2022 ", footnotes[[i]]))
         }
       }
-      output_lines <- c(output_lines, "</div>")
+      fn_text <- paste(fn_parts, collapse = "<br>")
+      output_lines <- c(output_lines,
+        paste0("<tr><td colspan=\"", ncols,
+               "\" class=\"footnotes\">",
+               fn_text, "</td></tr>"))
     }
   )
 

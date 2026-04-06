@@ -108,7 +108,12 @@ trial <- data.frame(
     round(rnorm(n_per_arm, 75.5, 8.5), 1),
     round(rnorm(n_per_arm, 75.0, 8.8), 1)
   ),
-  female_sex = make_binary(0.358, 0.343),
+  sex = factor(c(
+    sample(c("Female", "Male"), n_per_arm, TRUE,
+           c(0.358, 0.642)),
+    sample(c("Female", "Male"), n_per_arm, TRUE,
+           c(0.343, 0.657))
+  ), levels = c("Female", "Male")),
   bmi = c(
     round(rnorm(n_per_arm, 25.2, 4.2), 1),
     round(rnorm(n_per_arm, 25.7, 4.4), 1)
@@ -135,6 +140,13 @@ trial$bmi[sample(which(trial$arm ==
 ```{r gt-table, results='asis'}
 calc_n_pct <- function(x) {
   n <- sum(x == "Yes", na.rm = TRUE)
+  total <- sum(!is.na(x))
+  pct <- round(100 * n / total, 1)
+  paste0(n, " (", pct, ")")
+}
+
+calc_n_pct_level <- function(x, level) {
+  n <- sum(x == level, na.rm = TRUE)
   total <- sum(!is.na(x))
   pct <- round(100 * n / total, 1)
   paste0(n, " (", pct, ")")
@@ -167,7 +179,7 @@ rows <- data.frame(
   ),
   scb = c(
     calc_median_iqr(s1$age),
-    calc_n_pct(s1$female_sex),
+    calc_n_pct_level(s1$sex, "Female"),
     calc_median_iqr(s1$bmi),
     calc_n_pct(s1$diabetes),
     calc_n_pct(s1$hypertension),
@@ -181,7 +193,7 @@ rows <- data.frame(
   ),
   ub = c(
     calc_median_iqr(s2$age),
-    calc_n_pct(s2$female_sex),
+    calc_n_pct_level(s2$sex, "Female"),
     calc_median_iqr(s2$bmi),
     calc_n_pct(s2$diabetes),
     calc_n_pct(s2$hypertension),
@@ -332,7 +344,7 @@ pre-computed summary strings.
 
 ```{r zztable1-table}
 bp <- table1(
-  arm ~ age + female_sex + bmi + diabetes +
+  arm ~ age + sex + bmi + diabetes +
     hypertension + dyslipidemia + smoking +
     renal_insufficiency + cad +
     antiplatelet + anticoagulant +

@@ -1770,7 +1770,12 @@ trial &lt;- data.frame(
     round(rnorm(n_per_arm, 75.5, 8.5), 1),
     round(rnorm(n_per_arm, 75.0, 8.8), 1)
   ),
-  female_sex = make_binary(0.358, 0.343),
+  sex = factor(c(
+    sample(c(&quot;Female&quot;, &quot;Male&quot;), n_per_arm, TRUE,
+           c(0.358, 0.642)),
+    sample(c(&quot;Female&quot;, &quot;Male&quot;), n_per_arm, TRUE,
+           c(0.343, 0.657))
+  ), levels = c(&quot;Female&quot;, &quot;Male&quot;)),
   bmi = c(
     round(rnorm(n_per_arm, 25.2, 4.2), 1),
     round(rnorm(n_per_arm, 25.7, 4.4), 1)
@@ -1795,6 +1800,13 @@ trial$bmi[sample(which(trial$arm ==
 <h2>gt Version</h2>
 <pre class="r"><code>calc_n_pct &lt;- function(x) {
   n &lt;- sum(x == &quot;Yes&quot;, na.rm = TRUE)
+  total &lt;- sum(!is.na(x))
+  pct &lt;- round(100 * n / total, 1)
+  paste0(n, &quot; (&quot;, pct, &quot;)&quot;)
+}
+
+calc_n_pct_level &lt;- function(x, level) {
+  n &lt;- sum(x == level, na.rm = TRUE)
   total &lt;- sum(!is.na(x))
   pct &lt;- round(100 * n / total, 1)
   paste0(n, &quot; (&quot;, pct, &quot;)&quot;)
@@ -1827,7 +1839,7 @@ rows &lt;- data.frame(
   ),
   scb = c(
     calc_median_iqr(s1$age),
-    calc_n_pct(s1$female_sex),
+    calc_n_pct_level(s1$sex, &quot;Female&quot;),
     calc_median_iqr(s1$bmi),
     calc_n_pct(s1$diabetes),
     calc_n_pct(s1$hypertension),
@@ -1841,7 +1853,7 @@ rows &lt;- data.frame(
   ),
   ub = c(
     calc_median_iqr(s2$age),
-    calc_n_pct(s2$female_sex),
+    calc_n_pct_level(s2$sex, &quot;Female&quot;),
     calc_median_iqr(s2$bmi),
     calc_n_pct(s2$diabetes),
     calc_n_pct(s2$hypertension),
@@ -2463,7 +2475,7 @@ height: 0px !important;
 computation. Note that zztable1 computes statistics from raw data rather
 than requiring pre-computed summary strings.</p>
 <pre class="r"><code>bp &lt;- table1(
-  arm ~ age + female_sex + bmi + diabetes +
+  arm ~ age + sex + bmi + diabetes +
     hypertension + dyslipidemia + smoking +
     renal_insufficiency + cad +
     antiplatelet + anticoagulant +
@@ -2537,7 +2549,7 @@ age
 </tr>
 <tr>
 <td class="table1-indent-variable">
-female_sex
+sex
 </td>
 <td>
 </td>
@@ -2545,25 +2557,25 @@ female_sex
 </td>
 </tr>
 <tr>
-<td>
-No
-</td>
-<td>
-405 (65%)
-</td>
-<td>
-438 (70%)
-</td>
-</tr>
-<tr>
-<td>
-Yes
+<td class="table1-indent-level">
+Female
 </td>
 <td>
 221 (35%)
 </td>
 <td>
 188 (30%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Male
+</td>
+<td>
+405 (65%)
+</td>
+<td>
+438 (70%)
 </td>
 </tr>
 <tr>
@@ -2587,7 +2599,7 @@ diabetes
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2598,7 +2610,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2618,7 +2630,7 @@ hypertension†
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2629,7 +2641,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2649,7 +2661,7 @@ dyslipidemia
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2660,7 +2672,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2680,7 +2692,7 @@ smoking‡
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2691,7 +2703,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2711,7 +2723,7 @@ renal_insufficiency§
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2722,7 +2734,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2742,7 +2754,7 @@ cad
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2753,7 +2765,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2773,7 +2785,7 @@ antiplatelet
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2784,7 +2796,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2804,7 +2816,7 @@ anticoagulant
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2815,7 +2827,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2835,7 +2847,7 @@ lipid_lowering
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 No
 </td>
 <td>
@@ -2846,7 +2858,7 @@ No
 </td>
 </tr>
 <tr>
-<td>
+<td class="table1-indent-level">
 Yes
 </td>
 <td>
@@ -2858,30 +2870,21 @@ Yes
 </tr>
 </tbody>
 <tfoot>
-<div class="footnotes">
-<p>
+<tr>
+<td colspan="3" class="footnotes">
 <sup>*</sup> The body-mass index is the weight in kilograms divided by
-the square of the height in meters.
-</p>
-<p>
-<sup>†</sup> Arterial hypertension was defined as a previous diagnosis
-documented in medical records, current treatment with antihypertensive
-medication, or blood pressure of at least 140/90 mm Hg at baseline.
-</p>
-<p>
-<sup>‡</sup> History of smoking was defined as active smoking at the
-time of enrollment (or in the previous 12 months) or previous smoking
-habits more than 12 months before enrollment.
-</p>
-<p>
-<sup>§</sup> Renal insufficiency was defined as a previous diagnosis of
-stage 3 or higher chronic kidney disease.
-</p>
-<p>
-• Percentages may not total 100 owing to rounding. IQR denotes
-interquartile range.
-</p>
-</div>
+the square of the height in meters.<br><sup>†</sup> Arterial
+hypertension was defined as a previous diagnosis documented in medical
+records, current treatment with antihypertensive medication, or blood
+pressure of at least 140/90 mm Hg at baseline.<br><sup>‡</sup> History
+of smoking was defined as active smoking at the time of enrollment (or
+in the previous 12 months) or previous smoking habits more than 12
+months before enrollment.<br><sup>§</sup> Renal insufficiency was
+defined as a previous diagnosis of stage 3 or higher chronic kidney
+disease.<br>• Percentages may not total 100 owing to rounding. IQR
+denotes interquartile range.
+</td>
+</tr>
 </tfoot>
 </table>
 </div>
