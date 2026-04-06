@@ -40,22 +40,21 @@ analyze_dimensions <- function(x_vars, grp_var, data, strata = NULL,
                                          missing = FALSE, size = FALSE,
                                          totals = FALSE, pvalue = TRUE,
                                          layout = "console", footnotes = NULL,
-                                         theme = NULL) {
-  # Quick validation (detailed validation happens earlier)
+                                         theme = NULL, block = NULL,
+                                         collapse_binary = FALSE) {
   validate_dimensions_inputs(x_vars, grp_var, data, strata)
 
-  # Get theme object if string provided
   theme_obj <- if (is.character(theme)) get_theme(theme) else theme
 
-  # Use functional approach - each function returns immutable result
   analyses <- list(
-    variables = analyze_variables(x_vars, data, missing),
+    variables = analyze_variables(x_vars, data, missing,
+                                  collapse_binary = collapse_binary),
     groups = analyze_groups(grp_var, data),
     strata = if (!is.null(strata)) analyze_strata(strata, data) else NULL,
-    footnotes = if (!is.null(footnotes)) analyze_footnotes(footnotes, x_vars) else NULL
+    footnotes = if (!is.null(footnotes)) analyze_footnotes(footnotes, x_vars) else NULL,
+    block = block
   )
 
-  # Calculate dimensions using theme-aware functions if theme provided
   if (!is.null(theme_obj)) {
     dimensions <- calculate_table_dimensions_themed(analyses, totals, pvalue, size, theme_obj, missing)
   } else {
@@ -107,39 +106,46 @@ validate_dimensions_inputs <- function(x_vars, grp_var, data, strata) {
 #'
 #' @return Optimized variable analysis structure
 #' @keywords internal
-analyze_variables <- function(x_vars, data, missing) {
-  # Extract all variables at once (vectorized)
+analyze_variables <- function(x_vars, data, missing,
+                              collapse_binary = FALSE) {
   var_data <- data[x_vars]
 
-  # Optimized type detection using vapply
   var_types <- vapply(var_data, function(x) {
     if (is.factor(x) || is.character(x) || is.logical(x)) "factor" else "numeric"
   }, character(1))
 
-  # Vectorized missing count calculation
   missing_counts <- colSums(is.na(var_data))
 
-  # Optimized level counting for factors using vapply
   level_counts <- vapply(seq_along(x_vars), function(i) {
     var_name <- x_vars[i]
     x <- var_data[[var_name]]
     if (var_types[i] == "factor") {
       if (is.factor(x)) {
-        length(levels(x)[table(x) > 0]) # Only count observed levels
+        length(levels(x)[table(x) > 0])
       } else {
-        length(unique(x[!is.na(x)])) # Character/logical
+        length(unique(x[!is.na(x)]))
       }
     } else {
-      0L # Numeric variables have 0 levels
+      0L
     }
   }, integer(1))
 
-  # Calculate row requirements vectorized
-  # For numeric variables: header and data go in same row (total_rows = 1)
-  # For factor variables: header row + level rows (total_rows = 1 + n_levels)
-  header_rows <- rep(1L, length(x_vars)) # All variables get header
-  data_rows <- ifelse(var_types == "factor", level_counts, 0L) # Factors get level rows, numerics get 0 additional rows
-  missing_rows <- if (missing) ifelse(missing_counts > 0, 1L, 0L) else rep(0L, length(x_vars))
+  # Detect binary factors (exactly 2 levels)
+  is_binary <- var_types == "factor" & level_counts == 2L
+
+  header_rows <- rep(1L, length(x_vars))
+  data_rows <- ifelse(var_types == "factor", level_counts, 0L)
+
+  # Collapse binary factors: 1 row total (header = data), no level rows
+  if (collapse_binary) {
+    data_rows[is_binary] <- 0L
+  }
+
+  missing_rows <- if (missing) {
+    ifelse(missing_counts > 0, 1L, 0L)
+  } else {
+    rep(0L, length(x_vars))
+  }
   total_rows <- header_rows + data_rows + missing_rows
 
   # Build result structure efficiently
@@ -148,6 +154,8 @@ analyze_variables <- function(x_vars, data, missing) {
       variables = x_vars,
       types = var_types,
       level_counts = level_counts,
+      is_binary = is_binary,
+      collapse_binary = collapse_binary,
       missing_counts = missing_counts,
       row_requirements = list(
         header_rows = header_rows,
@@ -323,16 +331,12 @@ process_footnote_type <- function(footnote_spec, type, x_vars, counter) {
 #' @return Complete dimension specification
 #' @keywords internal
 calculate_table_dimensions <- function(analyses, totals, pvalue, size, layout) {
-  # Calculate rows (pure function)
   base_rows <- analyses$variables$summary$total_rows
   strata_multiplier <- if (!is.null(analyses$strata)) analyses$strata$n_strata else 1L
-  
-  # NOTE: footnote_rows removed - footnotes now rendered separately below table
-  # footnote_rows <- if (!is.null(analyses$footnotes)) analyses$footnotes$additional_rows else 0L
 
-  # Add extra rows for stratum headers (one per stratum)
   strata_header_rows <- if (!is.null(analyses$strata)) analyses$strata$n_strata else 0L
-  total_rows <- (base_rows * strata_multiplier) + strata_header_rows
+  block_header_rows <- if (!is.null(analyses$block)) length(analyses$block) else 0L
+  total_rows <- (base_rows * strata_multiplier) + strata_header_rows + block_header_rows
 
   # Calculate columns (pure function)
   base_cols <- 1L + analyses$groups$n_groups # Variable name + group columns
@@ -362,6 +366,7 @@ calculate_table_dimensions <- function(analyses, totals, pvalue, size, layout) {
       # Metadata (essential only)
       var_info = analyses$variables,
       group_info = analyses$groups,
+      block = analyses$block,
       footnote_markers = if (!is.null(analyses$footnotes)) analyses$footnotes$markers else list(),
       footnote_list = if (!is.null(analyses$footnotes)) analyses$footnotes$text else character(0),
 
@@ -411,11 +416,14 @@ calculate_table_dimensions_themed <- function(analyses, totals, pvalue, size, th
     0L
   }
   
+  block_header_rows <- if (!is.null(analyses$block)) length(analyses$block) else 0L
+
   # Total row calculation with theme adjustments
-  total_rows <- (base_rows * strata_multiplier) + 
-                strata_header_rows + 
-                footnote_rows + 
-                separator_rows + 
+  total_rows <- (base_rows * strata_multiplier) +
+                strata_header_rows +
+                block_header_rows +
+                footnote_rows +
+                separator_rows +
                 theme_missing_rows
   
   # Column calculation (existing)
@@ -452,6 +460,7 @@ calculate_table_dimensions_themed <- function(analyses, totals, pvalue, size, th
       # Analysis data (same as regular)
       var_info = analyses$variables,
       group_info = analyses$groups,
+      block = analyses$block,
       footnote_markers = if (!is.null(analyses$footnotes)) analyses$footnotes$markers else list(),
       footnote_list = if (!is.null(analyses$footnotes)) analyses$footnotes$text else character(0),
       

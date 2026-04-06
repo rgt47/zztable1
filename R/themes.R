@@ -40,7 +40,7 @@
 create_theme <- function(name, decimal_places = 1, variable_indent = 2,
                         level_indent = 4, stratum_separator = "text",
                         factor_separator = "text", show_missing = TRUE,
-                        dimension_rules = list(),
+                        collapse_binary = FALSE, dimension_rules = list(),
                         rendering_rules = list(), css_properties = list()) {
 
   # Default dimension rules if not provided
@@ -81,6 +81,7 @@ create_theme <- function(name, decimal_places = 1, variable_indent = 2,
       factor_separator = factor_separator,
       footnote_style = footnote_style,
       show_missing = show_missing,
+      collapse_binary = collapse_binary,
       dimension_rules = dimension_rules,
       rendering_rules = rendering_rules,
       css_properties = css_properties,
@@ -122,6 +123,7 @@ create_theme <- function(name, decimal_places = 1, variable_indent = 2,
       stratum_separator = "line",
       factor_separator = "none",
       show_missing = FALSE,
+      collapse_binary = TRUE,
       dimension_rules = list(
         factor_separator = "none",
         stratum_separator = "line",

@@ -352,6 +352,16 @@ bp <- table1(
   data = trial,
   theme = "nejm",
   pvalue = FALSE,
+  block = list(
+    "Cardiovascular risk factors and coexisting conditions" = c(
+      "diabetes", "hypertension", "dyslipidemia",
+      "smoking", "renal_insufficiency", "cad"
+    ),
+    "Medications -- no. (%)" = c(
+      "antiplatelet", "anticoagulant",
+      "lipid_lowering"
+    )
+  ),
   footnotes = list(
     variables = list(
       bmi = paste(

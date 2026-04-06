@@ -94,11 +94,15 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
     strata <- formula_strata
   }
 
+  # Resolve theme object for theme-driven defaults
+  theme_obj <- if (is.character(theme)) get_theme(theme) else theme
+
   # Resolve missing default from theme (NULL = theme decides)
   if (is.null(missing)) {
-    theme_obj <- if (is.character(theme)) get_theme(theme) else theme
     missing <- isTRUE(theme_obj$show_missing %||% TRUE)
   }
+
+  collapse_binary <- isTRUE(theme_obj$collapse_binary)
 
   # Step 1: Input validation (simplified)
   validate_inputs(formula, data, strata, theme, footnotes)
@@ -106,7 +110,8 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
   # Step 2: Parse and analyze
   components <- parse_and_analyze(
     formula, data, strata, missing, size,
-    totals, pvalue, layout, footnotes
+    totals, pvalue, layout, footnotes,
+    block = block, collapse_binary = collapse_binary
   )
 
   # Step 3: Create and configure blueprint
@@ -116,7 +121,8 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
       strata = strata, missing = missing, pvalue = pvalue, size = size,
       totals = totals, fname = fname, layout = layout,
       numeric_summary = numeric_summary, footnotes = footnotes, theme = theme,
-      continuous_test = continuous_test, categorical_test = categorical_test
+      continuous_test = continuous_test, categorical_test = categorical_test,
+      block = block
     ),
     components$formula_info, components$dimensions
   )
@@ -128,14 +134,11 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
 #' Parse Formula and Analyze Dimensions (Combined)
 #' @keywords internal
 parse_and_analyze <- function(formula, data, strata, missing, size,
-                              totals, pvalue, layout, footnotes) {
-  # Parse formula
+                              totals, pvalue, layout, footnotes,
+                              block = NULL, collapse_binary = FALSE) {
   formula_components <- parse_formula(formula, data, totals, pvalue)
-
-  # Use modified data (with dummy variables if needed)
   analysis_data <- formula_components$data
 
-  # Analyze dimensions
   dimensions <- analyze_dimensions(
     x_vars = formula_components$x_vars,
     grp_var = formula_components$grp_var,
@@ -146,7 +149,9 @@ parse_and_analyze <- function(formula, data, strata, missing, size,
     totals = totals,
     pvalue = pvalue,
     layout = layout,
-    footnotes = footnotes
+    footnotes = footnotes,
+    block = block,
+    collapse_binary = collapse_binary
   )
 
   list(formula_info = formula_components, dimensions = dimensions, data = analysis_data)
@@ -182,9 +187,11 @@ finalize_blueprint <- function(blueprint, data, dimensions, theme) {
     theme_config <- theme
   }
 
-  # Store footnote style from theme for marker rendering
+  # Store theme-driven options for rendering
   blueprint$metadata$options$footnote_style <-
     theme_config$footnote_style %||% "numbers"
+  blueprint$metadata$options$collapse_binary <-
+    isTRUE(theme_config$collapse_binary)
 
   # Populate cells with theme information
   blueprint <- populate_blueprint(blueprint, data, dimensions, theme_config)
@@ -514,19 +521,31 @@ populate_variables_for_stratum <- function(blueprint, stratum_data, var_info,
                                           dimensions, theme_config, start_row) {
   current_row <- start_row
 
+  collapse_binary <- isTRUE(blueprint$metadata$options$collapse_binary)
+
   for (i in seq_along(var_info$variables)) {
     var_name <- var_info$variables[i]
     var_type <- var_info$types[i]
 
-    if (var_type == "factor") {
+    if (var_type == "factor" && collapse_binary &&
+        isTRUE(var_info$is_binary[i])) {
+      populate_binary_variable(
+        blueprint, var_name, stratum_data, current_row,
+        dimensions,
+        get_theme_decimal_places(blueprint$metadata$options$theme)
+      )
+      current_row <- current_row + 1
+    } else if (var_type == "factor") {
       populate_factor_variable_stratified(
-        blueprint, var_name, stratum_data, current_row, dimensions, theme_config, NULL
+        blueprint, var_name, stratum_data, current_row,
+        dimensions, theme_config, NULL
       )
       levels_count <- length(levels(stratum_data[[var_name]]))
       current_row <- current_row + 1 + levels_count
     } else {
       populate_numeric_variable_stratified(
-        blueprint, var_name, stratum_data, current_row, dimensions, theme_config, NULL
+        blueprint, var_name, stratum_data, current_row,
+        dimensions, theme_config, NULL
       )
       current_row <- current_row + 1
     }
@@ -550,29 +569,69 @@ populate_variables_for_stratum <- function(blueprint, stratum_data, var_info,
 populate_variable_cells_simple <- function(blueprint, data, dimensions, theme_config) {
   var_info <- dimensions$var_info
   options <- blueprint$metadata$options
+  block <- options$block
+  collapse_binary <- isTRUE(options$collapse_binary)
   current_row <- 1
 
-  # Get theme information for formatting
   theme_digits <- get_theme_decimal_places(options$theme)
   theme_name <- if (is.character(options$theme)) options$theme else options$theme$theme_name
 
-  # Process each variable
+  # Build map: variable -> block label (NULL if no block)
+  block_map <- list()
+  if (!is.null(block)) {
+    for (blk_name in names(block)) {
+      for (v in block[[blk_name]]) {
+        block_map[[v]] <- blk_name
+      }
+    }
+  }
+
+  inserted_blocks <- character(0)
+
   for (i in seq_along(var_info$variables)) {
     var_name <- var_info$variables[i]
     var_type <- var_info$types[i]
 
-    # Populate based on variable type
-    if (var_type == "factor") {
+    # Insert block header if this variable starts a new block
+    blk_label <- block_map[[var_name]]
+    if (!is.null(blk_label) && !(blk_label %in% inserted_blocks)) {
+      blueprint[current_row, 1] <- Cell(
+        type = "content", content = blk_label
+      )
+      inserted_blocks <- c(inserted_blocks, blk_label)
+      current_row <- current_row + 1L
+    }
+
+    in_block <- !is.null(block_map[[var_name]])
+
+    if (var_type == "factor" && collapse_binary &&
+        isTRUE(var_info$is_binary[i])) {
+      populate_binary_variable(
+        blueprint, var_name, data, current_row,
+        dimensions, theme_digits
+      )
+    } else if (var_type == "factor") {
       populate_factor_variable(
-        blueprint, var_name, data, current_row, dimensions, theme_digits
+        blueprint, var_name, data, current_row,
+        dimensions, theme_digits
       )
     } else {
       populate_numeric_variable(
-        blueprint, var_name, data, current_row, dimensions, theme_digits, theme_name
+        blueprint, var_name, data, current_row,
+        dimensions, theme_digits, theme_name
       )
     }
 
-    # Update row counter
+    # Indent variables inside a block
+    if (in_block) {
+      key <- sprintf("%d_%d", current_row, 1L)
+      if (exists(key, envir = blueprint$cells, inherits = FALSE)) {
+        cell <- blueprint$cells[[key]]
+        cell$content <- paste0("    ", cell$content)
+        assign(key, cell, envir = blueprint$cells)
+      }
+    }
+
     current_row <- current_row + var_info$row_requirements$total_rows[i]
   }
 
@@ -669,6 +728,96 @@ populate_factor_variable <- function(blueprint, var_name, data,
         dependencies = c("data", var_name)
       )
     }
+  }
+
+  return(blueprint)
+}
+
+#' Populate Binary Variable (Collapsed)
+#'
+#' For 2-level factors, renders as a single row showing the count
+#' and percentage of the second (positive) level. The variable
+#' label includes '-- no. (%)' to match NEJM convention.
+#'
+#' @param blueprint Blueprint object
+#' @param var_name Variable name
+#' @param data Data frame
+#' @param start_row Starting row
+#' @param dimensions Dimension analysis
+#' @param theme_digits Theme decimal places
+#' @return Blueprint with binary variable cells populated
+#' @keywords internal
+populate_binary_variable <- function(blueprint, var_name, data,
+                                     start_row, dimensions,
+                                     theme_digits) {
+  grp_var <- blueprint$metadata$data_info$grp_var
+  group_levels <- dimensions$group_info$levels
+  options <- blueprint$metadata$options
+
+  var_data <- data[[var_name]]
+  pos_level <- if (is.factor(var_data)) {
+    levels(var_data)[2]
+  } else {
+    sort(unique(var_data[!is.na(var_data)]))[2]
+  }
+
+  label <- paste0(var_name, " -- no. (%)")
+  var_content <- apply_footnote_marker(
+    label, paste0("var_", var_name),
+    dimensions$footnote_markers,
+    options$layout,
+    style = options$footnote_style %||% "numbers"
+  )
+  blueprint[start_row, 1] <- Cell(
+    type = "content", content = var_content
+  )
+
+  for (col_idx in seq_along(group_levels)) {
+    group_level <- group_levels[col_idx]
+    data_col <- col_idx + 1L
+    group_total <- nrow(
+      data[data[[grp_var]] == group_level, ]
+    )
+
+    blueprint[start_row, data_col] <- Cell(
+      type = "computation",
+      data_subset = substitute(
+        data[data[[vn]] == lv & data[[gn]] == gv, ],
+        list(vn = var_name, lv = pos_level,
+             gn = grp_var, gv = group_level)
+      ),
+      computation = substitute({
+        n_level <- nrow(x)
+        pct <- round(100 * n_level / gtot, 1)
+        paste0(n_level, " (", pct, ")")
+      }, list(gtot = group_total)),
+      dependencies = c("data", var_name, grp_var)
+    )
+  }
+
+  if (options$totals) {
+    totals_col <- length(group_levels) + 2L
+    total_n <- nrow(data)
+    blueprint[start_row, totals_col] <- Cell(
+      type = "computation",
+      data_subset = substitute(
+        data[data[[vn]] == lv, ],
+        list(vn = var_name, lv = pos_level)
+      ),
+      computation = substitute({
+        n_level <- nrow(x)
+        pct <- round(100 * n_level / tn, 1)
+        paste0(n_level, " (", pct, ")")
+      }, list(tn = total_n)),
+      dependencies = c("data", var_name)
+    )
+  }
+
+  if (options$pvalue) {
+    pval_col <- ncol(blueprint)
+    blueprint[start_row, pval_col] <- create_pvalue_cell(
+      var_name, grp_var, options$categorical_test
+    )
   }
 
   return(blueprint)
