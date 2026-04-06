@@ -424,6 +424,7 @@ bp_lancet <- table1(
   data = trial,
   theme = "lancet",
   pvalue = FALSE,
+  title = "Table 1. Baseline Characteristics (Lancet style).",
   block = list(
     "Cardiovascular risk factors and coexisting conditions" = c(
       "diabetes", "hypertension", "dyslipidemia",
