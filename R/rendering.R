@@ -626,6 +626,12 @@ render_html <- function(blueprint, theme = NULL) {
 
   output_lines <- c(paste0("<table class=\"", css_class, "\">"))
 
+  if (!is.null(blueprint$metadata$title)) {
+    output_lines <- c(output_lines,
+      paste0("<caption>", escape_html(blueprint$metadata$title),
+             "</caption>"))
+  }
+
   header_lines <- render_table_headers(blueprint, theme, "html")
   if (length(header_lines) > 0) {
     output_lines <- c(output_lines, "<thead>", header_lines, "</thead>")

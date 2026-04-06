@@ -623,6 +623,18 @@ generate_theme_css <- function(theme = NULL) {
   border: none;
 }
 
+/* -- title / caption ------------------------------------------------------ */
+.table1 caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 13px;
+  font-weight: normal;
+  color: #333;
+  padding: 8px 12px;
+  background-color: #f5f0e8;
+  border-bottom: 1px solid #d0c8b8;
+}
+
 /* -- header region -------------------------------------------------------- */
 .table1 thead {
   border-bottom: 1px solid #5f6368;

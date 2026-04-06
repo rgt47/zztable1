@@ -1594,6 +1594,17 @@ vertical-align: middle;
 border: none;
 }
 
+.table1 caption {
+caption-side: top;
+text-align: left;
+font-size: 13px;
+font-weight: normal;
+color: #333;
+padding: 8px 12px;
+background-color: #f5f0e8;
+border-bottom: 1px solid #d0c8b8;
+}
+
 .table1 thead {
 border-bottom: 1px solid #5f6368;
 }
@@ -2483,6 +2494,11 @@ than requiring pre-computed summary strings.</p>
   data = trial,
   theme = &quot;nejm&quot;,
   pvalue = FALSE,
+  title = paste(
+    &quot;Table 1. Demographic Characteristics&quot;,
+    &quot;and Medical History of the Patients&quot;,
+    &quot;at Baseline.*&quot;
+  ),
   block = list(
     &quot;Cardiovascular risk factors and coexisting conditions&quot; = c(
       &quot;diabetes&quot;, &quot;hypertension&quot;, &quot;dyslipidemia&quot;,
@@ -2530,8 +2546,12 @@ than requiring pre-computed summary strings.</p>
   )
 )
 
-render_bp(bp, &quot;nejm&quot;)</code></pre>
+render_bp(bp)</code></pre>
 <table class="table1 table1-nejm">
+<caption>
+Table 1. Demographic Characteristics and Medical History of the Patients
+at Baseline.*
+</caption>
 <thead>
 <tr>
 <th>
@@ -2711,6 +2731,428 @@ months before enrollment.<br><sup>§</sup> Renal insufficiency was
 defined as a previous diagnosis of stage 3 or higher chronic kidney
 disease.<br>• Percentages may not total 100 owing to rounding. IQR
 denotes interquartile range.
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div id="zztable1-with-lancet-theme" class="section level2">
+<h2>zztable1 with Lancet Theme</h2>
+<p>The same data rendered with <code>theme = &quot;lancet&quot;</code> to show how
+the theme changes the output. Binary variables are no longer collapsed
+(Lancet shows all factor levels), missing data rows appear, footnotes
+use numbers instead of symbols, and the row striping is removed.</p>
+<pre class="r"><code>bp_lancet &lt;- table1(
+  arm ~ age + sex + bmi + diabetes +
+    hypertension + dyslipidemia + smoking +
+    renal_insufficiency + cad +
+    antiplatelet + anticoagulant +
+    lipid_lowering,
+  data = trial,
+  theme = &quot;lancet&quot;,
+  pvalue = FALSE,
+  block = list(
+    &quot;Cardiovascular risk factors and coexisting conditions&quot; = c(
+      &quot;diabetes&quot;, &quot;hypertension&quot;, &quot;dyslipidemia&quot;,
+      &quot;smoking&quot;, &quot;renal_insufficiency&quot;, &quot;cad&quot;
+    ),
+    &quot;Medications -- no. (%)&quot; = c(
+      &quot;antiplatelet&quot;, &quot;anticoagulant&quot;,
+      &quot;lipid_lowering&quot;
+    )
+  ),
+  footnotes = list(
+    variables = list(
+      bmi = &quot;Body-mass index (kg/m-squared).&quot;,
+      hypertension = &quot;Blood pressure &gt;= 140/90 mm Hg.&quot;
+    ),
+    general = c(
+      &quot;Percentages may not total 100 owing to rounding.&quot;
+    )
+  )
+)
+
+render_bp(bp_lancet)</code></pre>
+<table class="table1 table1-lancet">
+<thead>
+<tr>
+<th>
+Variable
+</th>
+<th>
+Sirolimus-Coated Balloon<br><span style="font-weight:400;">(N=626)</span>
+</th>
+<th>
+Uncoated Balloon<br><span style="font-weight:400;">(N=626)</span>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="table1-indent-variable">
+age
+</td>
+<td>
+75.7 (8.7)
+</td>
+<td>
+74.8 (8.7)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-variable">
+sex
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Female
+</td>
+<td>
+221 (35%)
+</td>
+<td>
+188 (30%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Male
+</td>
+<td>
+405 (65%)
+</td>
+<td>
+438 (70%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-variable">
+bmi¹
+</td>
+<td>
+25 (4.3)
+</td>
+<td>
+25.9 (4.4)
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-variable">
+Cardiovascular risk factors and coexisting conditions
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+diabetes
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+369 (59%)
+</td>
+<td>
+318 (51%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+257 (41%)
+</td>
+<td>
+308 (49%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+hypertension²
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+158 (25%)
+</td>
+<td>
+143 (23%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+468 (75%)
+</td>
+<td>
+483 (77%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+dyslipidemia
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+253 (40%)
+</td>
+<td>
+256 (41%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+373 (60%)
+</td>
+<td>
+370 (59%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+smoking
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+253 (40%)
+</td>
+<td>
+283 (45%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+373 (60%)
+</td>
+<td>
+343 (55%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+renal_insufficiency
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+419 (67%)
+</td>
+<td>
+392 (63%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+207 (33%)
+</td>
+<td>
+234 (37%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+cad
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+379 (61%)
+</td>
+<td>
+367 (59%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+247 (39%)
+</td>
+<td>
+259 (41%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-variable">
+Medications – no. (%)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+antiplatelet
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+178 (28%)
+</td>
+<td>
+196 (31%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+448 (72%)
+</td>
+<td>
+430 (69%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+anticoagulant
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+421 (67%)
+</td>
+<td>
+400 (64%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+205 (33%)
+</td>
+<td>
+226 (36%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+lipid_lowering
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+No
+</td>
+<td>
+205 (33%)
+</td>
+<td>
+215 (34%)
+</td>
+</tr>
+<tr>
+<td class="table1-indent-level">
+Yes
+</td>
+<td>
+421 (67%)
+</td>
+<td>
+411 (66%)
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td colspan="3" class="footnotes">
+<sup>1</sup> Body-mass index (kg/m-squared).<br><sup>2</sup> Blood
+pressure &gt;= 140/90 mm Hg.<br>• Percentages may not total 100 owing to
+rounding.
 </td>
 </tr>
 </tfoot>

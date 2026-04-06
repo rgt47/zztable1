@@ -83,9 +83,10 @@ NULL
 #' @export
 table1 <- function(formula, data, strata = NULL, block = NULL,
                    missing = NULL, pvalue = TRUE, size = TRUE,
-                   totals = FALSE, fname = "table1", layout = "console",
+                   totals = FALSE, title = NULL,
+                   fname = "table1", layout = "console",
                    numeric_summary = "mean_sd", footnotes = NULL,
-                   theme = "console", 
+                   theme = "console",
                    continuous_test = "ttest", categorical_test = "fisher",
                    ...) {
   # Step 0: Extract strata from formula if present (| operator)
@@ -126,6 +127,11 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
     ),
     components$formula_info, components$dimensions
   )
+
+  # Store title
+  if (!is.null(title)) {
+    blueprint$metadata$title <- title
+  }
 
   # Step 4: Populate and theme
   blueprint <- finalize_blueprint(blueprint, components$data, components$dimensions, theme)

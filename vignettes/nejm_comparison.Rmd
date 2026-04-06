@@ -53,14 +53,13 @@ if (knitr::is_html_output()) {
 ```{r helper, include=FALSE}
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
-render_bp <- function(bp, theme_name = "nejm") {
-  theme <- get_theme(theme_name)
+render_bp <- function(bp) {
   if (knitr::is_latex_output()) {
-    output <- render_latex(bp, theme)
+    output <- render_latex(bp)
   } else if (knitr::is_html_output()) {
-    output <- render_html(bp, theme)
+    output <- render_html(bp)
   } else {
-    output <- render_console(bp, theme)
+    output <- render_console(bp)
   }
   knitr::asis_output(paste(output, collapse = "\n"))
 }
@@ -352,6 +351,11 @@ bp <- table1(
   data = trial,
   theme = "nejm",
   pvalue = FALSE,
+  title = paste(
+    "Table 1. Demographic Characteristics",
+    "and Medical History of the Patients",
+    "at Baseline.*"
+  ),
   block = list(
     "Cardiovascular risk factors and coexisting conditions" = c(
       "diabetes", "hypertension", "dyslipidemia",
@@ -399,7 +403,49 @@ bp <- table1(
   )
 )
 
-render_bp(bp, "nejm")
+render_bp(bp)
+```
+
+## zztable1 with Lancet Theme
+
+The same data rendered with `theme = "lancet"` to show how the
+theme changes the output. Binary variables are no longer
+collapsed (Lancet shows all factor levels), missing data rows
+appear, footnotes use numbers instead of symbols, and the
+row striping is removed.
+
+```{r zztable1-lancet}
+bp_lancet <- table1(
+  arm ~ age + sex + bmi + diabetes +
+    hypertension + dyslipidemia + smoking +
+    renal_insufficiency + cad +
+    antiplatelet + anticoagulant +
+    lipid_lowering,
+  data = trial,
+  theme = "lancet",
+  pvalue = FALSE,
+  block = list(
+    "Cardiovascular risk factors and coexisting conditions" = c(
+      "diabetes", "hypertension", "dyslipidemia",
+      "smoking", "renal_insufficiency", "cad"
+    ),
+    "Medications -- no. (%)" = c(
+      "antiplatelet", "anticoagulant",
+      "lipid_lowering"
+    )
+  ),
+  footnotes = list(
+    variables = list(
+      bmi = "Body-mass index (kg/m-squared).",
+      hypertension = "Blood pressure >= 140/90 mm Hg."
+    ),
+    general = c(
+      "Percentages may not total 100 owing to rounding."
+    )
+  )
+)
+
+render_bp(bp_lancet)
 ```
 
 ## Side-by-Side Comparison
