@@ -594,7 +594,7 @@ get_theme_decimal_places <- function(theme_name) {
 #' @param theme Optional theme object. If NULL, generates CSS for all themes.
 #' @return CSS string
 #'
-#' @keywords internal
+#' @export
 generate_theme_css <- function(theme = NULL) {
   if (!is.null(theme)) {
     return(generate_single_theme_css(theme))

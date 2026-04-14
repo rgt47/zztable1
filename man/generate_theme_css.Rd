@@ -19,4 +19,3 @@ Generate Theme CSS
 Generates CSS for themes. If a specific theme is provided, generates CSS
 for that theme only. Otherwise generates comprehensive CSS for all themes.
 }
-\keyword{internal}

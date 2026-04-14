@@ -23,3 +23,16 @@ docs/.Rprofile.local
 CLAUDE.md
 /doc/
 /Meta/
+
+# Vignette rendered outputs (regenerate on demand)
+vignettes/*.html
+vignettes/*.pdf
+vignettes/*.aux
+vignettes/*.log
+vignettes/*.tex
+vignettes/Rplots.pdf
+vignettes/*_files/
+vignettes/*_cache/
+
+# pkgdown (if used)
+docs/

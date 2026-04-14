@@ -26,19 +26,7 @@ knitr::opts_chunk$set(
 library(gt)
 library(htmltools)
 
-source("../R/table1.R")
-source("../R/blueprint.R")
-source("../R/validation_consolidated.R")
-source("../R/dimensions.R")
-source("../R/cells.R")
-source("../R/themes.R")
-source("../R/rendering.R")
-source("../R/utils.R")
-source("../R/spanners.R")
-source("../R/summary_rows.R")
-
-.builtin_themes <- .create_builtin_themes()
-get_theme_registry <- function() .builtin_themes
+library(zztable1)
 ```
 
 ```{r theme-css, results='asis', echo=FALSE}

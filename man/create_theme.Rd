@@ -11,6 +11,8 @@ create_theme(
   level_indent = 4,
   stratum_separator = "text",
   factor_separator = "text",
+  show_missing = TRUE,
+  collapse_binary = FALSE,
   dimension_rules = list(),
   rendering_rules = list(),
   css_properties = list()

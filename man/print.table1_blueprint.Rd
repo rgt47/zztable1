@@ -2,19 +2,20 @@
 % Please edit documentation in R/blueprint.R
 \name{print.table1_blueprint}
 \alias{print.table1_blueprint}
-\title{Enhanced Print Method for Blueprint}
+\title{Print Method for Blueprint}
 \usage{
 \method{print}{table1_blueprint}(x, ...)
 }
 \arguments{
 \item{x}{A table1_blueprint object}
 
-\item{...}{Additional arguments (unused)}
+\item{...}{Additional arguments passed to the renderer}
 }
 \value{
 Invisibly returns the blueprint object
 }
 \description{
-Provides informative console output for table1_blueprint objects
-including memory usage and population statistics.
+Renders the table. In an interactive RStudio session with the Viewer
+pane available, opens a formatted HTML rendering in the Viewer (gt-style).
+Otherwise, renders to the console.
 }

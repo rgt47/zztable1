@@ -4,7 +4,7 @@
 \alias{analyze_variables}
 \title{Analyze Variables}
 \usage{
-analyze_variables(x_vars, data, missing)
+analyze_variables(x_vars, data, missing, collapse_binary = FALSE)
 }
 \arguments{
 \item{x_vars}{Character vector of variables}

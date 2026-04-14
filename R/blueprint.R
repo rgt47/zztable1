@@ -418,69 +418,41 @@ validate_table1_blueprint <- function(x, strict = FALSE) {
   return(x)
 }
 
-#' Enhanced Print Method for Blueprint
+#' Print Method for Blueprint
 #'
-#' Provides informative console output for table1_blueprint objects
-#' including memory usage and population statistics.
+#' Renders the table. In an interactive RStudio session with the Viewer
+#' pane available, opens a formatted HTML rendering in the Viewer (gt-style).
+#' Otherwise, renders to the console.
 #'
 #' @param x A table1_blueprint object
-#' @param ... Additional arguments (unused)
+#' @param ... Additional arguments passed to the renderer
 #'
 #' @return Invisibly returns the blueprint object
 #' @export
 print.table1_blueprint <- function(x, ...) {
-  cat("Table1 Blueprint (", x$nrows, " \u00d7 ", x$ncols, ")
-", sep = "")
+  viewer <- getOption("viewer", default = NULL)
+  use_viewer <- interactive() && is.function(viewer) &&
+    requireNamespace("htmltools", quietly = TRUE)
 
-  # Formula information
-  if (!is.null(x$metadata$formula)) {
-    formula_str <- deparse(x$metadata$formula, width.cutoff = 60)
-    if (length(formula_str) > 1) {
-      formula_str <- paste(formula_str[1], "...")
-    }
-    cat("Formula: ", formula_str, "
-")
-  }
-
-  # Theme information
-  if (!is.null(x$metadata$theme)) {
-    cat("Theme: ", x$metadata$theme$name, "
-")
-  }
-
-  # Population statistics
-  total_cells <- x$nrows * x$ncols
-  populated_cells <- x$metadata$cell_count %||%
-    calculate_cell_count(x)
-
-  if (total_cells > 0) {
-    pct_populated <- round(100 * populated_cells / total_cells, 1)
-    cat("Populated: ", populated_cells, "/", total_cells,
-      " (", pct_populated, "%)
-",
-      sep = ""
+  if (use_viewer) {
+    theme <- x$metadata$theme %||% get_theme("console")
+    html_body <- paste(render_html(x, theme), collapse = "\n")
+    css <- tryCatch(generate_theme_css(theme), error = function(e) "")
+    page <- paste0(
+      "<!DOCTYPE html><html><head><meta charset='utf-8'>",
+      "<style>", css, "\nbody{font-family:sans-serif;margin:20px;}</style>",
+      "</head><body>", html_body, "</body></html>"
     )
+    tmp_dir <- tempfile("table1_")
+    dir.create(tmp_dir)
+    tmp_file <- file.path(tmp_dir, "index.html")
+    writeLines(page, tmp_file, useBytes = TRUE)
+    viewer(tmp_file)
+    return(invisible(x))
   }
 
-  # Memory efficiency note for sparse tables
-  if (total_cells > 100 && pct_populated < 50) {
-    memory_saved <- round(100 * (1 - pct_populated / 100), 0)
-    cat("Memory efficiency: ~", memory_saved, "% reduction vs dense storage
-")
-  }
-
-  # Additional metadata
-  if (!is.null(x$metadata$footnote_list) &&
-    length(x$metadata$footnote_list) > 0) {
-    cat("Footnotes: ", length(x$metadata$footnote_list), "
-")
-  }
-
-  if (!is.null(x$metadata$options$strata)) {
-    cat("Stratification: ", x$metadata$options$strata, "
-")
-  }
-
+  theme <- x$metadata$theme %||% get_theme("console")
+  cat(render_console(x, theme), sep = "\n")
   invisible(x)
 }
 

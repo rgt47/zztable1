@@ -23,4 +23,6 @@ Suggests:
     pkgload,
     rlang (>= 1.0.0),
     htmltools,
-    kableExtra
+    kableExtra,
+    gt,
+    zztab2fig

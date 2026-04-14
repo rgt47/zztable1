@@ -13,7 +13,9 @@ parse_and_analyze(
   totals,
   pvalue,
   layout,
-  footnotes
+  footnotes,
+  block = NULL,
+  collapse_binary = FALSE
 )
 }
 \description{

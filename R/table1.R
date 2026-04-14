@@ -9,7 +9,7 @@
 # - Modular dimension analysis
 # - Enhanced error handling
 
-#' @importFrom stats median quantile sd terms
+#' @importFrom stats median quantile sd terms as.formula reformulate
 #' @importFrom utils object.size
 NULL
 
@@ -39,6 +39,7 @@ NULL
 #' @param pvalue Logical indicating whether to include p-values
 #' @param size Logical indicating whether to show group sizes
 #' @param totals Logical indicating whether to include totals column
+#' @param title Optional table title
 #' @param fname Output filename (for export functions)
 #' @param layout Output format ("console", "latex", "html")
 #' @param numeric_summary Summary type for numeric variables
@@ -46,6 +47,10 @@ NULL
 #' @param theme Journal theme ("console", "nejm", "lancet", "jama", "bmj", "simple")
 #' @param continuous_test Statistical test for continuous variables ("ttest", "anova", "welch", "kruskal")
 #' @param categorical_test Statistical test for categorical variables ("fisher", "chisq")
+#' @param transpose Logical; if \code{TRUE}, place groups as rows and
+#'   variables as columns (gt-style summary layout). Requires
+#'   all-numeric RHS variables and disables p-values, totals,
+#'   missing rows, and stratification.
 #' @param ... Additional arguments for future extensibility
 #'
 #' @return Optimized table1_blueprint object with sparse storage
@@ -88,7 +93,24 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
                    numeric_summary = "mean_sd", footnotes = NULL,
                    theme = "console",
                    continuous_test = "ttest", categorical_test = "fisher",
+                   transpose = FALSE,
                    ...) {
+  # data.frame as first argument: treat as ungrouped summary of all columns
+  if (is.data.frame(formula) && missing(data)) {
+    data <- formula
+    vars <- names(data)
+    formula <- stats::reformulate(vars)
+    pvalue <- FALSE
+    totals <- TRUE
+  }
+
+  if (isTRUE(transpose)) {
+    return(build_transposed_blueprint(
+      formula = formula, data = data,
+      numeric_summary = numeric_summary, theme = theme, title = title
+    ))
+  }
+
   # Step 0: Extract strata from formula if present (| operator)
   formula_strata <- extract_formula_strata(formula)
   if (!is.null(formula_strata) && is.null(strata)) {
@@ -946,7 +968,13 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         tab <- table(data[[var_col]], data[[grp_col]])
         if (min(dim(tab)) >= 2) {
-          round(fisher.test(tab)$p.value, 3)
+          pv <- tryCatch(
+            fisher.test(tab)$p.value,
+            error = function(e) fisher.test(
+              tab, simulate.p.value = TRUE, B = 10000
+            )$p.value
+          )
+          round(pv, 3)
         } else {
           NA
         }
@@ -1015,7 +1043,13 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
           round(chisq.test(tab)$p.value, 3)
         } else {
           # Fall back to Fisher's exact if assumptions not met
-          round(fisher.test(tab)$p.value, 3)
+          pv <- tryCatch(
+            fisher.test(tab)$p.value,
+            error = function(e) fisher.test(
+              tab, simulate.p.value = TRUE, B = 10000
+            )$p.value
+          )
+          round(pv, 3)
         }
       },
       list(var_col = var_name, grp_col = grp_var)
@@ -1239,6 +1273,14 @@ get_numeric_summary_expression <- function(summary_type, digits = 2, theme_name 
         },
         list(digits = digits)
       ),
+      "mean" = substitute(
+        as.character(round(mean(x, na.rm = TRUE), digits)),
+        list(digits = digits)
+      ),
+      "median" = substitute(
+        as.character(round(median(x, na.rm = TRUE), digits)),
+        list(digits = digits)
+      ),
       stop("Unknown numeric summary type: ", summary_type)
     )
   }
@@ -1422,4 +1464,89 @@ populate_numeric_variable_stratified <- function(blueprint, var_name, stratum_da
   }
 
   return(blueprint)
+}
+
+#' Build Transposed Blueprint (groups as rows, variables as columns)
+#'
+#' Constructs a minimal \code{table1_blueprint} with one row per group
+#' level and one cell per (group, variable) pair. All RHS variables must
+#' be numeric. P-values, missing rows, and stratification are not
+#' supported in transposed mode.
+#'
+#' @param formula Two-sided formula \code{group ~ var1 + var2 + ...}.
+#' @param data Data frame containing all variables.
+#' @param numeric_summary Summary type (string or function).
+#' @param theme Theme name or object.
+#' @param title Optional title.
+#' @return A \code{table1_blueprint} object with pre-computed cells.
+#' @keywords internal
+build_transposed_blueprint <- function(formula, data,
+                                       numeric_summary = "mean_sd",
+                                       theme = "console",
+                                       title = NULL) {
+  if (length(formula) != 3L) {
+    stop("transpose = TRUE requires a two-sided formula",
+      " (group ~ var1 + var2 + ...)", call. = FALSE)
+  }
+  grp_var <- all.vars(formula[[2L]])
+  if (length(grp_var) != 1L) {
+    stop("transpose = TRUE supports exactly one grouping variable",
+      call. = FALSE)
+  }
+  rhs_vars <- all.vars(formula[[3L]])
+  if (length(rhs_vars) == 0L) {
+    stop("transpose = TRUE requires at least one RHS variable",
+      call. = FALSE)
+  }
+  non_numeric <- rhs_vars[!vapply(data[rhs_vars], is.numeric, logical(1))]
+  if (length(non_numeric) > 0L) {
+    stop("transpose = TRUE supports only numeric RHS variables.",
+      " Non-numeric: ", paste(non_numeric, collapse = ", "),
+      call. = FALSE)
+  }
+
+  theme_obj <- if (is.character(theme)) get_theme(theme) else theme
+  theme_digits <- theme_obj$decimal_places %||% 1
+  theme_name <- theme_obj$theme_name %||% theme_obj$name %||% "console"
+
+  group_vec <- data[[grp_var]]
+  group_levels <- if (is.factor(group_vec)) levels(group_vec) else {
+    sort(unique(as.character(group_vec[!is.na(group_vec)])))
+  }
+
+  expr <- get_numeric_summary_expression(numeric_summary,
+    digits = theme_digits, theme_name = theme_name)
+
+  bp <- Table1Blueprint(
+    nrows = length(group_levels),
+    ncols = length(rhs_vars) + 1L
+  )
+  bp$row_names <- paste0("group_", seq_along(group_levels))
+  bp$col_names <- c(grp_var, rhs_vars)
+
+  for (i in seq_along(group_levels)) {
+    bp[i, 1L] <- Cell(type = "content", content = group_levels[i])
+    for (j in seq_along(rhs_vars)) {
+      x <- data[[rhs_vars[j]]][group_vec == group_levels[i] &
+        !is.na(group_vec)]
+      val <- tryCatch(eval(expr, list(x = x)),
+        error = function(e) NA_character_)
+      bp[i, j + 1L] <- Cell(type = "content", content = as.character(val))
+    }
+  }
+
+  bp$metadata$formula <- formula
+  bp$metadata$theme <- theme_obj
+  bp$metadata$options <- list(
+    pvalue = FALSE, size = FALSE, totals = FALSE,
+    theme = theme, numeric_summary = numeric_summary,
+    transpose = TRUE
+  )
+  bp$metadata$data_info <- list(
+    x_vars = rhs_vars, grp_var = grp_var, has_groups = TRUE,
+    all_vars = c(grp_var, rhs_vars)
+  )
+  bp$metadata$data <- data
+  if (!is.null(title)) bp$metadata$title <- title
+  bp
 }

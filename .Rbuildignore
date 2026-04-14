@@ -21,6 +21,7 @@
 # Development
 ^dev-scripts$
 ^analysis$
+^dev$
 
 # Build artifacts
 ^docs$

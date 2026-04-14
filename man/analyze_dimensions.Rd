@@ -15,7 +15,9 @@ analyze_dimensions(
   pvalue = TRUE,
   layout = "console",
   footnotes = NULL,
-  theme = NULL
+  theme = NULL,
+  block = NULL,
+  collapse_binary = FALSE
 )
 }
 \arguments{

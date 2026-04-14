@@ -18,5 +18,7 @@ Character vector with rendered headers
 }
 \description{
 Renders column headers with proper footnote markers for the specified format.
+When column spanners are defined, emits spanner rows above the column
+headers to produce multi-level hierarchical headings.
 }
 \keyword{internal}

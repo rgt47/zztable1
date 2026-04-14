@@ -1129,6 +1129,27 @@ display_table <- function(blueprint, data, format = "console", ...) {
   invisible(output)
 }
 
+#' Knitr Print Method for table1_blueprint
+#'
+#' Automatically renders a table1_blueprint object in the
+#' appropriate format (HTML, LaTeX, or console) when used as
+#' the last expression in an R Markdown or Quarto code chunk.
+#'
+#' @param x A \code{table1_blueprint} object.
+#' @param ... Additional arguments (ignored).
+#' @return A \code{knitr::asis_output} object.
+#' @export
+knit_print.table1_blueprint <- function(x, ...) {
+  if (knitr::is_html_output()) {
+    out <- render_html(x)
+  } else if (knitr::is_latex_output()) {
+    out <- render_latex(x)
+  } else {
+    out <- render_console(x)
+  }
+  knitr::asis_output(paste(out, collapse = "\n"))
+}
+
 #' Generate LaTeX Theme Setup
 #'
 #' @param theme Theme configuration
@@ -1156,7 +1177,7 @@ generate_latex_theme_setup <- function(theme) {
       "% JAMA theme formatting"
     )
   }
-  
+
   return(setup_lines)
 }
 
@@ -1257,14 +1278,20 @@ get_latex_rule <- function(theme, position = "middle") {
 #' @param theme Theme configuration
 #' @return Character vector with formatted headers
 apply_latex_header_formatting <- function(headers, theme) {
-  # Different themes might apply different header formatting
+  if (theme$theme_name == "console") return(headers)
+
+  bold_wrap <- function(h) {
+    has_break <- grepl("\\\\", h, fixed = TRUE)
+    ifelse(has_break,
+      paste0("\\makecell[b]{\\textbf{",
+             gsub("\\\\", "} \\\\\\\\ \\textbf{", h, fixed = TRUE),
+             "}}"),
+      paste0("\\textbf{", h, "}"))
+  }
+
   switch(theme$theme_name,
-    "console" = headers, # No special formatting for console
-    "nejm" = paste0("\\textbf{", headers, "}"), # Bold for NEJM
-    "lancet" = paste0("\\textbf{", headers, "}"), # Bold for Lancet
-    "jama" = paste0("\\textbf{", headers, "}"), # Bold for JAMA
-    "bmj" = paste0("\\textbf{", headers, "}"), # Bold for BMJ
-    headers # Default: no formatting
+    "nejm" = , "lancet" = , "jama" = , "bmj" = bold_wrap(headers),
+    headers
   )
 }
 
@@ -1314,4 +1341,42 @@ as.data.frame.table1_blueprint <- function(x, row.names = NULL, optional = FALSE
   }
 
   return(result_df)
+}
+
+#' Save a Table1 Blueprint as an Image
+#'
+#' Renders a \code{table1_blueprint} to PDF, PNG, or SVG via the
+#' \code{zztab2fig::zzt2f()} Typst pipeline. Intended for workflows
+#' that need a pixel image of the table, including terminal-based
+#' display via graphics protocols (Kitty, iTerm2).
+#'
+#' @param blueprint A \code{table1_blueprint}.
+#' @param filename Output file base name (no extension). Defaults to
+#'   \code{"table1"}.
+#' @param sub_dir Output directory. Defaults to \code{tempdir()}.
+#' @param format One of \code{"png"}, \code{"pdf"}, or \code{"svg"}.
+#' @param theme Optional theme name passed to \code{zzt2f()}.
+#' @param dpi PNG resolution.
+#' @param ... Additional arguments forwarded to \code{zzt2f()}.
+#' @return Invisibly, the path to the rendered file.
+#' @export
+save_as_image <- function(blueprint,
+                          filename = "table1",
+                          sub_dir = tempdir(),
+                          format = c("png", "pdf", "svg"),
+                          theme = NULL,
+                          dpi = 300L,
+                          ...) {
+  if (!inherits(blueprint, "table1_blueprint")) {
+    stop("'blueprint' must be a table1_blueprint object", call. = FALSE)
+  }
+  if (!requireNamespace("zztab2fig", quietly = TRUE)) {
+    stop("Package 'zztab2fig' is required. Install from ",
+      "https://github.com/rgt47/zztab2fig", call. = FALSE)
+  }
+  format <- match.arg(format)
+  df <- as.data.frame(blueprint)
+  rownames(df) <- NULL
+  zztab2fig::zzt2f(df, filename = filename, sub_dir = sub_dir,
+    format = format, theme = theme, dpi = dpi, ...)
 }

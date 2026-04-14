@@ -4,7 +4,7 @@
 \alias{format_footnote_marker}
 \title{Format Footnote Marker}
 \usage{
-format_footnote_marker(number, format = "console")
+format_footnote_marker(number, format = "console", style = "numbers")
 }
 \arguments{
 \item{number}{Footnote number}

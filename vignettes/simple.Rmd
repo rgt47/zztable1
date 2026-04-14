@@ -24,17 +24,7 @@ knitr::opts_chunk$set(
 library(htmltools)
 
 # Load the package functions in correct dependency order
-source("../R/themes.R")
-source("../R/validation_consolidated.R")
-source("../R/error_handling.R")
-source("../R/cells.R")
-source("../R/utils.R")
-source("../R/spanners.R")
-source("../R/summary_rows.R")
-source("../R/blueprint.R")
-source("../R/dimensions.R")
-source("../R/rendering.R")
-source("../R/table1.R")
+library(zztable1)
 ```
 
 ```{r theme-css, results='asis', echo=FALSE}

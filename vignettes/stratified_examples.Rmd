@@ -26,16 +26,7 @@ knitr::opts_chunk$set(
 library(htmltools)
 
 # Source all required files
-source("../R/table1.R")
-source("../R/blueprint.R")
-source("../R/validation_consolidated.R") 
-source("../R/dimensions.R")
-source("../R/cells.R")
-source("../R/themes.R")
-source("../R/rendering.R")
-source("../R/utils.R")
-source("../R/spanners.R")
-source("../R/summary_rows.R")
+library(zztable1)
 ```
 
 ```{r theme-css, results='asis', echo=FALSE}

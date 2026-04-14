@@ -4,7 +4,13 @@
 \alias{apply_footnote_marker}
 \title{Apply Footnote Marker Optimized}
 \usage{
-apply_footnote_marker(text, marker_key, footnote_markers, layout)
+apply_footnote_marker(
+  text,
+  marker_key,
+  footnote_markers,
+  layout,
+  style = "numbers"
+)
 }
 \arguments{
 \item{text}{Text to potentially mark}

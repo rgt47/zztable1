@@ -9,10 +9,11 @@ table1(
   data,
   strata = NULL,
   block = NULL,
-  missing = FALSE,
+  missing = NULL,
   pvalue = TRUE,
-  size = FALSE,
+  size = TRUE,
   totals = FALSE,
+  title = NULL,
   fname = "table1",
   layout = "console",
   numeric_summary = "mean_sd",
@@ -20,6 +21,7 @@ table1(
   theme = "console",
   continuous_test = "ttest",
   categorical_test = "fisher",
+  transpose = FALSE,
   ...
 )
 }
@@ -40,6 +42,8 @@ table1(
 
 \item{totals}{Logical indicating whether to include totals column}
 
+\item{title}{Optional table title}
+
 \item{fname}{Output filename (for export functions)}
 
 \item{layout}{Output format ("console", "latex", "html")}
@@ -48,11 +52,16 @@ table1(
 
 \item{footnotes}{Footnote specifications}
 
-\item{theme}{Journal theme ("default", "nejm", "lancet", "jama", "bmj")}
+\item{theme}{Journal theme ("console", "nejm", "lancet", "jama", "bmj", "simple")}
 
 \item{continuous_test}{Statistical test for continuous variables ("ttest", "anova", "welch", "kruskal")}
 
 \item{categorical_test}{Statistical test for categorical variables ("fisher", "chisq")}
+
+\item{transpose}{Logical; if \code{TRUE}, place groups as rows and
+variables as columns (gt-style summary layout). Requires
+all-numeric RHS variables and disables p-values, totals,
+missing rows, and stratification.}
 
 \item{...}{Additional arguments for future extensibility}
 }
