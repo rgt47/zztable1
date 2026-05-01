@@ -1,4 +1,4 @@
-# zztable1
+# zztable1 <a href="https://rgt47.github.io/zztable1/"><img src="man/figures/logo.png" align="right" height="138" alt="zztable1 hex sticker" /></a>
 
 ## Publication-Ready Summary Tables for Biomedical Research
 
