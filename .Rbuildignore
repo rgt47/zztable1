@@ -1,0 +1,40 @@
+# zzcollab framework files
+^renv$
+^renv\.lock$
+^zzcollab\.yaml$
+^Makefile$
+^Dockerfile$
+^\.Rprofile$
+^\.Rprofile\.local$
+
+# IDE and editor files
+^\.claude$
+^\.Rproj\.user$
+^\.Rhistory$
+^\.RData$
+^.*\.Rproj$
+^vignettes/\.claude$
+
+# GitHub
+^\.github$
+
+# Development
+^dev-scripts$
+^analysis$
+^dev$
+
+# Build artifacts
+^docs$
+^.*\.tar\.gz$
+^.*\.Rcheck$
+
+# Documentation (not part of package)
+^CLAUDE\.md$
+^.*\.pdf$
+
+# Temporary and test files
+^test_.*\.R$
+^test_.*\.Rmd$
+^debug_.*\.R$
+^doc$
+^Meta$

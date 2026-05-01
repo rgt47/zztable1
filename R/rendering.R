@@ -1,0 +1,1382 @@
+# ============================================================================
+# Output Format Rendering System
+# ============================================================================
+#
+# Multi-format rendering for console, LaTeX, HTML, and other outputs
+#
+
+#' Base Rendering Pipeline (Format-Agnostic)
+#'
+#' Internal function that provides the common rendering flow for all formats.
+#' Handles theme resolution, headers, table content, and footnotes.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration (optional) - will be resolved if character
+#' @param format Output format ("console", "latex", "html", etc.)
+#' @param default_theme Default theme name if none specified
+#' @return Character vector with rendered output
+#'
+#' @keywords internal
+render_pipeline <- function(blueprint, theme = NULL, format, default_theme = "console") {
+  # Validate input
+  if (!inherits(blueprint, "table1_blueprint")) {
+    stop("First argument must be a table1_blueprint", call. = FALSE)
+  }
+
+  # Resolve theme
+  if (is.null(theme)) {
+    theme <- get_theme(default_theme)
+  } else if (is.character(theme)) {
+    theme <- get_theme(theme)
+  }
+
+  # Initialize output
+  output_lines <- character(0)
+
+  # Step 1: Add title/header if present
+  if (!is.null(blueprint$metadata$title)) {
+    output_lines <- c(output_lines, blueprint$metadata$title, "")
+  }
+
+  # Step 2: Format-specific setup (LaTeX packages, HTML tags, etc.)
+  setup_lines <- get_format_setup(theme, format)
+  if (length(setup_lines) > 0) {
+    output_lines <- c(output_lines, setup_lines, "")
+  }
+
+  # Step 3: Add table headers with footnote markers
+  header_lines <- render_table_headers(blueprint, theme, format)
+  if (length(header_lines) > 0) {
+    output_lines <- c(output_lines, header_lines)
+  }
+
+  # Step 4: Render table content (lazy evaluation of cells)
+  table_lines <- render_table_content(blueprint, theme, format)
+  if (length(table_lines) > 0) {
+    output_lines <- c(output_lines, table_lines)
+  }
+
+  # Step 5: Add footnotes if present
+  footnote_lines <- render_footnotes(blueprint, theme, format)
+  if (length(footnote_lines) > 0) {
+    output_lines <- c(output_lines, footnote_lines)
+  }
+
+  # Step 6: Format-specific cleanup (closing tags, etc.)
+  cleanup_lines <- get_format_cleanup(theme, format)
+  if (length(cleanup_lines) > 0) {
+    output_lines <- c(output_lines, cleanup_lines)
+  }
+
+  output_lines
+}
+
+#' Get format-specific setup lines
+#'
+#' @param theme Theme configuration
+#' @param format Output format
+#' @return Character vector with setup commands
+#'
+#' @keywords internal
+get_format_setup <- function(theme, format) {
+  switch(format,
+    "latex" = character(0),  # LaTeX setup handled in render_latex
+    "html" = character(0),   # HTML setup handled in render_html
+    "console" = character(0),
+    character(0)
+  )
+}
+
+#' Get format-specific cleanup lines
+#'
+#' @param theme Theme configuration
+#' @param format Output format
+#' @return Character vector with cleanup commands
+#'
+#' @keywords internal
+get_format_cleanup <- function(theme, format) {
+  # Cleanup is typically handled at end of render_* functions
+  character(0)
+}
+
+#' Render Table Headers (Format-Agnostic)
+#'
+#' Renders column headers with proper footnote markers for the specified format.
+#' When column spanners are defined, emits spanner rows above the column
+#' headers to produce multi-level hierarchical headings.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @param format Output format
+#' @return Character vector with rendered headers
+#'
+#' @keywords internal
+render_table_headers <- function(blueprint, theme, format) {
+  if (length(blueprint$col_names) == 0) {
+    return(character(0))
+  }
+
+  fn_style <- blueprint$metadata$options$footnote_style %||% "numbers"
+  col_headers <- character(length(blueprint$col_names))
+  for (i in seq_along(blueprint$col_names)) {
+    col_name <- blueprint$col_names[i]
+    marker_key <- paste0("col_", col_name)
+    col_headers[i] <- apply_footnote_marker(col_name, marker_key,
+                                           blueprint$metadata$footnote_markers,
+                                           format, style = fn_style)
+  }
+
+  col_headers <- apply_size_labels(col_headers, blueprint, format)
+
+  n_levels <- max_spanner_level(blueprint)
+
+  if (n_levels == 0) {
+    header_lines <- switch(format,
+      "latex" = {
+        fh <- apply_latex_header_formatting(col_headers, theme)
+        c(paste0(paste(fh, collapse = " & "), " \\\\"),
+          get_latex_rule(theme, "middle"))
+      },
+      "html" = {
+        hc <- paste0("  <th>", col_headers, "</th>")
+        c(paste0("<tr>\n", paste(hc, collapse = "\n"), "\n</tr>"))
+      },
+      "console" = character(0),
+      character(0)
+    )
+    return(header_lines)
+  }
+
+  unspanned <- find_unspanned_columns(blueprint)
+  spanner_lines <- render_spanner_rows(blueprint, theme, format,
+                                        unspanned, col_headers)
+
+  header_lines <- switch(format,
+    "latex" = {
+      fh <- apply_latex_header_formatting(col_headers, theme)
+      parts <- character(0)
+      for (ci in seq_along(fh)) {
+        if (ci %in% unspanned) next
+        parts <- c(parts, fh[ci])
+      }
+      c(paste0(paste(parts, collapse = " & "), " \\\\"),
+        get_latex_rule(theme, "middle"))
+    },
+    "html" = {
+      cells <- character(0)
+      for (ci in seq_along(col_headers)) {
+        if (ci %in% unspanned) next
+        cells <- c(cells,
+          paste0("  <th>", col_headers[ci], "</th>"))
+      }
+      c(paste0("<tr>\n", paste(cells, collapse = "\n"), "\n</tr>"))
+    },
+    "console" = character(0),
+    character(0)
+  )
+
+  c(spanner_lines, header_lines)
+}
+
+#' Append Group Sizes to Column Headers
+#'
+#' When \code{size = TRUE}, appends \code{(N=XX)} below each group
+#' column header and the totals column header. Skips the first column
+#' (variable names) and the p-value column.
+#'
+#' @param col_headers Character vector of column header labels
+#' @param blueprint Table1Blueprint object
+#' @param format Output format
+#' @return Modified col_headers with size labels
+#' @keywords internal
+apply_size_labels <- function(col_headers, blueprint, format) {
+  if (!isTRUE(blueprint$metadata$options$size)) return(col_headers)
+
+  group_info <- blueprint$metadata$dimensions$group_info
+  if (is.null(group_info)) return(col_headers)
+
+  sizes <- group_info$sizes
+  total_n <- group_info$total_n
+  group_levels <- group_info$levels
+  has_totals <- isTRUE(blueprint$metadata$options$totals)
+  has_pvalue <- isTRUE(blueprint$metadata$options$pvalue)
+
+  ncols <- length(col_headers)
+  pval_col <- if (has_pvalue) ncols else 0L
+
+  for (i in seq_along(col_headers)) {
+    if (i == 1) next
+    if (i == pval_col) next
+
+    col_name <- blueprint$col_names[i]
+    n <- NULL
+
+    if (col_name %in% names(sizes)) {
+      n <- sizes[[col_name]]
+    } else if (col_name == "Total" && has_totals) {
+      n <- total_n
+    }
+
+    if (!is.null(n)) {
+      size_label <- paste0("(N=", n, ")")
+      col_headers[i] <- switch(format,
+        "html" = paste0(col_headers[i],
+                        "<br><span style=\"font-weight:400;\">",
+                        size_label, "</span>"),
+        "latex" = paste0(col_headers[i], " \\\\ ", size_label),
+        paste0(col_headers[i], " ", size_label)
+      )
+    }
+  }
+
+  col_headers
+}
+
+#' Find columns not covered by any spanner at any level
+#' @param blueprint A table1_blueprint
+#' @return Integer vector of column indices
+#' @keywords internal
+find_unspanned_columns <- function(blueprint) {
+  spanners <- get_spanners(blueprint)
+  if (length(spanners) == 0) return(seq_len(blueprint$ncols))
+
+  all_covered <- unique(unlist(lapply(spanners, `[[`, "columns")))
+  setdiff(seq_len(blueprint$ncols), all_covered)
+}
+
+#' Render Spanner Rows
+#'
+#' Produces output lines for column spanners in the appropriate format.
+#' Spanner rows appear above the column headers, from highest level
+#' (outermost grouping) down to level 1. Columns not covered by any
+#' spanner receive a \code{rowspan} (HTML) or \code{\\multirow}
+#' (LaTeX) that spans all spanner levels plus the column header row.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @param format Output format
+#' @param unspanned Integer vector of column indices not in any spanner
+#' @param col_headers Character vector of column header labels
+#' @return Character vector with spanner header lines
+#' @keywords internal
+render_spanner_rows <- function(blueprint, theme, format,
+                                 unspanned = integer(0),
+                                 col_headers = blueprint$col_names) {
+  spanner_rows <- build_spanner_rows(blueprint)
+  if (length(spanner_rows) == 0) return(character(0))
+
+  ncols <- blueprint$ncols
+  n_levels <- length(spanner_rows)
+  total_header_rows <- n_levels + 1L
+  output <- character(0)
+  is_first_row <- TRUE
+
+  for (sr in spanner_rows) {
+    switch(format,
+      "latex" = {
+        parts <- character(0)
+        ci <- 1L
+        cmidrule_parts <- character(0)
+        while (ci <= ncols) {
+          if (ci %in% unspanned) {
+            if (is_first_row) {
+              fh <- apply_latex_header_formatting(col_headers[ci], theme)
+              parts <- c(parts,
+                paste0("\\multirow{", total_header_rows,
+                       "}{*}{", fh, "}"))
+            } else {
+              parts <- c(parts, "")
+            }
+            ci <- ci + 1L
+          } else if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
+            span <- sr$spans[ci]
+            parts <- c(parts,
+              paste0("\\multicolumn{", span, "}{c}{\\textbf{",
+                     escape_latex(sr$cells[ci]), "}}"))
+            cmidrule_parts <- c(cmidrule_parts,
+              paste0("\\cmidrule(lr){", ci, "-", ci + span - 1L, "}"))
+            ci <- ci + span
+          } else if (sr$covered[ci]) {
+            ci <- ci + 1L
+            next
+          } else {
+            parts <- c(parts, "")
+            ci <- ci + 1L
+          }
+        }
+        row_line <- paste0(paste(parts, collapse = " & "), " \\\\")
+        if (length(cmidrule_parts) > 0) {
+          output <- c(output, row_line,
+                      paste(cmidrule_parts, collapse = " "))
+        } else {
+          output <- c(output, row_line)
+        }
+      },
+      "html" = {
+        cells <- character(0)
+        ci <- 1L
+        while (ci <= ncols) {
+          if (ci %in% unspanned) {
+            if (is_first_row) {
+              cells <- c(cells,
+                paste0("  <th rowspan=\"", total_header_rows,
+                       "\" style=\"vertical-align:bottom;\">",
+                       escape_html(col_headers[ci]), "</th>"))
+            }
+            ci <- ci + 1L
+          } else if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
+            span <- sr$spans[ci]
+            cells <- c(cells,
+              paste0("  <th colspan=\"", span,
+                     "\" style=\"text-align:center;",
+                     " border-bottom:1px solid #999;\">",
+                     escape_html(sr$cells[ci]), "</th>"))
+            ci <- ci + span
+          } else if (sr$covered[ci]) {
+            ci <- ci + 1L
+            next
+          } else {
+            cells <- c(cells, "  <th></th>")
+            ci <- ci + 1L
+          }
+        }
+        output <- c(output,
+          paste0("<tr>\n", paste(cells, collapse = "\n"),
+                 "\n</tr>"))
+      },
+      "console" = {
+        row_text <- character(ncols)
+        ci <- 1L
+        while (ci <= ncols) {
+          if (sr$covered[ci] && nchar(sr$cells[ci]) > 0) {
+            span <- sr$spans[ci]
+            total_width <- span * 10
+            label <- sr$cells[ci]
+            pad <- max(0, total_width - nchar(label))
+            left_pad <- floor(pad / 2)
+            row_text[ci] <- paste0(
+              strrep(" ", left_pad), label,
+              strrep(" ", pad - left_pad))
+            if (span > 1) {
+              for (k in seq_len(span - 1)) {
+                row_text[ci + k] <- ""
+              }
+            }
+            ci <- ci + span
+          } else {
+            row_text[ci] <- strrep(" ", 10)
+            ci <- ci + 1L
+          }
+        }
+        row_text <- row_text[nchar(row_text) > 0 |
+                               seq_along(row_text) == 1]
+        output <- c(output, paste(row_text, collapse = ""))
+      }
+    )
+    is_first_row <- FALSE
+  }
+
+  output
+}
+
+#' Render Blueprint to Console
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration (optional)
+#' @return Character vector for console output
+#' @export
+render_console <- function(blueprint, theme = NULL) {
+  render_pipeline(blueprint, theme, "console", default_theme = "console")
+}
+
+#' Render Blueprint to LaTeX
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration (optional)
+#' @return Character vector with LaTeX code
+#' @export
+render_latex <- function(blueprint, theme = NULL) {
+  if (!inherits(blueprint, "table1_blueprint")) {
+    stop("First argument must be a table1_blueprint", call. = FALSE)
+  }
+
+  # Use blueprint's theme if available, then parameter, then default to nejm
+  if (is.null(theme) && !is.null(blueprint$metadata$theme)) {
+    theme <- blueprint$metadata$theme
+  } else if (is.null(theme)) {
+    theme <- get_theme("nejm") # Default to journal theme for LaTeX
+  } else if (is.character(theme)) {
+    theme <- get_theme(theme)
+  }
+
+  # Check for footnotes (needed for threeparttable)
+  has_footnotes <- !is.null(blueprint$metadata$footnote_list) &&
+                   length(blueprint$metadata$footnote_list) > 0
+
+  output_lines <- character(0)
+
+  # Use pipeline for common rendering (headers + content)
+  pipeline_output <- render_pipeline(blueprint, theme, "latex", "nejm")
+
+  # Insert LaTeX table environment setup
+  col_spec <- generate_latex_column_spec(blueprint$ncols, theme)
+  table_env <- get_latex_table_environment(theme)
+  table_start <- paste0("\\begin{", table_env, "}{", col_spec, "}")
+  top_rule <- get_latex_rule(theme, "top")
+  theme_setup <- generate_latex_theme_setup(theme)
+
+  output_lines <- c(
+    theme_setup,
+    table_start,
+    top_rule,
+    pipeline_output
+  )
+
+  # Add bottom rule before table end
+  bottom_rule <- get_latex_rule(theme, "bottom")
+  output_lines <- c(output_lines, bottom_rule, paste0("\\end{", table_env, "}"))
+
+  # Handle threeparttable wrapping with footnotes
+  # Structure: \begin{threeparttable} \begin{tabular}...\end{tabular} \begin{tablenotes}...\end{tablenotes} \end{threeparttable}
+  if (has_footnotes) {
+    footnotes <- blueprint$metadata$footnote_list
+    markers <- blueprint$metadata$footnote_markers
+    n_with_markers <- length(markers)
+
+    # Build tablenotes
+    tablenotes <- c("\\begin{tablenotes}", "\\small")
+
+    # Numbered footnotes
+    if (n_with_markers > 0) {
+      for (i in 1:min(n_with_markers, length(footnotes))) {
+        tablenotes <- c(tablenotes, paste0("\\item[", i, "] ", escape_latex(footnotes[[i]])))
+      }
+    }
+
+    # General footnotes without numbers
+    if (length(footnotes) > n_with_markers) {
+      for (i in (n_with_markers + 1):length(footnotes)) {
+        tablenotes <- c(tablenotes, paste0("\\item[\\textbullet] ", escape_latex(footnotes[[i]])))
+      }
+    }
+
+    tablenotes <- c(tablenotes, "\\end{tablenotes}")
+
+    # Wrap everything: threeparttable -> tabular -> tablenotes
+    output_lines <- c("\\begin{threeparttable}", output_lines, tablenotes, "\\end{threeparttable}")
+  }
+
+  output_lines
+}
+
+# NOTE: LaTeX helper functions have been consolidated to avoid duplication.
+# See lines 759-865 for the unified theme-aware implementations.
+# The simple versions that were here have been removed to eliminate code duplication.
+
+#' Render table content based on output format
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @param format Output format ("console", "latex", "html")
+#' @return Character vector with formatted table content
+render_table_content <- function(blueprint, theme, format) {
+  if (format == "latex") {
+    render_table_content_latex(blueprint, theme)
+  } else if (format == "html") {
+    render_table_content_html(blueprint, theme)
+  } else {
+    render_table_content_console(blueprint, theme)
+  }
+}
+
+#' Render table content for LaTeX with theme-specific styling
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @return Character vector with LaTeX table rows
+render_table_content_latex <- function(blueprint, theme) {
+  content_lines <- character(0)
+  
+  # Use the blueprint's built-in cell access and evaluation
+  for (row_idx in 1:blueprint$nrows) {
+    row_data <- character(blueprint$ncols)
+    row_type <- "data" # Default row type
+    
+    # Extract data for each cell in the row using blueprint accessor
+    for (col_idx in 1:blueprint$ncols) {
+      cell_content <- ""
+      
+      # Use blueprint's [] accessor to get cell
+      cell <- blueprint[row_idx, col_idx]
+      if (!is.null(cell) && !is.null(cell$content)) {
+        cell_content <- as.character(cell$content)
+      } else {
+        # Fallback to row/column names for structure
+        if (col_idx == 1 && row_idx <= length(blueprint$row_names)) {
+          cell_content <- blueprint$row_names[row_idx]
+          # Detect if this is a factor level (starts with spaces or dashes)
+          if (grepl("^\\s+|^-", cell_content)) {
+            row_type <- "factor_level"
+          }
+        } else if (row_idx == 1 && col_idx <= length(blueprint$col_names)) {
+          cell_content <- blueprint$col_names[col_idx]
+          row_type <- "header"
+        }
+      }
+      
+      row_data[col_idx] <- cell_content
+    }
+    
+    # Apply theme-specific row formatting with striping
+    row_line <- format_latex_table_row(row_data, row_idx, theme, row_type)
+    if (length(row_line) > 0) {
+      content_lines <- c(content_lines, row_line)
+    }
+  }
+  
+  content_lines
+}
+
+#' Format a LaTeX table row with theme-specific styling
+#' @param row_data Character vector of cell values
+#' @param row_index Row number (for striping)
+#' @param theme Theme configuration  
+#' @param row_type Type of row ("data", "factor_level", "header")
+#' @return Character string with formatted LaTeX row
+format_latex_table_row <- function(row_data, row_index, theme, row_type = "data") {
+  if (length(row_data) == 0 || all(row_data == "")) {
+    return(character(0))
+  }
+  
+  # Apply factor level indentation
+  if (row_type == "factor_level") {
+    row_data[1] <- paste0("\\indent{", gsub("^\\s+|^-\\s*", "", row_data[1]), "}")
+  }
+  
+  # Escape LaTeX special characters
+  row_data <- sapply(row_data, function(x) {
+    x <- gsub("&", "\\\\&", x)
+    x <- gsub("%", "\\\\%", x)
+    x <- gsub("\\$", "\\\\\\$", x)
+    x <- gsub("_", "\\\\_", x)
+    x <- gsub("\\^", "\\\\textasciicircum{}", x)
+    return(x)
+  })
+  
+  # Create basic row
+  row_line <- paste0(paste(row_data, collapse = " & "), " \\\\")
+  
+  # Apply theme-specific row formatting
+  theme_name <- theme$theme_name %||% theme$name %||% "console"
+  
+  if (theme_name == "nejm" || theme_name == "New England Journal of Medicine") {
+    # NEJM theme: alternating row colors using rowcolor directly
+    if (row_index %% 2 == 0) {
+      row_line <- paste0("\\rowcolor{nejmstripe} ", row_line)
+    }
+  }
+  
+  return(row_line)
+}
+
+#' Placeholder for console content rendering
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @return Character vector with formatted content
+#' @keywords internal
+render_table_content_console <- function(blueprint, theme) {
+  # Simplified placeholder - would need full implementation
+  character(0)
+}
+
+#' Placeholder for HTML content rendering
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @return Character vector with formatted content
+#' @keywords internal
+render_table_content_html <- function(blueprint, theme) {
+  # Simplified placeholder - would need full implementation
+  character(0)
+}
+
+# Placeholder footnote function removed - see actual implementation below
+
+#' Render Blueprint to HTML
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration (optional)
+#' @return Character vector with HTML code
+#' @export
+render_html <- function(blueprint, theme = NULL) {
+  if (!inherits(blueprint, "table1_blueprint")) {
+    stop("First argument must be a table1_blueprint", call. = FALSE)
+  }
+
+  if (is.null(theme)) {
+    theme <- blueprint$metadata$theme %||% get_theme("console")
+  } else if (is.character(theme)) {
+    theme <- get_theme(theme)
+  }
+
+  css_class <- if (!is.null(theme$theme_name)) {
+    paste("table1", paste0("table1-", theme$theme_name))
+  } else if (!is.null(theme$css_class)) {
+    paste("table1", theme$css_class)
+  } else {
+    "table1"
+  }
+
+  output_lines <- c(paste0("<table class=\"", css_class, "\">"))
+
+  if (!is.null(blueprint$metadata$title)) {
+    output_lines <- c(output_lines,
+      paste0("<caption>", escape_html(blueprint$metadata$title),
+             "</caption>"))
+  }
+
+  header_lines <- render_table_headers(blueprint, theme, "html")
+  if (length(header_lines) > 0) {
+    output_lines <- c(output_lines, "<thead>", header_lines, "</thead>")
+  }
+
+  content_lines <- render_table_content(blueprint, theme, "html")
+  if (length(content_lines) > 0) {
+    output_lines <- c(output_lines, "<tbody>", content_lines, "</tbody>")
+  }
+
+  footnote_lines <- render_footnotes(blueprint, theme, "html")
+  if (length(footnote_lines) > 0) {
+    output_lines <- c(output_lines, "<tfoot>", footnote_lines, "</tfoot>")
+  }
+
+  output_lines <- c(output_lines, "</table>")
+
+  output_lines
+}
+
+#' Render Table Content (Optimized)
+#'
+#' Optimized rendering logic that iterates over existing cells rather than
+#' all possible grid positions. This is much more efficient for the sparse
+#' tables generated by this package.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @param format Output format (console, latex, html)
+#' @return Character vector with table content
+render_table_content <- function(blueprint, theme, format) {
+  # 1. Pre-allocate a matrix to hold evaluated cell content.
+  content_matrix <- matrix("", nrow = blueprint$nrows, ncol = blueprint$ncols)
+
+  # 2. Get all existing cell keys once.
+  cell_keys <- ls(blueprint$cells, all.names = TRUE)
+
+  # 3. Iterate over existing cells, evaluate them, and place content in the matrix.
+  #    This avoids iterating over millions of empty cells in large, sparse tables.
+  for (key in cell_keys) {
+    pos <- parse_cell_key(key)
+    if (is.na(pos$row) || is.na(pos$col)) next # Skip invalid keys
+
+    cell <- blueprint$cells[[key]]
+    content <- evaluate_cell(cell, blueprint$metadata$data, blueprint = blueprint)
+    content <- format_cell_content(content, theme, cell$type)
+    content <- format_content_for_output(content, format, pos$row, pos$col, theme)
+
+    content_matrix[pos$row, pos$col] <- content
+  }
+
+  # 4. Efficiently format the pre-populated matrix into output lines.
+  #    Pre-allocating the list is much faster than growing a vector with c().
+  output_lines <- vector("list", blueprint$nrows)
+  for (i in 1:blueprint$nrows) {
+    output_lines[[i]] <- combine_row_content(content_matrix[i, ], format, theme, i)
+  }
+
+  # Add separators if needed (after initial lines are generated)
+  if (format == "console" && blueprint$nrows > 0 && !is.null(theme$header_separator)) {
+    header_width <- nchar(output_lines[[1]])
+    sep_line <- strrep(theme$header_separator, header_width)
+    final_lines <- c(output_lines[[1]], sep_line, unlist(output_lines[-1], use.names = FALSE))
+    return(inject_summary_rows(final_lines, content_matrix, blueprint, format, theme))
+  }
+
+  base_lines <- unlist(output_lines, use.names = FALSE)
+  inject_summary_rows(base_lines, content_matrix, blueprint, format, theme)
+}
+
+#' Inject Summary Rows Into Rendered Output
+#'
+#' After the base table content is rendered, this function inserts
+#' per-group summary rows at group boundaries and grand summary rows
+#' at the table end.
+#'
+#' @param lines Character vector of rendered table rows
+#' @param content_matrix Character matrix of evaluated cell content
+#' @param blueprint Table1Blueprint object
+#' @param format Output format
+#' @param theme Theme configuration
+#' @return Character vector with summary rows injected
+#' @keywords internal
+inject_summary_rows <- function(lines, content_matrix, blueprint,
+                                format, theme) {
+  store <- blueprint$metadata$summary_store
+  if (is.null(store) || length(ls(store, all.names = TRUE)) == 0) {
+    return(lines)
+  }
+
+  all_defs <- as.list(store)
+  group_defs <- Filter(function(d) d$type == "group", all_defs)
+  grand_defs <- Filter(function(d) d$type == "grand", all_defs)
+
+  ncols <- ncol(content_matrix)
+
+  if (length(group_defs) > 0) {
+    groups <- detect_row_groups(content_matrix, blueprint)
+    if (length(groups) > 0) {
+      for (sdef in group_defs) {
+        insertion_offset <- 0L
+        for (g in groups) {
+          if (!is.null(sdef$groups) &&
+              !(g$name %in% sdef$groups)) next
+          row_range <- g$start_row:g$end_row
+          summary_vals <- evaluate_summary_for_group(
+            blueprint, row_range, sdef, ncols
+          )
+          summary_lines <- format_summary_lines(
+            summary_vals, format, theme, type = "group"
+          )
+          if (sdef$side == "bottom") {
+            insert_pos <- g$end_row + insertion_offset
+            lines <- append(lines, summary_lines, after = insert_pos)
+            insertion_offset <- insertion_offset + length(summary_lines)
+          } else {
+            insert_pos <- g$start_row - 1L + insertion_offset
+            lines <- append(lines, summary_lines, after = insert_pos)
+            insertion_offset <- insertion_offset + length(summary_lines)
+          }
+        }
+      }
+    }
+  }
+
+  if (length(grand_defs) > 0) {
+    all_rows <- seq_len(nrow(content_matrix))
+    for (gdef in grand_defs) {
+      summary_vals <- evaluate_summary_for_group(
+        blueprint, all_rows, gdef, ncols
+      )
+      summary_lines <- format_summary_lines(
+        summary_vals, format, theme, type = "grand"
+      )
+      if (gdef$side == "bottom") {
+        lines <- c(lines, summary_lines)
+      } else {
+        lines <- c(summary_lines, lines)
+      }
+    }
+  }
+
+  lines
+}
+
+#' Format Summary Row Values Into Output Lines
+#'
+#' @param summary_vals List of named character vectors from
+#'   evaluate_summary_for_group
+#' @param format Output format
+#' @param theme Theme configuration
+#' @param type "group" or "grand"
+#' @return Character vector of formatted summary lines
+#' @keywords internal
+format_summary_lines <- function(summary_vals, format, theme,
+                                 type = "group") {
+  lines <- character(0)
+
+  for (fn_name in names(summary_vals)) {
+    row_vals <- summary_vals[[fn_name]]
+
+    switch(format,
+      "console" = {
+        max_widths <- pmax(nchar(row_vals), 8)
+        formatted <- mapply(function(content, width) {
+          format(content, width = width, justify = "left")
+        }, row_vals, max_widths)
+        prefix <- if (type == "grand") ">>> " else "  > "
+        line <- paste0(prefix, paste(formatted, collapse = "  "))
+        lines <- c(lines, line)
+      },
+      "latex" = {
+        escaped <- vapply(row_vals, escape_latex, character(1))
+        if (type == "grand") {
+          escaped[1] <- paste0("\\textbf{", escaped[1], "}")
+        } else {
+          escaped[1] <- paste0("\\textit{", escaped[1], "}")
+        }
+        row_line <- paste0(paste(escaped, collapse = " & "), " \\\\")
+        if (type == "grand") {
+          lines <- c(lines, "\\midrule", row_line)
+        } else {
+          lines <- c(lines, row_line)
+        }
+      },
+      "html" = {
+        css_class <- if (type == "grand") {
+          "table1-grand-summary"
+        } else {
+          "table1-group-summary"
+        }
+        cells <- character(length(row_vals))
+        for (i in seq_along(row_vals)) {
+          cell_style <- ""
+          if (i == 1 && type == "grand") {
+            cell_style <- " style=\"font-weight:bold;\""
+          } else if (i == 1 && type == "group") {
+            cell_style <- " style=\"font-style:italic;\""
+          }
+          cells[i] <- paste0("  <td", cell_style, ">",
+                             escape_html(row_vals[i]), "</td>")
+        }
+        line <- paste0("<tr class=\"", css_class, "\">\n",
+                       paste(cells, collapse = "\n"), "\n</tr>")
+        lines <- c(lines, line)
+      }
+    )
+  }
+
+  lines
+}
+
+#' Format Content for Output Format
+#' @param content Cell content
+#' @param format Output format
+#' @param row Row number
+#' @param col Column number
+#' @param theme Theme configuration
+#' @return Formatted content
+format_content_for_output <- function(content, format, row, col, theme) {
+  switch(format,
+    "console" = content, # Already formatted by theme
+    "latex" = escape_latex(content),
+    "html" = escape_html(content),
+    content
+  )
+}
+
+#' Combine Row Content
+#' @param row_content Character vector of cell contents
+#' @param format Output format
+#' @param theme Theme configuration
+#' @param row_index Row index for context-specific formatting
+#' @return Single character string for the row
+#' @keywords internal
+combine_row_content <- function(row_content, format, theme, row_index = 1) {
+  switch(format,
+    "console" = {
+      # Pad columns to align properly
+      max_widths <- pmax(nchar(row_content), 8) # Minimum 8 chars per column
+      formatted <- mapply(function(content, width) {
+        format(content, width = width, justify = "left")
+      }, row_content, max_widths)
+      paste(formatted, collapse = "  ")
+    },
+    "latex" = {
+      # Apply factor level indentation to first column if it has leading spaces
+      if (length(row_content) > 0 && grepl("^\\s+", row_content[1])) {
+        # This is a factor level - apply indentation
+        clean_content <- gsub("^\\s+", "", row_content[1])
+        row_content[1] <- paste0("\\hspace{1em}", clean_content)
+      }
+      
+      # Create basic row
+      row_line <- paste0(paste(row_content, collapse = " & "), " \\\\")
+      
+      # Apply theme-specific row formatting (striping)
+      theme_name <- theme$theme_name %||% theme$name %||% "console"
+      
+      if (theme_name == "nejm" || theme_name == "New England Journal of Medicine") {
+        # NEJM theme: alternating row colors
+        if (row_index %% 2 == 0) {
+          row_line <- paste0("\\rowcolor{nejmstripe} ", row_line)
+        }
+      }
+      
+      row_line
+    },
+    "html" = {
+      # Add CSS classes for indentation using theme settings
+      variable_indent <- theme$variable_indent %||% 2
+      level_indent <- theme$level_indent %||% 4
+      
+      cells <- character(length(row_content))
+      for (i in seq_along(row_content)) {
+        content <- row_content[i]
+        css_class <- ""
+        
+        # For first column, add CSS class based on leading spaces and theme settings
+        if (i == 1) {
+          leading_spaces <- nchar(content) - nchar(sub("^\\s+", "", content))
+          content_text <- trimws(content)
+
+          if (leading_spaces > 0 && nchar(content_text) > 0) {
+            css_class <- ' class="table1-indent-level"'
+          } else if (leading_spaces == 0 && nchar(content_text) > 0) {
+            css_class <- ' class="table1-indent-variable"'
+          }
+
+          content <- content_text
+        }
+        
+        cells[i] <- paste0("  <td", css_class, ">", content, "</td>")
+      }
+      paste0("<tr>\n", paste(cells, collapse = "\n"), "\n</tr>")
+    },
+    paste(row_content, collapse = "\t") # Default: tab-separated
+  )
+}
+
+#' Render Footnotes
+#' @param blueprint Table1Blueprint object
+#' @param theme Theme configuration
+#' @param format Output format
+#' @return Character vector with footnotes
+render_footnotes <- function(blueprint, theme, format) {
+  if (is.null(blueprint$metadata$footnote_list) || length(blueprint$metadata$footnote_list) == 0) {
+    return(character(0))
+  }
+
+  footnotes <- blueprint$metadata$footnote_list
+  markers <- blueprint$metadata$footnote_markers
+  fn_style <- blueprint$metadata$options$footnote_style %||% "numbers"
+  output_lines <- character(0)
+
+  n_with_markers <- length(markers)
+
+  switch(format,
+    "console" = {
+      if (n_with_markers > 0) {
+        for (i in 1:min(n_with_markers, length(footnotes))) {
+          sym <- format_footnote_marker(i, "console", style = fn_style)
+          output_lines <- c(output_lines, paste0(sym, " ", footnotes[[i]]))
+        }
+      }
+      if (length(footnotes) > n_with_markers) {
+        for (i in (n_with_markers + 1):length(footnotes)) {
+          output_lines <- c(output_lines, paste0("\u2022 ", footnotes[[i]]))
+        }
+      }
+    },
+    "latex" = {
+      # LaTeX footnotes handled by render_latex() threeparttable
+    },
+    "html" = {
+      ncols <- blueprint$ncols
+      fn_parts <- character(0)
+      if (n_with_markers > 0) {
+        for (i in 1:min(n_with_markers, length(footnotes))) {
+          sym <- format_footnote_marker(i, "html", style = fn_style)
+          fn_parts <- c(fn_parts,
+            paste0(sym, " ", footnotes[[i]]))
+        }
+      }
+      if (length(footnotes) > n_with_markers) {
+        for (i in (n_with_markers + 1):length(footnotes)) {
+          fn_parts <- c(fn_parts,
+            paste0("\u2022 ", footnotes[[i]]))
+        }
+      }
+      fn_text <- paste(fn_parts, collapse = "<br>")
+      output_lines <- c(output_lines,
+        paste0("<tr><td colspan=\"", ncols,
+               "\" class=\"footnotes\">",
+               fn_text, "</td></tr>"))
+    }
+  )
+
+  output_lines
+}
+
+#' Escape LaTeX Special Characters
+#' @param text Character string
+#' @return LaTeX-escaped string
+escape_latex <- function(text) {
+  if (!is.character(text)) {
+    # Handle special cases
+    if (is.function(text)) {
+      return("[Function]")
+    }
+    if (is.null(text)) {
+      return("")
+    }
+    # Try to convert to character safely
+    return(tryCatch(as.character(text), error = function(e) "[Error]"))
+  }
+
+  # Standard LaTeX escaping (except $, which we'll use for math)
+  text <- gsub("\\", "\\textbackslash{}", text, fixed = TRUE)
+  text <- gsub("{", "\\{", text, fixed = TRUE)
+  text <- gsub("}", "\\}", text, fixed = TRUE)
+  
+  # Handle Unicode characters with math mode (after other escaping, before $ escaping)
+  text <- gsub("\u00b1", "$\\pm$", text, fixed = TRUE)
+  text <- gsub("\u00d7", "$\\times$", text, fixed = TRUE)
+  text <- gsub("\u2022", "$\\bullet$", text, fixed = TRUE)
+  text <- gsub("\u22c5", "$\\cdot$", text, fixed = TRUE)
+  
+  # Now escape remaining $ symbols (but not the ones we just added for math)
+  # This is tricky - let's use a placeholder approach
+  text <- gsub("$\\pm$", "PMPLACEHOLDER", text, fixed = TRUE)
+  text <- gsub("$\\times$", "TIMESPLACEHOLDER", text, fixed = TRUE)
+  text <- gsub("$\\bullet$", "BULLETPLACEHOLDER", text, fixed = TRUE)
+  text <- gsub("$\\cdot$", "CDOTPLACEHOLDER", text, fixed = TRUE)
+  
+  text <- gsub("$", "\\$", text, fixed = TRUE)
+  
+  # Restore math mode
+  text <- gsub("PMPLACEHOLDER", "$\\pm$", text, fixed = TRUE)
+  text <- gsub("TIMESPLACEHOLDER", "$\\times$", text, fixed = TRUE)
+  text <- gsub("BULLETPLACEHOLDER", "$\\bullet$", text, fixed = TRUE)
+  text <- gsub("CDOTPLACEHOLDER", "$\\cdot$", text, fixed = TRUE)
+  text <- gsub("&", "\\&", text, fixed = TRUE)
+  text <- gsub("%", "\\%", text, fixed = TRUE)
+  text <- gsub("#", "\\#", text, fixed = TRUE)
+  text <- gsub("^", "\\textasciicircum{}", text, fixed = TRUE)
+  text <- gsub("_", "\\_", text, fixed = TRUE)
+  text <- gsub("~", "\\textasciitilde{}", text, fixed = TRUE)
+
+  text
+}
+
+#' Escape HTML Special Characters
+#' @param text Character string
+#' @return HTML-escaped string
+escape_html <- function(text) {
+  if (!is.character(text)) {
+    # Handle special cases
+    if (is.function(text)) {
+      return("[Function]")
+    }
+    if (is.null(text)) {
+      return("")
+    }
+    # Try to convert to character safely
+    return(tryCatch(as.character(text), error = function(e) "[Error]"))
+  }
+
+  # First, preserve allowed HTML tags by temporarily replacing them with placeholders
+  text <- gsub("<sup>", "SUPSTART_PLACEHOLDER", text, fixed = TRUE)
+  text <- gsub("</sup>", "SUPEND_PLACEHOLDER", text, fixed = TRUE)
+
+  # Now escape general HTML characters
+  text <- gsub("&", "&amp;", text, fixed = TRUE)
+  text <- gsub("<", "&lt;", text, fixed = TRUE)
+  text <- gsub(">", "&gt;", text, fixed = TRUE)
+  text <- gsub("\"", "&quot;", text, fixed = TRUE)
+  text <- gsub("'", "&#39;", text, fixed = TRUE)
+
+  # Restore the allowed HTML tags
+  text <- gsub("SUPSTART_PLACEHOLDER", "<sup>", text, fixed = TRUE)
+  text <- gsub("SUPEND_PLACEHOLDER", "</sup>", text, fixed = TRUE)
+
+  text
+}
+
+#' Display Blueprint as Formatted Table
+#'
+#' Convenience function that evaluates the blueprint and displays it as
+#' a nicely formatted table. This provides the "Table 1" output that
+#' users expect.
+#'
+#' @param blueprint A table1_blueprint object
+#' @param data Data frame containing the source data
+#' @param format Output format ("console", "latex", "html")
+#' @param ... Additional arguments passed to print methods
+#'
+#' @return Invisibly returns the rendered output
+#'
+#' @examples
+#' \dontrun{
+#' data(mtcars)
+#' mtcars$transmission <- factor(ifelse(mtcars$am == 1, "Manual", "Auto"))
+#' blueprint <- table1(transmission ~ mpg + hp, data = mtcars)
+#' display_table(blueprint, mtcars)
+#' }
+#'
+#' @export
+display_table <- function(blueprint, data, format = "console", ...) {
+  if (!inherits(blueprint, "table1_blueprint")) {
+    stop("First argument must be a table1_blueprint object", call. = FALSE)
+  }
+
+  if (!is.data.frame(data)) {
+    stop("Data must be a data frame", call. = FALSE)
+  }
+
+  # Store data in metadata if not already there
+  if (is.null(blueprint$metadata$data)) {
+    blueprint$metadata$data <- data
+  }
+
+  # Render based on format
+  output <- switch(format,
+    "console" = render_console(blueprint),
+    "latex" = render_latex(blueprint),
+    "html" = render_html(blueprint),
+    stop("Unknown format: ", format, call. = FALSE)
+  )
+
+  # Display output
+  cat(paste(output, collapse = "\n"))
+  cat("\n")
+
+  invisible(output)
+}
+
+#' Knitr Print Method for table1_blueprint
+#'
+#' Automatically renders a table1_blueprint object in the
+#' appropriate format (HTML, LaTeX, or console) when used as
+#' the last expression in an R Markdown or Quarto code chunk.
+#'
+#' @param x A \code{table1_blueprint} object.
+#' @param ... Additional arguments (ignored).
+#' @return A \code{knitr::asis_output} object.
+#' @export
+knit_print.table1_blueprint <- function(x, ...) {
+  if (knitr::is_html_output()) {
+    out <- render_html(x)
+  } else if (knitr::is_latex_output()) {
+    out <- render_latex(x)
+  } else {
+    out <- render_console(x)
+  }
+  knitr::asis_output(paste(out, collapse = "\n"))
+}
+
+#' Generate LaTeX Theme Setup
+#'
+#' @param theme Theme configuration
+#' @return Character vector with LaTeX setup commands
+generate_latex_theme_setup <- function(theme) {
+  # For R Markdown, we should not include preamble commands in the body
+  # These should be handled through the YAML header instead
+  setup_lines <- character(0)
+  
+  # Get theme name from either theme_name or name field
+  theme_name <- theme$theme_name %||% theme$name %||% "console"
+  
+  if (theme_name == "nejm" || theme_name == "New England Journal of Medicine") {
+    setup_lines <- c(setup_lines,
+      "% NEJM theme colors and formatting",
+      "\\definecolor{nejmstripe}{HTML}{fefcf0}",
+      "\\definecolor{nejmtext}{HTML}{333333}"
+    )
+  } else if (theme_name == "lancet" || theme_name == "The Lancet") {
+    setup_lines <- c(setup_lines,
+      "% Lancet theme formatting"
+    )
+  } else if (theme_name == "jama" || theme_name == "JAMA") {
+    setup_lines <- c(setup_lines,
+      "% JAMA theme formatting"
+    )
+  }
+
+  return(setup_lines)
+}
+
+#' Generate LaTeX Column Specification
+#'
+#' @param ncols Number of columns
+#' @param theme Theme configuration
+#' @return Character string with column specification
+generate_latex_column_spec <- function(ncols, theme) {
+  # Different themes might prefer different column alignments
+  switch(theme$theme_name,
+    "console" = paste0("l", strrep("r", ncols - 1)), # Console: left + right-aligned
+    "nejm" = paste0("l", strrep("c", ncols - 1)),    # NEJM: left + centered
+    "lancet" = paste0("l", strrep("c", ncols - 1)),  # Lancet: left + centered
+    "jama" = paste0("l", strrep("c", ncols - 1)),    # JAMA: left + centered  
+    "bmj" = paste0("l", strrep("c", ncols - 1)),     # BMJ: left + centered
+    paste0("l", strrep("c", ncols - 1)) # Default: left + centered
+  )
+}
+
+#' Get LaTeX Table Environment
+#'
+#' @param theme Theme configuration
+#' @return Character string with table environment name
+get_latex_table_environment <- function(theme) {
+  # Different themes might use different table environments
+  switch(theme$theme_name,
+    "console" = "tabular",
+    "nejm" = "tabular",
+    "lancet" = "tabular", 
+    "jama" = "tabular",
+    "bmj" = "tabular",
+    "tabular" # Default
+  )
+}
+
+#' Get LaTeX Rule Command
+#'
+#' @param theme Theme configuration
+#' @param position Rule position ("top", "middle", "bottom")
+#' @return Character string with LaTeX rule command
+get_latex_rule <- function(theme, position = "middle") {
+  # Different themes use different rule styles
+  switch(theme$theme_name,
+    "console" = {
+      switch(position,
+        "top" = "\\hline",
+        "middle" = "\\hline", 
+        "bottom" = "\\hline",
+        "\\hline"
+      )
+    },
+    "nejm" = {
+      switch(position,
+        "top" = "\\toprule",
+        "middle" = "\\midrule",
+        "bottom" = "\\bottomrule",
+        "\\midrule"
+      )
+    },
+    "lancet" = {
+      switch(position,
+        "top" = "\\toprule",
+        "middle" = "\\midrule", 
+        "bottom" = "\\bottomrule",
+        "\\midrule"
+      )
+    },
+    "jama" = {
+      switch(position,
+        "top" = "\\toprule",
+        "middle" = "\\midrule",
+        "bottom" = "\\bottomrule", 
+        "\\midrule"
+      )
+    },
+    "bmj" = {
+      switch(position,
+        "top" = "\\hline\\hline", # Double line for BMJ
+        "middle" = "\\hline",
+        "bottom" = "\\hline\\hline",
+        "\\hline"
+      )
+    },
+    # Default
+    switch(position,
+      "top" = "\\toprule",
+      "middle" = "\\midrule", 
+      "bottom" = "\\bottomrule",
+      "\\midrule"
+    )
+  )
+}
+
+#' Apply LaTeX Header Formatting
+#'
+#' @param headers Character vector of header names
+#' @param theme Theme configuration
+#' @return Character vector with formatted headers
+apply_latex_header_formatting <- function(headers, theme) {
+  if (theme$theme_name == "console") return(headers)
+
+  bold_wrap <- function(h) {
+    has_break <- grepl("\\\\", h, fixed = TRUE)
+    ifelse(has_break,
+      paste0("\\makecell[b]{\\textbf{",
+             gsub("\\\\", "} \\\\\\\\ \\textbf{", h, fixed = TRUE),
+             "}}"),
+      paste0("\\textbf{", h, "}"))
+  }
+
+  switch(theme$theme_name,
+    "nejm" = , "lancet" = , "jama" = , "bmj" = bold_wrap(headers),
+    headers
+  )
+}
+
+#' Convert Blueprint to Data Frame
+#'
+#' Converts a table1_blueprint to a data frame for further processing
+#'
+#' @param x A table1_blueprint object
+#' @param row.names Row names (ignored)
+#' @param optional Logical (ignored)
+#' @param ... Additional arguments (ignored)
+#'
+#' @return Data frame with evaluated cell contents
+#' @export
+as.data.frame.table1_blueprint <- function(x, row.names = NULL, optional = FALSE, ...) {
+  # Get data from blueprint metadata
+  data <- x$metadata$data
+  if (is.null(data)) {
+    stop("Data not available in blueprint metadata", call. = FALSE)
+  }
+
+  # Create result data frame
+  result_df <- data.frame(matrix("", nrow = x$nrows, ncol = x$ncols),
+    stringsAsFactors = FALSE
+  )
+
+  # Set column names
+  if (length(x$col_names) > 0) {
+    names(result_df) <- x$col_names
+  } else {
+    names(result_df) <- paste0("V", 1:x$ncols)
+  }
+
+  # Evaluate each cell
+  for (i in 1:x$nrows) {
+    for (j in 1:x$ncols) {
+      cell <- x[i, j]
+      if (!is.null(cell)) {
+        result_df[i, j] <- as.character(evaluate_cell(cell, data, blueprint = x))
+      }
+    }
+  }
+
+  # Set row names if available
+  if (length(x$row_names) == x$nrows) {
+    rownames(result_df) <- x$row_names
+  }
+
+  return(result_df)
+}
+
+#' Save a Table1 Blueprint as an Image
+#'
+#' Renders a \code{table1_blueprint} to PDF, PNG, or SVG via the
+#' \code{zztab2fig::zzt2f()} Typst pipeline. Intended for workflows
+#' that need a pixel image of the table, including terminal-based
+#' display via graphics protocols (Kitty, iTerm2).
+#'
+#' @param blueprint A \code{table1_blueprint}.
+#' @param filename Output file base name (no extension). Defaults to
+#'   \code{"table1"}.
+#' @param sub_dir Output directory. Defaults to \code{tempdir()}.
+#' @param format One of \code{"png"}, \code{"pdf"}, or \code{"svg"}.
+#' @param theme Optional theme name passed to \code{zzt2f()}.
+#' @param dpi PNG resolution.
+#' @param ... Additional arguments forwarded to \code{zzt2f()}.
+#' @return Invisibly, the path to the rendered file.
+#' @export
+save_as_image <- function(blueprint,
+                          filename = "table1",
+                          sub_dir = tempdir(),
+                          format = c("png", "pdf", "svg"),
+                          theme = NULL,
+                          dpi = 300L,
+                          ...) {
+  if (!inherits(blueprint, "table1_blueprint")) {
+    stop("'blueprint' must be a table1_blueprint object", call. = FALSE)
+  }
+  if (!requireNamespace("zztab2fig", quietly = TRUE)) {
+    stop("Package 'zztab2fig' is required. Install from ",
+      "https://github.com/rgt47/zztab2fig", call. = FALSE)
+  }
+  format <- match.arg(format)
+  df <- as.data.frame(blueprint)
+  rownames(df) <- NULL
+  zztab2fig::zzt2f(df, filename = filename, sub_dir = sub_dir,
+    format = format, theme = theme, dpi = dpi, ...)
+}

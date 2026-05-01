@@ -1,0 +1,46 @@
+url: https://rgt47.github.io/zztable1/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: '#0054AD'
+
+home:
+  title: zztable1
+  description: >
+    Publication-ready summary tables for biomedical research, with a
+    lazy-evaluation blueprint architecture, medical-journal themes,
+    and console / HTML / LaTeX output.
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    intro:
+      text: Get started
+      href: articles/zztable1_guide.html
+    articles:
+      text: Articles
+      menu:
+        - text: Package guide
+          href: articles/zztable1_guide.html
+        - text: Theming system
+          href: articles/theming_system.html
+        - text: Stratified examples
+          href: articles/stratified_examples.html
+        - text: Dataset examples
+          href: articles/dataset_examples.html
+        - text: Spanners and summaries
+          href: articles/spanners_and_summaries.html
+        - text: Customizing statistics
+          href: articles/customizing_statistics.html
+        - text: gt feature comparison
+          href: articles/gt_features.html
+
+authors:
+  Ronald (Ryy) G. Thomas:
+    href: https://profiles.ucsd.edu/ronald.thomas
+
+development:
+  mode: auto
