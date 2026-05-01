@@ -38,3 +38,4 @@
 ^debug_.*\.R$
 ^doc$
 ^Meta$
+^CODE_OF_CONDUCT\.md$
