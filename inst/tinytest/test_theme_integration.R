@@ -28,7 +28,7 @@ test_data <- mtcars[1:20, ]  # Small subset for faster tests
 
 themes <- list_available_themes()
 
-expect_is(themes, "character")
+expect_inherits(themes, "character")
 expect_length(themes, 6)  # console, nejm, lancet, jama, bmj, simple
 expect_true("console" %in% themes)
 expect_true("nejm" %in% themes)
@@ -38,7 +38,7 @@ themes <- list_available_themes()
 
 for (theme_name in themes) {
   theme <- get_theme(theme_name)
-  expect_is(theme, "table1_theme")
+  expect_inherits(theme, "table1_theme")
   expect_equal(theme$theme_name, theme_name)
 }
 
@@ -49,7 +49,7 @@ for (theme_name in themes) {
 
 theme_nejm <- get_theme("nejm")
 
-expect_is(theme_nejm, "table1_theme")
+expect_inherits(theme_nejm, "table1_theme")
 expect_equal(theme_nejm$name, "New England Journal of Medicine")
 expect_equal(theme_nejm$decimal_places, 1)
 
@@ -57,13 +57,13 @@ expect_equal(theme_nejm$decimal_places, 1)
 theme_unknown <- get_theme("unknown_theme_xyz")
 
 # Should return console theme as fallback
-expect_is(theme_unknown, "table1_theme")
+expect_inherits(theme_unknown, "table1_theme")
 expect_equal(theme_unknown$theme_name, "console")
 
 
 theme_default <- get_theme(NULL)
 
-expect_is(theme_default, "table1_theme")
+expect_inherits(theme_default, "table1_theme")
 expect_equal(theme_default$theme_name, "console")
 
 
@@ -73,8 +73,8 @@ expect_equal(theme_default$theme_name, "console")
 
 bp <- table1(transmission ~ mpg, data = test_data, theme = "nejm")
 
-expect_is(bp, "table1_blueprint")
-expect_is(bp$metadata$theme, "table1_theme")
+expect_inherits(bp, "table1_blueprint")
+expect_inherits(bp$metadata$theme, "table1_theme")
 expect_equal(bp$metadata$theme$name, "New England Journal of Medicine")
 
 
@@ -84,7 +84,7 @@ bp <- table1(transmission ~ mpg, data = test_data)
 # Apply theme after creation
 bp_themed <- apply_theme(bp, "lancet")
 
-expect_is(bp_themed$metadata$theme, "table1_theme")
+expect_inherits(bp_themed$metadata$theme, "table1_theme")
 expect_equal(bp_themed$metadata$theme$name, "The Lancet")
 
 
@@ -119,7 +119,7 @@ for (theme_name in themes) {
   theme <- get_theme(theme_name)
   css_props <- theme$css_properties
 
-  expect_is(css_props, "list")
+  expect_inherits(css_props, "list")
   expect_true(all(sapply(css_props, is.character)),
              info = paste("Theme", theme_name, "has non-character CSS properties"))
 }
@@ -152,7 +152,7 @@ for (theme_name in themes) {
 
 custom <- create_custom_theme("Custom1", base_theme = "nejm")
 
-expect_is(custom, "table1_theme")
+expect_inherits(custom, "table1_theme")
 expect_equal(custom$name, "Custom1")
 
 
@@ -186,7 +186,7 @@ for (theme_name in themes) {
   bp <- table1(transmission ~ mpg, data = test_data, theme = theme_name)
   output <- render_console(bp)
 
-  expect_is(output, "character")
+  expect_inherits(output, "character")
   expect_length(output, nrow(bp))
 }
 
@@ -197,7 +197,7 @@ for (theme_name in themes) {
   bp <- table1(transmission ~ mpg, data = test_data, theme = theme_name)
   output <- render_latex(bp)
 
-  expect_is(output, "character")
+  expect_inherits(output, "character")
   # LaTeX output should be non-empty and contain content
   expect_true(nchar(paste(output, collapse = " ")) > 0)
 }
@@ -209,7 +209,7 @@ for (theme_name in themes) {
   bp <- table1(transmission ~ mpg, data = test_data, theme = theme_name)
   output <- render_html(bp)
 
-  expect_is(output, "character")
+  expect_inherits(output, "character")
   expect_true(any(grepl("<table", output)))
   expect_true(any(grepl("</table>", output)))
 }
@@ -224,10 +224,10 @@ bp_pval <- table1(transmission ~ mpg + hp,
                  theme = "nejm",
                  pvalue = TRUE)
 
-expect_is(bp_pval$metadata$theme, "table1_theme")
+expect_inherits(bp_pval$metadata$theme, "table1_theme")
 output <- render_console(bp_pval)
 # pvalue option should create output
-expect_is(output, "character")
+expect_inherits(output, "character")
 expect_true(length(output) > 0)
 
 
@@ -236,10 +236,10 @@ bp_totals <- table1(transmission ~ mpg + hp,
                    theme = "lancet",
                    totals = TRUE)
 
-expect_is(bp_totals$metadata$theme, "table1_theme")
+expect_inherits(bp_totals$metadata$theme, "table1_theme")
 output <- render_console(bp_totals)
 # totals option should create output
-expect_is(output, "character")
+expect_inherits(output, "character")
 expect_true(length(output) > 0)
 
 
@@ -251,9 +251,9 @@ bp_missing <- table1(transmission ~ mpg,
                     theme = "jama",
                     missing = TRUE)
 
-expect_is(bp_missing$metadata$theme, "table1_theme")
+expect_inherits(bp_missing$metadata$theme, "table1_theme")
 output <- render_console(bp_missing)
-expect_is(output, "character")
+expect_inherits(output, "character")
 
 
 # ============================================================================
@@ -265,7 +265,7 @@ bp_strata <- table1(transmission ~ mpg + hp,
                    strata = "engine",
                    theme = "nejm")
 
-expect_is(bp_strata$metadata$theme, "table1_theme")
+expect_inherits(bp_strata$metadata$theme, "table1_theme")
 output <- render_console(bp_strata)
 expect_true(any(grepl("Engine", output)))
 
@@ -282,7 +282,7 @@ for (theme_name in themes) {
   latex_out <- render_latex(bp)
   html_out <- render_html(bp)
 
-  expect_is(console_out, "character")
+  expect_inherits(console_out, "character")
   expect_true(length(console_out) > 0)
   expect_true(any(grepl("Engine", console_out)))
 }
@@ -307,7 +307,7 @@ expect_equal(bp_bmj$metadata$theme$decimal_places, 2)
 
 css <- generate_theme_css()
 
-expect_is(css, "character")
+expect_inherits(css, "character")
 expect_true(nchar(css) > 0)
 expect_true(any(grepl("\\.table1", css)))
 expect_true(any(grepl("font-family:", css)))
@@ -331,7 +331,7 @@ for (theme_name in themes) {
 
 custom <- create_custom_theme("NoCSS")
 
-expect_is(custom$css_properties, "list")
+expect_inherits(custom$css_properties, "list")
 expect_true("font_family" %in% names(custom$css_properties))
 
 

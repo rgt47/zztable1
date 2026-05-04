@@ -10,6 +10,9 @@ if (nzchar(Sys.getenv("CI"))) {
   exit_file("Skipping on CI")
 }
 
+# Bring non-exported helpers into scope for tinytest::test_package().
+analyze_variables <- getFromNamespace("analyze_variables", "zztable1")
+
 # Test data generation
 create_test_data <- function(n_rows = 1000, n_vars = 10) {
   set.seed(123)
@@ -49,11 +52,11 @@ for (size_name in names(sizes)) {
   memory_size <- as.numeric(object.size(bp))
   
   # Should be fast
-  expect_lt(elapsed, 0.1)
+  expect_true(elapsed < 0.1)
   
   # Should use reasonable memory (sparse storage benefit)
   max_memory <- dims[1] * dims[2] * 100  # 100 bytes per potential cell
-  expect_lt(memory_size, max_memory)
+  expect_true(memory_size < max_memory)
 }
 
 
@@ -81,7 +84,7 @@ dense_size <- as.numeric(object.size(dense_simulation))
 
 # Sparse should be more efficient for low utilization
 efficiency_ratio <- sparse_size / dense_size
-expect_lt(efficiency_ratio, 0.8)
+expect_true(efficiency_ratio < 0.8)
 
 
 bp <- Table1Blueprint(1000, 50)
@@ -108,7 +111,7 @@ elapsed <- as.numeric(end_time - start_time, units = "secs")
 average_access_time <- elapsed / n_accesses
 
 # Should be very fast (sub-microsecond average)
-expect_lt(average_access_time, 1e-5)
+expect_true(average_access_time < 1e-5)
 
 
 data_sizes <- c(100, 500, 1000, 2000)
@@ -159,7 +162,7 @@ for (theme_name in themes_to_test) {
   end_time <- Sys.time()
   
   elapsed <- as.numeric(end_time - start_time, units = "secs")
-  expect_lt(elapsed, 0.1)
+  expect_true(elapsed < 0.1)
 }
 
 
@@ -188,7 +191,7 @@ for (format_name in names(formats)) {
   
   elapsed <- as.numeric(end_time - start_time, units = "secs")
   
-  expect_lt(elapsed, 1.0)
+  expect_true(elapsed < 1.0)
   expect_true(length(output) > 0)
 }
 
@@ -224,7 +227,7 @@ loop_time <- as.numeric(Sys.time() - start_time, units = "secs")
 
 # Vectorized should be faster (or at least not significantly slower)
 speedup_ratio <- loop_time / vectorized_time
-expect_gte(speedup_ratio, 0.5)
+expect_true(speedup_ratio >= 0.5)
 
 
 # Create initial table
@@ -248,7 +251,7 @@ final_memory <- gc()["Vcells", "used"]
 
 # Memory growth should be reasonable
 memory_growth <- (final_memory - initial_memory) / initial_memory
-expect_lt(memory_growth, 2.0)
+expect_true(memory_growth < 2.0)
 
 
 # These are baseline performance expectations that should not regress
@@ -274,9 +277,9 @@ rendering_time <- as.numeric(Sys.time() - start_time, units = "secs")
 memory_usage <- as.numeric(object.size(bp))
 
 # Set performance expectations (adjust based on your system)
-expect_lt(table_creation_time, 2.0, "Table creation regression")
-expect_lt(rendering_time, 1.0, "Rendering performance regression")
-expect_lt(memory_usage, 500000, "Memory usage regression")  # 500KB limit
+expect_true(table_creation_time < 2.0)
+expect_true(rendering_time < 1.0)
+expect_true(memory_usage < 500000)  # 500KB limit
 
 # Log performance metrics for monitoring
 cat(sprintf("\nPerformance Metrics:\n"))

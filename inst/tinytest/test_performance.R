@@ -1,30 +1,33 @@
 # Test Performance and Memory Efficiency
 # =====================================
 
+# Bring non-exported helpers into scope for tinytest::test_package().
+analyze_dimensions <- getFromNamespace("analyze_dimensions", "zztable1")
+analyze_variables <- getFromNamespace("analyze_variables", "zztable1")
 
-# Test uses package functions via testthat - no need to source files
+# Block-scoped conditional: only the memory test needs long.double.
+# Subsequent blocks must still run if it is unavailable, so we use
+# an if-block rather than file-level exit_file().
+if (capabilities("long.double")) {
 
-if (!capabilities("long.double")) {
-  exit_file("Need long.double for memory tests")
-}
+  # Create large sparse blueprint
+  bp_sparse <- Table1Blueprint(500, 20)
 
-# Create large sparse blueprint
-bp_sparse <- Table1Blueprint(500, 20)
+  # Populate only 5% of cells
+  n_cells_to_fill <- round(0.05 * 500 * 20)
 
-# Populate only 5% of cells
-n_cells_to_fill <- round(0.05 * 500 * 20)
-
-for (i in 1:n_cells_to_fill) {
-  row <- ((i-1) %% 500) + 1
-  col <- ((i-1) %/% 500) + 1
-  if (col <= 20 && exists("Cell", mode = "function")) {
-    bp_sparse[row, col] <- Cell(type = "content", content = paste("Cell", i))
+  for (i in 1:n_cells_to_fill) {
+    row <- ((i-1) %% 500) + 1
+    col <- ((i-1) %/% 500) + 1
+    if (col <= 20 && exists("Cell", mode = "function")) {
+      bp_sparse[row, col] <- Cell(type = "content", content = paste("Cell", i))
+    }
   }
-}
 
-# Memory should be reasonable for sparse structure
-memory_size <- as.numeric(object.size(bp_sparse))
-expect_lt(memory_size, 1000000)  # Less than 1MB
+  # Memory should be reasonable for sparse structure
+  memory_size <- as.numeric(object.size(bp_sparse))
+  expect_true(memory_size < 1000000)  # Less than 1MB
+}
 
 
 bp <- Table1Blueprint(100, 10)
@@ -45,7 +48,7 @@ for (i in 1:1000) {
 end_time <- Sys.time()
 
 elapsed <- as.numeric(end_time - start_time, units = "secs")
-expect_lt(elapsed, 0.1)  # Should be very fast
+expect_true(elapsed < 0.1)  # Should be very fast
 
 
 data(mtcars)
@@ -58,7 +61,7 @@ if (exists("analyze_variables", mode = "function")) {
   end_time <- Sys.time()
   
   elapsed <- as.numeric(end_time - start_time, units = "secs")
-  expect_lt(elapsed, 0.5)  # Should complete quickly
+  expect_true(elapsed < 0.5)  # Should complete quickly
   
   expect_equal(length(result$variables), length(vars))
 } else {
@@ -66,9 +69,7 @@ if (exists("analyze_variables", mode = "function")) {
 }
 
 
-if (!(nrow(mtcars) > 0)) {
-  exit_file("Need test data")
-}
+stopifnot(nrow(mtcars) > 0)
 
 # Create larger test dataset
 set.seed(123)
@@ -92,7 +93,7 @@ if (exists("analyze_dimensions", mode = "function")) {
   
   end_time <- Sys.time()
   elapsed <- as.numeric(end_time - start_time, units = "secs")
-  expect_lt(elapsed, 2.0)  # Should handle large data quickly
+  expect_true(elapsed < 2.0)  # Should handle large data quickly
   
   expect_true(dims$nrows > 0)
   expect_true(dims$ncols > 0)
@@ -122,7 +123,7 @@ if (exists("table1", mode = "function")) {
   
   # Check memory usage
   bp_size <- as.numeric(object.size(bp))
-  expect_lt(bp_size, 1000000)  # Less than 1MB for this size table
+  expect_true(bp_size < 1000000)  # Less than 1MB for this size table
   
   # Verify structure
   expect_inherits(bp, "table1_blueprint")

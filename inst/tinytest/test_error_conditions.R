@@ -57,7 +57,7 @@ expect_error(
 # P-values without grouping variable
 expect_error(
   table1(~ mpg, data = mtcars, pvalue = TRUE),
-  regex = "(grouping|totals)"
+  pattern = "(grouping|totals)"
 )
 
 # Invalid theme

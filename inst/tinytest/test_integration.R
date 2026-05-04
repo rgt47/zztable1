@@ -244,8 +244,7 @@ final_memory <- gc()
 memory_growth <- (final_memory["Vcells", "used"] - initial_memory["Vcells", "used"]) / 
                  initial_memory["Vcells", "used"]
 
-expect_lt(abs(memory_growth), 3.0,
-         "Excessive memory growth in long-running workflow")
+expect_true(abs(memory_growth) < 3.0)
 
 
 # Test that results are consistent regardless of platform differences

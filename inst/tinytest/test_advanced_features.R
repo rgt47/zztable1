@@ -154,7 +154,7 @@ end_time <- Sys.time()
 elapsed <- as.numeric(end_time - start_time, units = "secs")
 
 expect_inherits(bp, "table1_blueprint")
-expect_lt(elapsed, 2.0)  # Should complete in under 2 seconds
+expect_true(elapsed < 2.0)  # Should complete in under 2 seconds
 
 
 bp <- Table1Blueprint(1000, 50)  # Large sparse table
@@ -171,7 +171,7 @@ for (i in 1:n_cells) {
 
 # Memory should be reasonable
 memory_size <- as.numeric(object.size(bp))
-expect_lt(memory_size, 1000000)  # Less than 1MB
+expect_true(memory_size < 1000000)  # Less than 1MB
 
 
 # One-sided formula (requires totals = TRUE and pvalue = FALSE)

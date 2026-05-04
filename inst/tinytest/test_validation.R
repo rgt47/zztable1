@@ -53,7 +53,7 @@ expect_warning(
     formula = transmission ~ high_missing,
     data = test_data
   ),
-  regexp = "missing"
+  pattern = "missing"
 )
 
 

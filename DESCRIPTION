@@ -18,7 +18,6 @@ Remotes: rgt47/zzobj2fig
 Suggests:
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0),
     tinytest,
     parallel,
     devtools,

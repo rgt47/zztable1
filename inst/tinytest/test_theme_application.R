@@ -2,6 +2,9 @@
 # Theme Application Tests - Colors, Fonts, Indentation, Striping
 # =============================================================================
 
+# Bring non-exported helpers into scope for tinytest::test_package().
+generate_latex_theme_setup <- getFromNamespace(
+  "generate_latex_theme_setup", "zztable1")
 
 # Test data setup
 data(mtcars)

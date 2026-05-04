@@ -5,7 +5,12 @@
 # Tests for Phase 5.2: Statistical Result Caching
 # Validates blueprint-level caching of statistical computations
 
-context("Result Caching System")
+# Bring non-exported helpers into scope for tinytest::test_package().
+create_stat_cache_key <- getFromNamespace(
+  "create_stat_cache_key", "zztable1")
+get_cached <- getFromNamespace("get_cached", "zztable1")
+is_cached <- getFromNamespace("is_cached", "zztable1")
+set_cached <- getFromNamespace("set_cached", "zztable1")
 
 # Test 1: Cache key generation
 key1 <- create_stat_cache_key("age", NULL, "ttest")
