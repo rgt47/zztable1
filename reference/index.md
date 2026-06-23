@@ -112,8 +112,6 @@
   : Render table content based on output format
 - [`render_table_content_latex()`](https://rgt47.github.io/zztable1/reference/render_table_content_latex.md)
   : Render table content for LaTeX with theme-specific styling
-- [`save_as_image()`](https://rgt47.github.io/zztable1/reference/save_as_image.md)
-  : Save a Table1 Blueprint as an Image
 - [`save_theme_bundle()`](https://rgt47.github.io/zztable1/reference/save_theme_bundle.md)
   : Save theme bundle to file
 - [`` `[`( ``*`<table1_blueprint>`*`)`](https://rgt47.github.io/zztable1/reference/sub-.table1_blueprint.md)

@@ -503,7 +503,7 @@ system.time({
 })
 ```
 
-user system elapsed 0.004 0.001 0.004
+user system elapsed 0.004 0.000 0.004
 
 ``` r
 
@@ -673,13 +673,13 @@ htmltools_0.5.9
 
 loaded via a namespace (and not attached): \[1\] vctrs_0.7.3
 svglite_2.2.2 cli_3.6.6 knitr_1.51  
-\[5\] rlang_1.2.0 xfun_0.57 stringi_1.8.7 otel_0.2.0  
+\[5\] rlang_1.2.0 xfun_0.59 stringi_1.8.7 otel_0.2.0  
 \[9\] textshaping_1.0.5 jsonlite_2.0.0 glue_1.8.1 ragg_1.5.2  
 \[13\] sass_0.4.10 scales_1.4.0 rmarkdown_2.31 evaluate_1.0.5  
 \[17\] jquerylib_0.1.4 fastmap_1.2.0 yaml_2.3.12 lifecycle_1.0.5  
 \[21\] stringr_1.6.0 compiler_4.6.0 RColorBrewer_1.1-3 fs_2.1.0  
-\[25\] htmlwidgets_1.6.4 rstudioapi_0.18.0 farver_2.1.2
+\[25\] htmlwidgets_1.6.4 rstudioapi_0.19.0 farver_2.1.2
 systemfonts_1.3.2 \[29\] digest_0.6.39 viridisLite_0.4.3 R6_2.6.1
 pillar_1.11.1  
-\[33\] parallel_4.6.0 magrittr_2.0.5 bslib_0.10.0 tools_4.6.0  
-\[37\] xml2_1.5.2 pkgdown_2.2.0 cachem_1.1.0 desc_1.4.3
+\[33\] parallel_4.6.0 magrittr_2.0.5 bslib_0.11.0 tools_4.6.0  
+\[37\] xml2_1.6.0 pkgdown_2.2.0 cachem_1.1.0 desc_1.4.3
