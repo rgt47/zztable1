@@ -196,8 +196,10 @@ analyze_groups <- function(grp_var, data) {
     levels <- unique(grp_data[!is.na(grp_data)])
   }
 
-  # Quick size calculation
-  sizes <- as.vector(table(grp_data, useNA = "no"))
+  # Size calculation aligned to `levels` order (robust to factor vs
+  # character ordering and to absent factor levels).
+  counts <- table(grp_data, useNA = "no")
+  sizes <- as.integer(counts[levels])
   names(sizes) <- levels
 
   list(
@@ -234,7 +236,7 @@ analyze_strata <- function(strata, data) {
     variable = strata,
     levels = as.character(levels),
     n_strata = length(levels),
-    sizes = as.vector(table(strata_data, useNA = "no"))
+    sizes = as.integer(table(strata_data, useNA = "no")[levels])
   )
 }
 

@@ -42,3 +42,4 @@
 ^doc$
 ^Meta$
 ^CODE_OF_CONDUCT\.md$
+^PATCH-PLAN-.*\.md$
