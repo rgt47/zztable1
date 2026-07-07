@@ -503,7 +503,7 @@ system.time({
 })
 ```
 
-user system elapsed 0.004 0.000 0.004
+user system elapsed 0.003 0.000 0.003
 
 ``` r
 
