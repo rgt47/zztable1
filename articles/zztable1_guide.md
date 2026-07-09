@@ -503,7 +503,7 @@ system.time({
 })
 ```
 
-user system elapsed 0.003 0.000 0.003
+user system elapsed 0.004 0.000 0.004
 
 ``` r
 
@@ -668,12 +668,12 @@ time zone: UTC tzcode source: system (glibc)
 attached base packages: \[1\] stats graphics grDevices utils datasets
 methods base
 
-other attached packages: \[1\] zztable1_0.5.0 kableExtra_1.4.0
+other attached packages: \[1\] zztable1_0.5.0 kableExtra_1.4.1
 htmltools_0.5.9
 
 loaded via a namespace (and not attached): \[1\] vctrs_0.7.3
 svglite_2.2.2 cli_3.6.6 knitr_1.51  
-\[5\] rlang_1.3.0 xfun_0.59 stringi_1.8.7 otel_0.2.0  
+\[5\] rlang_1.3.0 xfun_0.60 stringi_1.8.7 otel_0.2.0  
 \[9\] textshaping_1.0.5 jsonlite_2.0.0 glue_1.8.1 ragg_1.5.2  
 \[13\] sass_0.4.10 scales_1.4.0 rmarkdown_2.31 evaluate_1.0.5  
 \[17\] jquerylib_0.1.4 fastmap_1.2.0 yaml_2.3.12 lifecycle_1.0.5  
@@ -682,4 +682,4 @@ svglite_2.2.2 cli_3.6.6 knitr_1.51
 systemfonts_1.3.2 \[29\] digest_0.6.39 viridisLite_0.4.3 R6_2.6.1
 pillar_1.11.1  
 \[33\] parallel_4.6.1 magrittr_2.0.5 bslib_0.11.0 tools_4.6.1  
-\[37\] xml2_1.6.0 pkgdown_2.2.0 cachem_1.1.0 desc_1.4.3
+\[37\] xml2_1.6.0 pkgdown_2.2.1 cachem_1.1.0 desc_1.4.3
