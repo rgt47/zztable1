@@ -199,9 +199,9 @@ Table 1: Vehicle Characteristics by Transmission Type
 print(bp)
 ```
 
-mpg 17.1 ± 3.8 24.4 ± 6.2 0  
+mpg 17.1 ± 3.8 24.4 ± 6.2 \<0.001  
 hp 160.3 ± 53.9 126.8 ± 84.1 0.18  
-wt 3.8 ± 0.8 2.4 ± 0.6 0
+wt 3.8 ± 0.8 2.4 ± 0.6 \<0.001
 
 ### Applying Themes to Existing Blueprints
 

@@ -2,7 +2,6 @@
 <url><loc>https://rgt47.github.io/zztable1/404.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/CODE_OF_CONDUCT.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/CONTRIBUTING.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/PATCH-PLAN-size-header.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/articles/customizing_statistics.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/articles/dataset_examples.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/articles/extending_themes.html</loc></url>
@@ -36,7 +35,6 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/apply_size_labels.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/apply_theme.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/as.data.frame.table1_blueprint.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/benchmark_parallel.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/blueprint_memory_info.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/build_col_structure.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/build_row_structure.html</loc></url>
@@ -50,7 +48,6 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/calculate_table_dimensions_themed.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/calculate_theme_missing_rows.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/calculate_theme_separator_rows.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/can_use_parallel.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/check_data_quality.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/check_variables_exist.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/clear_cell_cache.html</loc></url>
@@ -79,15 +76,12 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/dot-onUnload.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/escape_html.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/escape_latex.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/estimate_parallel_speedup.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.cell_computation.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.cell_content.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.cell_separator.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.default.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cells_parallel.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cells_serial.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cells_smart.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cells_vectorized.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_computation_cell.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_separator_cell.html</loc></url>
@@ -126,7 +120,6 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/get_latex_table_environment.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/get_missing_summary.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/get_numeric_summary_expression.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/get_parallel_stats.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/get_spanners.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/get_theme.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/get_theme_decimal_places.html</loc></url>
