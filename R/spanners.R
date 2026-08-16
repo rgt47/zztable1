@@ -11,8 +11,6 @@
 #
 # ============================================================================
 
-`%||%` <- function(x, y) if (is.null(x)) y else x
-
 #' Add a Column Spanner to a Blueprint
 #'
 #' Groups one or more columns under a shared header label. Spanners

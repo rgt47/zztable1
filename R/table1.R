@@ -974,7 +974,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
               tab, simulate.p.value = TRUE, B = 10000
             )$p.value
           )
-          round(pv, 3)
+          if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           NA
         }
@@ -987,7 +987,8 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         if (length(unique(data[[grp_col]])) >= 2) {
           fit <- lm(data[[var_col]] ~ data[[grp_col]])
-          round(summary(fit)$coefficients[2, 4], 3)
+          pv <- summary(fit)$coefficients[2, 4]
+          if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           NA
         }
@@ -1000,7 +1001,8 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         if (length(unique(data[[grp_col]])) >= 2) {
           fit <- lm(data[[var_col]] ~ data[[grp_col]])
-          round(anova(fit)$`Pr(>F)`[1], 3)
+          pv <- anova(fit)$`Pr(>F)`[1]
+          if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           NA
         }
@@ -1014,7 +1016,8 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
         groups <- unique(data[[grp_col]][!is.na(data[[grp_col]])])
         if (length(groups) == 2) {
           t_result <- t.test(data[[var_col]] ~ data[[grp_col]], var.equal = FALSE)
-          round(t_result$p.value, 3)
+          pv <- t_result$p.value
+          if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           NA
         }
@@ -1027,7 +1030,8 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         if (length(unique(data[[grp_col]][!is.na(data[[grp_col]])])) >= 2) {
           kw_result <- kruskal.test(data[[var_col]] ~ data[[grp_col]])
-          round(kw_result$p.value, 3)
+          pv <- kw_result$p.value
+          if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           NA
         }
@@ -1040,7 +1044,8 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         tab <- table(data[[var_col]], data[[grp_col]])
         if (min(dim(tab)) >= 2 && all(tab >= 5)) {
-          round(chisq.test(tab)$p.value, 3)
+          pv <- chisq.test(tab)$p.value
+          if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           # Fall back to Fisher's exact if assumptions not met
           pv <- tryCatch(
@@ -1049,7 +1054,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
               tab, simulate.p.value = TRUE, B = 10000
             )$p.value
           )
-          round(pv, 3)
+          if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         }
       },
       list(var_col = var_name, grp_col = grp_var)
@@ -1060,7 +1065,8 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       {
         if (length(unique(data[[grp_col]])) >= 2) {
           fit <- lm(data[[var_col]] ~ data[[grp_col]])
-          round(summary(fit)$coefficients[2, 4], 3)
+          pv <- summary(fit)$coefficients[2, 4]
+          if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           NA
         }

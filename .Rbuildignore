@@ -35,6 +35,13 @@
 ^CLAUDE\.md$
 ^.*\.pdf$
 
+# zzcollab scaffolding
+^tooling\.lock$
+^zzcollab\.yaml$
+^\.zzcollab-state$
+^CONTRIBUTING\.md$
+^_pkgdown\.yml$
+
 # Temporary and test files
 ^test_.*\.R$
 ^test_.*\.Rmd$

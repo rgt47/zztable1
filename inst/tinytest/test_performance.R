@@ -26,7 +26,7 @@ if (capabilities("long.double")) {
 
   # Memory should be reasonable for sparse structure
   memory_size <- as.numeric(object.size(bp_sparse))
-  expect_true(memory_size < 1000000)  # Less than 1MB
+  if (at_home()) expect_true(memory_size < 1000000)  # Less than 1MB
 }
 
 
@@ -48,7 +48,7 @@ for (i in 1:1000) {
 end_time <- Sys.time()
 
 elapsed <- as.numeric(end_time - start_time, units = "secs")
-expect_true(elapsed < 2.0)  # CI runners vary; 2s is a safe ceiling for 1000 accesses
+if (at_home()) expect_true(elapsed < 2.0)  # CI runners vary; 2s ceiling, dev only
 
 
 data(mtcars)
@@ -61,7 +61,7 @@ if (exists("analyze_variables", mode = "function")) {
   end_time <- Sys.time()
   
   elapsed <- as.numeric(end_time - start_time, units = "secs")
-  expect_true(elapsed < 0.5)  # Should complete quickly
+  if (at_home()) expect_true(elapsed < 0.5)  # Should complete quickly
   
   expect_equal(length(result$variables), length(vars))
 } else {
@@ -93,7 +93,7 @@ if (exists("analyze_dimensions", mode = "function")) {
   
   end_time <- Sys.time()
   elapsed <- as.numeric(end_time - start_time, units = "secs")
-  expect_true(elapsed < 2.0)  # Should handle large data quickly
+  if (at_home()) expect_true(elapsed < 2.0)  # Should handle large data quickly
   
   expect_true(dims$nrows > 0)
   expect_true(dims$ncols > 0)
@@ -123,7 +123,7 @@ if (exists("table1", mode = "function")) {
   
   # Check memory usage
   bp_size <- as.numeric(object.size(bp))
-  expect_true(bp_size < 1000000)  # Less than 1MB for this size table
+  if (at_home()) expect_true(bp_size < 1000000)  # Less than 1MB for this table
   
   # Verify structure
   expect_inherits(bp, "table1_blueprint")

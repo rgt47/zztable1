@@ -287,19 +287,19 @@ system.time({
 
 ### Testing
 
-Run the comprehensive test suite:
+Run the test suite (tinytest):
 
 ```r
-source("tests/test_all.R")
+tinytest::test_package("zztable1")
 ```
-
-Current test results: **91.9% pass rate** (34/37 tests)
 
 ### Documentation
 
-- **Vignette**: `vignettes/zztable1_guide.Rmd` - Package guide
-- **Help Files**: All functions have detailed documentation with examples
-- **Tests**: `tests/test_all.R` - Complete test suite
+- **Vignettes**: see the `vignettes/` directory for the package guide
+  and topic tutorials
+- **Help Files**: function documentation via `?table1` and friends
+- **Tests**: `inst/tinytest/` - tinytest suite run by
+  `tests/tinytest.R`
 
 ### Comparison with Original zztable1
 
@@ -334,17 +334,17 @@ This is a research/development project. Key areas for contribution:
 
 ### License
 
-[Specify license when ready for distribution]
+GPL (>= 3)
 
 ### Citation
 
 ```bibtex
 @software{zztable1,
-  title = {zztable1: Publication-Ready Summary Tables for Biomedical Research},
-  author = {Development Team},
-  year = {2024},
-  note = {R package version 0.9.0},
-  url = {https://github.com/user/zztable1}
+  title = {zztable1: Next Generation Summary Tables},
+  author = {Ronald G. Thomas},
+  year = {2026},
+  note = {R package version 0.5.0},
+  url = {https://github.com/rgt47/zztable1}
 }
 ```
 

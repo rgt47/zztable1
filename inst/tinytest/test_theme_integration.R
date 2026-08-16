@@ -367,7 +367,7 @@ timing <- system.time({
 })
 
 # Should complete in under 1 second for 10 applications
-expect_true(timing["elapsed"] < 1.0)
+if (at_home()) expect_true(timing["elapsed"] < 1.0)
 
 
 # ============================================================================

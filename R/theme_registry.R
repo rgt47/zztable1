@@ -396,8 +396,4 @@ load_theme_bundle <- function(file) {
   bundle
 }
 
-# Null-coalescing operator (defined in themes.R)
-# Kept here for backward compatibility but no roxygen docs to avoid duplicate Rd
-`%||%` <- function(x, y) {
-  if (is.null(x)) y else x
-}
+# Null-coalescing operator: single definition lives in themes.R

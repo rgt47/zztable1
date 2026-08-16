@@ -473,20 +473,10 @@ render_latex <- function(blueprint, theme = NULL) {
 # See lines 759-865 for the unified theme-aware implementations.
 # The simple versions that were here have been removed to eliminate code duplication.
 
-#' Render table content based on output format
-#' @param blueprint Table1Blueprint object
-#' @param theme Theme configuration
-#' @param format Output format ("console", "latex", "html")
-#' @return Character vector with formatted table content
-render_table_content <- function(blueprint, theme, format) {
-  if (format == "latex") {
-    render_table_content_latex(blueprint, theme)
-  } else if (format == "html") {
-    render_table_content_html(blueprint, theme)
-  } else {
-    render_table_content_console(blueprint, theme)
-  }
-}
+# NOTE: the format dispatcher render_table_content() is defined once,
+# later in this file (optimized sparse-cell version). A duplicate
+# simple dispatcher that previously lived here was shadowed at load
+# time and has been removed.
 
 #' Render table content for LaTeX with theme-specific styling
 #' @param blueprint Table1Blueprint object

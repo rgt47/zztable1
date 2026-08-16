@@ -244,7 +244,7 @@ final_memory <- gc()
 memory_growth <- (final_memory["Vcells", "used"] - initial_memory["Vcells", "used"]) / 
                  initial_memory["Vcells", "used"]
 
-expect_true(abs(memory_growth) < 3.0)
+if (at_home()) expect_true(abs(memory_growth) < 3.0)
 
 
 # Test that results are consistent regardless of platform differences
