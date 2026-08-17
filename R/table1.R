@@ -525,7 +525,7 @@ populate_variable_cells_stratified <- function(blueprint, data, dimensions, them
     # Process variables within this stratum
     current_row <- populate_variables_for_stratum(
       blueprint, stratum_data, var_info, dimensions, theme_config,
-      current_row
+      current_row, current_stratum
     )
   }
 
@@ -542,11 +542,15 @@ populate_variable_cells_stratified <- function(blueprint, data, dimensions, them
 #' @param dimensions Dimension analysis
 #' @param theme_config Theme configuration
 #' @param start_row Starting row number
+#' @param current_stratum Value of the stratification variable for this
+#'   stratum, used so per-stratum p-value cells filter to the correct
+#'   subset rather than the whole sample.
 #'
 #' @return Updated row number after population
 #' @keywords internal
 populate_variables_for_stratum <- function(blueprint, stratum_data, var_info,
-                                          dimensions, theme_config, start_row) {
+                                          dimensions, theme_config, start_row,
+                                          current_stratum = NULL) {
   current_row <- start_row
 
   collapse_binary <- isTRUE(blueprint$metadata$options$collapse_binary)
@@ -566,14 +570,14 @@ populate_variables_for_stratum <- function(blueprint, stratum_data, var_info,
     } else if (var_type == "factor") {
       populate_factor_variable_stratified(
         blueprint, var_name, stratum_data, current_row,
-        dimensions, theme_config, NULL
+        dimensions, theme_config, current_stratum
       )
       levels_count <- length(levels(stratum_data[[var_name]]))
       current_row <- current_row + 1 + levels_count
     } else {
       populate_numeric_variable_stratified(
         blueprint, var_name, stratum_data, current_row,
-        dimensions, theme_config, NULL
+        dimensions, theme_config, current_stratum
       )
       current_row <- current_row + 1
     }
@@ -961,7 +965,29 @@ create_factor_computation <- function(grp_var, group_level, data) {
 #'
 #' @return P-value cell object
 #' @keywords internal
-create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
+create_pvalue_cell <- function(var_name, grp_var, test_type,
+                               strata_var = NULL, strata_val = NULL) {
+  # When called from a stratified table, restrict `data` to the
+  # current stratum before the test runs. Without this, every
+  # stratum's p-value cell evaluates against the whole-sample `data`
+  # (evaluate_computation_cell() always binds `data` to
+  # blueprint$metadata$data, not to any per-stratum subset), so all
+  # strata would silently report the identical whole-sample p-value.
+  strata_filter <- if (!is.null(strata_var)) {
+    substitute(
+      data <- data[data[[strata_col]] == strata_v & !is.na(data[[strata_col]]), ],
+      list(strata_col = strata_var, strata_v = strata_val)
+    )
+  } else {
+    NULL
+  }
+  with_strata_filter <- function(expr) {
+    if (is.null(strata_filter)) {
+      return(expr)
+    }
+    as.call(c(as.list(expr)[1], list(strata_filter), as.list(expr)[-1]))
+  }
+
   if (test_type == "fisher") {
     # Fisher's exact test for categorical variables
     computation_expr <- substitute(
@@ -1074,15 +1100,27 @@ create_pvalue_cell <- function(var_name, grp_var, test_type, data = NULL) {
       list(var_col = var_name, grp_col = grp_var)
     )
   }
+  computation_expr <- with_strata_filter(computation_expr)
+
+  data_subset_expr <- if (!is.null(strata_var)) {
+    substitute(
+      data[data[[strata_col]] == strata_v & !is.na(data[[strata_col]]),
+           c(var_col, grp_col)],
+      list(strata_col = strata_var, strata_v = strata_val,
+           var_col = var_name, grp_col = grp_var)
+    )
+  } else {
+    substitute(
+      data[c(var_col, grp_col)],
+      list(var_col = var_name, grp_col = grp_var)
+    )
+  }
 
   Cell(
     type = "computation",
-    data_subset = substitute(
-      data[c(var_col, grp_col)],
-      list(var_col = var_name, grp_col = grp_var)
-    ),
+    data_subset = data_subset_expr,
     computation = computation_expr,
-    dependencies = c("data", var_name, grp_var)
+    dependencies = c("data", var_name, grp_var, strata_var)
   )
 }
 
@@ -1384,7 +1422,10 @@ populate_factor_variable_stratified <- function(blueprint, var_name, stratum_dat
   if (blueprint$metadata$options$pvalue) {
     pval_col <- ncol(blueprint)
     first_level_row <- start_row + 1
-    blueprint[first_level_row, pval_col] <- create_pvalue_cell(var_name, group_var, blueprint$metadata$options$categorical_test, blueprint$metadata$data)
+    blueprint[first_level_row, pval_col] <- create_pvalue_cell(
+      var_name, group_var, blueprint$metadata$options$categorical_test,
+      strata_var = blueprint$metadata$options$strata, strata_val = current_stratum
+    )
   }
 
   return(blueprint)
@@ -1466,7 +1507,10 @@ populate_numeric_variable_stratified <- function(blueprint, var_name, stratum_da
   # P-value
   if (blueprint$metadata$options$pvalue) {
     pval_col <- ncol(blueprint)
-    blueprint[start_row, pval_col] <- create_pvalue_cell(var_name, group_var, blueprint$metadata$options$continuous_test, blueprint$metadata$data)
+    blueprint[start_row, pval_col] <- create_pvalue_cell(
+      var_name, group_var, blueprint$metadata$options$continuous_test,
+      strata_var = blueprint$metadata$options$strata, strata_val = current_stratum
+    )
   }
 
   return(blueprint)
