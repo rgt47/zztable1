@@ -495,7 +495,7 @@ summary tables.
 - [`render_latex()`](https://rgt47.github.io/zztable1/reference/render_latex.md)
   : Render Blueprint to LaTeX
 - [`render_table_content()`](https://rgt47.github.io/zztable1/reference/render_table_content.md)
-  : Render table content based on output format
+  : Render Table Content (Optimized)
 - [`render_table_content_latex()`](https://rgt47.github.io/zztable1/reference/render_table_content_latex.md)
   : Render table content for LaTeX with theme-specific styling
 - [`save_theme_bundle()`](https://rgt47.github.io/zztable1/reference/save_theme_bundle.md)

@@ -53,7 +53,6 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/clear_cell_cache.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/collect_raw_values.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/combine_row_content.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/convert_results_to_matrix.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_cell_data_by_type.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_cell_key.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_cell_keys_vectorized.html</loc></url>
@@ -67,7 +66,6 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/create_theme.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_theme_bundle.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/customize_theme.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/detect_cores.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/detect_row_groups.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/detect_variable_type.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/dim.table1_blueprint.html</loc></url>
@@ -81,11 +79,9 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.cell_separator.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.default.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cells_serial.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cells_vectorized.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_computation_cell.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_separator_cell.html</loc></url>
-<url><loc>https://rgt47.github.io/zztable1/reference/evaluate_single_cell.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_summary_for_group.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/expand_rhs_vars.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/export_theme_to_package.html</loc></url>
