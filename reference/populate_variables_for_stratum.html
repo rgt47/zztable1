@@ -55,7 +55,8 @@
 <span>  <span class="va">var_info</span>,</span>
 <span>  <span class="va">dimensions</span>,</span>
 <span>  <span class="va">theme_config</span>,</span>
-<span>  <span class="va">start_row</span></span>
+<span>  <span class="va">start_row</span>,</span>
+<span>  current_stratum <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,6 +86,12 @@
 
 <dt id="arg-start-row">start_row<a class="anchor" aria-label="anchor" href="#arg-start-row"></a></dt>
 <dd><p>Starting row number</p></dd>
+
+
+<dt id="arg-current-stratum">current_stratum<a class="anchor" aria-label="anchor" href="#arg-current-stratum"></a></dt>
+<dd><p>Value of the stratification variable for this
+stratum, used so per-stratum p-value cells filter to the correct
+subset rather than the whole sample.</p></dd>
 
 </dl></div>
     <div class="section level2">

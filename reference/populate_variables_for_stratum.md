@@ -11,7 +11,8 @@ populate_variables_for_stratum(
   var_info,
   dimensions,
   theme_config,
-  start_row
+  start_row,
+  current_stratum = NULL
 )
 ```
 
@@ -40,6 +41,12 @@ populate_variables_for_stratum(
 - start_row:
 
   Starting row number
+
+- current_stratum:
+
+  Value of the stratification variable for this stratum, used so
+  per-stratum p-value cells filter to the correct subset rather than the
+  whole sample.
 
 ## Value
 
