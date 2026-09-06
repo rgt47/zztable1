@@ -10,7 +10,8 @@ populate_variables_for_stratum(
   var_info,
   dimensions,
   theme_config,
-  start_row
+  start_row,
+  current_stratum = NULL
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ populate_variables_for_stratum(
 \item{theme_config}{Theme configuration}
 
 \item{start_row}{Starting row number}
+
+\item{current_stratum}{Value of the stratification variable for this
+stratum, used so per-stratum p-value cells filter to the correct
+subset rather than the whole sample.}
 }
 \value{
 Updated row number after population

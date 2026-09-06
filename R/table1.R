@@ -962,6 +962,11 @@ create_factor_computation <- function(grp_var, group_level, data) {
 #' @param var_name Variable name
 #' @param grp_var Grouping variable name
 #' @param test_type Type of statistical test
+#' @param strata_var Name of the stratifying column, or `NULL` (default)
+#'   for an unstratified table. When supplied, the computation restricts
+#'   `data` to the current stratum before the test runs.
+#' @param strata_val Value of `strata_var` identifying the current
+#'   stratum. Ignored when `strata_var` is `NULL`.
 #'
 #' @return P-value cell object
 #' @keywords internal
