@@ -393,6 +393,12 @@ calculate_table_dimensions <- function(analyses, totals, pvalue, size, layout) {
 #' @param size Include size information
 #' @param theme Theme object
 #' @param missing Include missing value information
+#'
+#' @return An object of class `themed_table_dimensions`: a list of the
+#'   computed row and column counts, the theme adjustments applied, the
+#'   footnote markers, and a `summary` element recording the inputs the
+#'   calculation was based on.
+#' @keywords internal
 calculate_table_dimensions_themed <- function(analyses, totals, pvalue, size, theme, missing = FALSE) {
   
   # Base calculation (existing)
@@ -689,6 +695,7 @@ build_col_structure <- function(analyses, totals, pvalue) {
 #' @param x Table dimensions object
 #' @param ... Additional arguments
 #'
+#' @return Invisibly returns `x`.
 #' @export
 print.table_dimensions <- function(x, ...) {
   cat("Optimized Table Dimensions (", x$nrows, " x ", x$ncols, ")\n", sep = "")

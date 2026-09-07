@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments}
 }
+\value{
+Invisibly returns `x`.
+}
 \description{
 Informative display of cell objects showing type and key content.
 }

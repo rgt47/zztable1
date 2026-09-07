@@ -528,6 +528,7 @@ evaluate_separator_cell <- function(cell) {
 #' @param x Cell object
 #' @param ... Additional arguments
 #'
+#' @return Invisibly returns `x`.
 #' @export
 print.cell <- function(x, ...) {
   cat("Cell [", x$type, "]\n", sep = "")
@@ -554,6 +555,7 @@ print.cell <- function(x, ...) {
 #' @param object Cell object
 #' @param ... Additional arguments
 #'
+#' @return Invisibly returns `object`.
 #' @export
 summary.cell <- function(object, ...) {
   cat("Cell Summary\n")

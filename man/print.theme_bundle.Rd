@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (ignored)}
 }
+\value{
+`NULL`, invisibly. Called for the printed output.
+}
 \description{
 Print method for theme bundles
 }

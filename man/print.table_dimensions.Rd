@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments}
 }
+\value{
+Invisibly returns `x`.
+}
 \description{
 Clean display of dimension analysis results.
 }

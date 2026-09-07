@@ -294,6 +294,7 @@ create_theme_bundle <- function(themes, name, description = NULL, author = NULL)
 #' @param x Theme bundle object
 #' @param ... Additional arguments (ignored)
 #'
+#' @return `NULL`, invisibly. Called for the printed output.
 #' @export
 print.theme_bundle <- function(x, ...) {
   cat("Theme Bundle: ", x$name, "\n", sep = "")

@@ -26,6 +26,13 @@ calculate_table_dimensions_themed(
 
 \item{missing}{Include missing value information}
 }
+\value{
+An object of class `themed_table_dimensions`: a list of the
+  computed row and column counts, the theme adjustments applied, the
+  footnote markers, and a `summary` element recording the inputs the
+  calculation was based on.
+}
 \description{
 Theme-Aware Table Dimension Calculation
 }
+\keyword{internal}

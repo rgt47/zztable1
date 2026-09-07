@@ -6,7 +6,10 @@
 data(mtcars)
 mtcars$transmission <- factor(ifelse(mtcars$am == 1, "Manual", "Automatic"))
 
-expect_silent(
+## Asserts the documented contract (returns invisible(TRUE) on valid
+## input) rather than the absence of output. Testing for silence turns
+## any future warning from a dependency into a failure here.
+expect_true(
   validate_inputs(
     formula = transmission ~ mpg + hp,
     data = mtcars,

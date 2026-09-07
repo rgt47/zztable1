@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments}
 }
+\value{
+Invisibly returns `object`.
+}
 \description{
 Detailed summary of cell objects including metadata.
 }
