@@ -410,8 +410,6 @@ summary tables.
   : Calculate Frequency Table
 - [`calculate_summary_stats()`](https://rgt47.github.io/zztable1/reference/calculate_summary_stats.md)
   : Calculate Summary Statistics
-- [`calculate_table_dimensions_themed()`](https://rgt47.github.io/zztable1/reference/calculate_table_dimensions_themed.md)
-  : Theme-Aware Table Dimension Calculation
 - [`create_custom_theme()`](https://rgt47.github.io/zztable1/reference/create_custom_theme.md)
   : Create Custom Theme
 - [`create_theme_bundle()`](https://rgt47.github.io/zztable1/reference/create_theme_bundle.md)

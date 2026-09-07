@@ -18,3 +18,7 @@ summary(object, ...)
 - ...:
 
   Additional arguments
+
+## Value
+
+Invisibly returns \`object\`.

@@ -592,7 +592,7 @@ system.time({
 })
 ```
 
-user system elapsed 0.012 0.000 0.011
+user system elapsed 0.009 0.001 0.008
 
 ## Available Themes
 

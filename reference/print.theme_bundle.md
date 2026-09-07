@@ -18,3 +18,7 @@ print(x, ...)
 - ...:
 
   Additional arguments (ignored)
+
+## Value
+
+\`NULL\`, invisibly. Called for the printed output.
