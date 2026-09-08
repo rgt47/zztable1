@@ -1,5 +1,5 @@
 Package: zztable1
-Version: 0.5.0
+Version: 0.6.0
 Title: Next Generation Summary Tables
 Description: Creates publication-quality summary tables with a flexible and powerful interface. Features sparse storage, comprehensive validation, modular architecture for high-performance table generation, and seamless R Markdown integration with automatic format detection for LaTeX and HTML output.
 Authors@R:

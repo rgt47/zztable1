@@ -1016,9 +1016,23 @@ create_pvalue_cell <- function(var_name, grp_var, test_type,
     # t-test for numeric variables
     computation_expr <- substitute(
       {
-        if (length(unique(data[[grp_col]])) >= 2) {
+        ng <- length(unique(data[[grp_col]][!is.na(data[[grp_col]])]))
+        if (ng >= 2) {
           fit <- lm(data[[var_col]] ~ data[[grp_col]])
-          pv <- summary(fit)$coefficients[2, 4]
+          # With more than two groups, coefficients[2, 4] is the p-value
+          # for the second level against the first and nothing else: a
+          # single contrast, carrying the pooled error term from all
+          # groups, printed in the column a reader scans as the test of
+          # whether this variable differs across groups. A variable
+          # whose overall F-test was 1e-16 could appear as p = 0.013
+          # because the difference sat in the third group. The overall
+          # F is the correct generalisation of the two-group t-test and
+          # reduces to it exactly when there are two groups.
+          pv <- if (ng > 2) {
+            anova(fit)$`Pr(>F)`[1]
+          } else {
+            summary(fit)$coefficients[2, 4]
+          }
           if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           NA
@@ -1074,7 +1088,19 @@ create_pvalue_cell <- function(var_name, grp_var, test_type,
     computation_expr <- substitute(
       {
         tab <- table(data[[var_col]], data[[grp_col]])
-        if (min(dim(tab)) >= 2 && all(tab >= 5)) {
+        # The chi-square approximation is a condition on EXPECTED cell
+        # counts, not observed ones. Testing the observed counts let
+        # through tables the approximation does not cover: with cells
+        # 6/6/6/30 every observed count is at least 5 while one expected
+        # count is 3, and R itself warns that the approximation may be
+        # incorrect. There it returned 0.054 where the exact test gives
+        # 0.049, on opposite sides of the conventional threshold.
+        expected <- if (min(dim(tab)) >= 2) {
+          outer(rowSums(tab), colSums(tab)) / sum(tab)
+        } else {
+          NULL
+        }
+        if (min(dim(tab)) >= 2 && all(expected >= 5)) {
           pv <- chisq.test(tab)$p.value
           if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
@@ -1094,9 +1120,23 @@ create_pvalue_cell <- function(var_name, grp_var, test_type,
     # Default to t-test
     computation_expr <- substitute(
       {
-        if (length(unique(data[[grp_col]])) >= 2) {
+        ng <- length(unique(data[[grp_col]][!is.na(data[[grp_col]])]))
+        if (ng >= 2) {
           fit <- lm(data[[var_col]] ~ data[[grp_col]])
-          pv <- summary(fit)$coefficients[2, 4]
+          # With more than two groups, coefficients[2, 4] is the p-value
+          # for the second level against the first and nothing else: a
+          # single contrast, carrying the pooled error term from all
+          # groups, printed in the column a reader scans as the test of
+          # whether this variable differs across groups. A variable
+          # whose overall F-test was 1e-16 could appear as p = 0.013
+          # because the difference sat in the third group. The overall
+          # F is the correct generalisation of the two-group t-test and
+          # reduces to it exactly when there are two groups.
+          pv <- if (ng > 2) {
+            anova(fit)$`Pr(>F)`[1]
+          } else {
+            summary(fit)$coefficients[2, 4]
+          }
           if (!is.na(pv) && pv < 0.001) "<0.001" else round(pv, 3)
         } else {
           NA
