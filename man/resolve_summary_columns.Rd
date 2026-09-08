@@ -2,11 +2,11 @@
 % Please edit documentation in R/summary_rows.R
 \name{resolve_summary_columns}
 \alias{resolve_summary_columns}
-\title{Resolve which columns to summarise}
+\title{Resolve which columns to summarize}
 \usage{
 resolve_summary_columns(columns, blueprint)
 }
 \description{
-Resolve which columns to summarise
+Resolve which columns to summarize
 }
 \keyword{internal}

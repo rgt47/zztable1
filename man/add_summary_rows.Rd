@@ -21,13 +21,13 @@ receives a numeric vector and returns a single value or formatted
 string. Names become the summary row labels.}
 
 \item{columns}{Integer or character vector of columns to
-summarise. Defaults to all data columns (excludes the variable
+summarize. Defaults to all data columns (excludes the variable
 name column and the p-value column).}
 
 \item{side}{Where to place summary rows: \code{"bottom"} (default)
 or \code{"top"} of each group.}
 
-\item{groups}{Character vector of row group names to summarise.
+\item{groups}{Character vector of row group names to summarize.
 Defaults to all groups.}
 
 \item{fmt_fn}{Optional formatting function applied to each

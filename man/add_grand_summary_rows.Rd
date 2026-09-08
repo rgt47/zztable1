@@ -18,7 +18,7 @@ add_grand_summary_rows(
 \item{fns}{A named list of aggregation functions.}
 
 \item{columns}{Integer or character vector of columns to
-summarise. Defaults to all data columns.}
+summarize. Defaults to all data columns.}
 
 \item{side}{Where to place grand summary rows: \code{"bottom"}
 (default) or \code{"top"}.}

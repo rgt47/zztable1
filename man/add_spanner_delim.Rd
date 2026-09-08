@@ -18,5 +18,5 @@ The blueprint with spanners added.
 Automatically generates spanners by splitting column names on a
 delimiter character. For example, columns named
 \code{"hematology.wbc"} and \code{"hematology.rbc"} produce a
-spanner labelled \code{"hematology"} covering both columns.
+spanner labeled \code{"hematology"} covering both columns.
 }

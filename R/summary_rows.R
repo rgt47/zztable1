@@ -24,11 +24,11 @@
 #'   receives a numeric vector and returns a single value or formatted
 #'   string. Names become the summary row labels.
 #' @param columns Integer or character vector of columns to
-#'   summarise. Defaults to all data columns (excludes the variable
+#'   summarize. Defaults to all data columns (excludes the variable
 #'   name column and the p-value column).
 #' @param side Where to place summary rows: \code{"bottom"} (default)
 #'   or \code{"top"} of each group.
-#' @param groups Character vector of row group names to summarise.
+#' @param groups Character vector of row group names to summarize.
 #'   Defaults to all groups.
 #' @param fmt_fn Optional formatting function applied to each
 #'   computed value before display. Receives a numeric value,
@@ -74,7 +74,7 @@ add_summary_rows <- function(blueprint, fns, columns = NULL,
 #' @param blueprint A table1_blueprint object
 #' @param fns A named list of aggregation functions.
 #' @param columns Integer or character vector of columns to
-#'   summarise. Defaults to all data columns.
+#'   summarize. Defaults to all data columns.
 #' @param side Where to place grand summary rows: \code{"bottom"}
 #'   (default) or \code{"top"}.
 #' @param fmt_fn Optional formatting function for computed values.
@@ -111,7 +111,7 @@ add_grand_summary_rows <- function(blueprint, fns, columns = NULL,
 
 # -- internal helpers --------------------------------------------------------
 
-#' Resolve which columns to summarise
+#' Resolve which columns to summarize
 #' @keywords internal
 resolve_summary_columns <- function(columns, blueprint) {
   if (is.null(columns)) {

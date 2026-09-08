@@ -83,7 +83,7 @@ add_spanner <- function(blueprint, label, columns = NULL,
 #' Automatically generates spanners by splitting column names on a
 #' delimiter character. For example, columns named
 #' \code{"hematology.wbc"} and \code{"hematology.rbc"} produce a
-#' spanner labelled \code{"hematology"} covering both columns.
+#' spanner labeled \code{"hematology"} covering both columns.
 #'
 #' @param blueprint A table1_blueprint object
 #' @param delim Single character delimiter (default \code{"."})
