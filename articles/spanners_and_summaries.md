@@ -260,7 +260,7 @@ render_bp(bp7)
 | Parameter | Description                                      |
 |:----------|:-------------------------------------------------|
 | `fns`     | Named list of aggregation functions              |
-| `columns` | Columns to summarise (default: all data columns) |
+| `columns` | Columns to summarize (default: all data columns) |
 | `side`    | `"bottom"` or `"top"` of each group              |
 | `groups`  | Restrict to specific groups                      |
 | `fmt_fn`  | Custom formatting function                       |

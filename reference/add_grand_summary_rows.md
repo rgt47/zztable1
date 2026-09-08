@@ -28,7 +28,7 @@ add_grand_summary_rows(
 
 - columns:
 
-  Integer or character vector of columns to summarise. Defaults to all
+  Integer or character vector of columns to summarize. Defaults to all
   data columns.
 
 - side:

@@ -32,7 +32,7 @@ add_summary_rows(
 
 - columns:
 
-  Integer or character vector of columns to summarise. Defaults to all
+  Integer or character vector of columns to summarize. Defaults to all
   data columns (excludes the variable name column and the p-value
   column).
 
@@ -43,7 +43,7 @@ add_summary_rows(
 
 - groups:
 
-  Character vector of row group names to summarise. Defaults to all
+  Character vector of row group names to summarize. Defaults to all
   groups.
 
 - fmt_fn:

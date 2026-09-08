@@ -2,7 +2,7 @@
 
 Automatically generates spanners by splitting column names on a
 delimiter character. For example, columns named `"hematology.wbc"` and
-`"hematology.rbc"` produce a spanner labelled `"hematology"` covering
+`"hematology.rbc"` produce a spanner labeled `"hematology"` covering
 both columns.
 
 ## Usage

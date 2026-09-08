@@ -1,6 +1,6 @@
-# Resolve which columns to summarise
+# Resolve which columns to summarize
 
-Resolve which columns to summarise
+Resolve which columns to summarize
 
 ## Usage
 
