@@ -668,7 +668,7 @@ time zone: UTC tzcode source: system (glibc)
 attached base packages: \[1\] stats graphics grDevices utils datasets
 methods base
 
-other attached packages: \[1\] zztable1_0.5.0 kableExtra_1.4.1
+other attached packages: \[1\] zztable1_0.6.0 kableExtra_1.4.1
 htmltools_0.5.9
 
 loaded via a namespace (and not attached): \[1\] vctrs_0.7.3

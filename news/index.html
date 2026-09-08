@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">zztable1</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,10 +43,25 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.0" id="zztable1-060">zztable1 0.6.0<a class="anchor" aria-label="anchor" href="#zztable1-060"></a></h2>
+<div class="section level3">
+<h3 id="correctness-fixes-0-6-0">Correctness fixes<a class="anchor" aria-label="anchor" href="#correctness-fixes-0-6-0"></a></h3>
+<ul><li><p><strong><code>continuous_test = "ttest"</code> reported a single contrast when there were more than two groups.</strong> The p-value was taken as <code>summary(fit)$coefficients[2, 4]</code>, which is the second group against the first and nothing else, carrying the pooled error term from all groups. The guard admitted any number of groups at or above two, so with three arms a variable whose overall F-test was 1e-16 appeared in the table as <code>p = 0.013</code>, because the difference sat in the third arm. That number went into the column a reader scans as the test of whether the variable differs across groups. With more than two groups the overall F is now used; it is the correct generalisation and reduces to the pooled t-test exactly when there are two groups, which is unchanged.</p></li>
+<li><p><strong>The chi-square guard tested observed counts rather than expected ones.</strong> <code>all(tab &gt;= 5)</code> checks the wrong quantity: the approximation is a condition on expected cell counts. A table with cells 6, 6, 6 and 30 has every observed count at or above 5 while one expected count is 3, so the chi-square branch was taken on a table where R itself warns that the approximation may be incorrect; it returned 0.054 against the exact test’s 0.049, on opposite sides of the conventional threshold. The guard now computes the expected counts and falls back to Fisher’s exact test when any is below 5, which is what the surrounding code already intended.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-0-6-0">Tests<a class="anchor" aria-label="anchor" href="#tests-0-6-0"></a></h3>
+<ul><li>
+<code>test_basic.R</code> held a single <code>expect_true(TRUE)</code>. It now asserts what goes in the p-value column against the test it claims to be: that three groups give the overall F rather than the first contrast, that two groups still give the pooled t-test, and that the expected-count rule is what decides between chi-square and Fisher.</li>
+<li>Suite grows from 579 assertions to 585.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.0" id="zztable1-v050">zztable1 v0.5.0<a class="anchor" aria-label="anchor" href="#zztable1-v050"></a></h2>
 <ul><li>Initial public release.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
