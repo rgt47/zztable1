@@ -503,7 +503,7 @@ system.time({
 })
 ```
 
-user system elapsed 0.003 0.000 0.003
+user system elapsed 0.004 0.000 0.004
 
 ``` r
 
@@ -651,7 +651,7 @@ sessionInfo()
 ```
 
 R version 4.6.1 (2026-06-24) Platform: x86_64-pc-linux-gnu Running
-under: Ubuntu 24.04.4 LTS
+under: Ubuntu 24.04.5 LTS
 
 Matrix products: default BLAS:
 /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 LAPACK:
@@ -673,7 +673,7 @@ htmltools_0.5.9
 
 loaded via a namespace (and not attached): \[1\] vctrs_0.7.3
 svglite_2.2.2 cli_3.6.6 knitr_1.52  
-\[5\] rlang_1.3.0 xfun_0.60 stringi_1.8.9 otel_0.2.0  
+\[5\] rlang_1.3.0 xfun_0.61 stringi_1.8.9 otel_0.2.0  
 \[9\] textshaping_1.0.5 jsonlite_2.0.0 glue_1.8.1 ragg_1.5.2  
 \[13\] sass_0.4.10 scales_1.4.0 rmarkdown_2.32 evaluate_1.0.5  
 \[17\] jquerylib_0.1.4 fastmap_1.2.0 yaml_2.3.12 lifecycle_1.0.5  

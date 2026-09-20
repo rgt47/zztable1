@@ -51,6 +51,7 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/check_data_quality.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/check_variables_exist.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/clear_cell_cache.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/clear_stat_cache.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/collect_raw_values.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/combine_row_content.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_cell_data_by_type.html</loc></url>
@@ -66,12 +67,14 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/create_theme.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_theme_bundle.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/customize_theme.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/data_fingerprint.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/detect_row_groups.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/detect_variable_type.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/dim.table1_blueprint.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/display_table.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/dot-onLoad.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/dot-onUnload.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/drop_cached.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/escape_html.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/escape_latex.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/evaluate_cell.cell_computation.html</loc></url>
@@ -186,6 +189,7 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_formula_enhanced.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_formula_structure.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_inputs.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/validate_stat_cache.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_table1_blueprint.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_theme_structure.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_var_in_data.html</loc></url>
