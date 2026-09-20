@@ -430,15 +430,26 @@ evaluate_cell.default <- function(cell, data, env = parent.frame(),
 #' @return Computed result
 #' @keywords internal
 evaluate_computation_cell <- function(cell, data, env, force_recalc, blueprint = NULL) {
+  use_cache <- !is.null(blueprint) && !is.null(cell$cache_key)
+
+  # Discard the cache if the data underlying the blueprint has been
+  # swapped since it was populated, so that a stale value is never
+  # returned for the new data.
+  if (use_cache) {
+    validate_stat_cache(blueprint, data)
+  }
+
   # Check blueprint-level cache first
-  if (!force_recalc && !is.null(blueprint) && !is.null(cell$cache_key)) {
+  if (!force_recalc && use_cache) {
     cached_result <- get_cached(blueprint, cell$cache_key)
     if (!is.null(cached_result)) {
       return(cached_result)
     }
   }
 
-  # Check cell-level cache as fallback
+  # Check cell-level cache as fallback. This serves cells constructed
+  # with a precomputed result; it is not written back to during
+  # evaluation (see below).
   if (!force_recalc && !is.null(cell$cached_result)) {
     return(cell$cached_result)
   }
@@ -468,16 +479,16 @@ evaluate_computation_cell <- function(cell, data, env, force_recalc, blueprint =
     format_computation_result(computation_result)
   }, "[Error]")
 
-  # Cache successful results at both levels
-  if (!identical(result, "[Error]") && !identical(result, "[No Data]")) {
-    # Cell-level cache
-    cell$cached_result <- result
-    cell$cache_timestamp <- Sys.time()
-
-    # Blueprint-level cache
-    if (!is.null(blueprint) && !is.null(cell$cache_key)) {
-      set_cached(blueprint, cell$cache_key, result)
-    }
+  # Cache successful results.
+  #
+  # Only the blueprint-level cache can persist. A cell is a plain list,
+  # so assigning to cell$cached_result here would mutate a local copy
+  # that is discarded when this function returns; the blueprint's
+  # stat_cache is an environment, so writing into it survives. Results
+  # are therefore stored once, against the cell's position key.
+  if (use_cache &&
+    !identical(result, "[Error]") && !identical(result, "[No Data]")) {
+    set_cached(blueprint, cell$cache_key, result)
   }
 
   result

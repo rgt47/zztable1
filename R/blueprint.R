@@ -397,13 +397,24 @@ validate_table1_blueprint <- function(x, strict = FALSE) {
     cell_exists <- !is.null(existing_cell)
 
     if (!is.null(value)) {
-      # Assign new cell
+      # Stamp the cell with its own position key. This is what
+      # evaluate_cell() uses to address the blueprint-level result
+      # cache, so it must be assigned wherever a cell enters the
+      # blueprint. Doing it here covers every construction path,
+      # since all of them route through this setter.
+      value$cache_key <- key
+
+      # Replacing a cell invalidates any result cached for the cell
+      # that previously occupied this position.
+      drop_cached(x, key)
+
       assign(key, value, envir = x$cells)
       if (!cell_exists) {
         x$metadata$cell_count <- x$metadata$cell_count + 1L
       }
     } else if (cell_exists) {
       # Remove existing cell
+      drop_cached(x, key)
       rm(list = key, envir = x$cells)
       x$metadata$cell_count <- x$metadata$cell_count - 1L
     }
@@ -411,6 +422,10 @@ validate_table1_blueprint <- function(x, strict = FALSE) {
     # Fallback for list-based storage
     idx <- (i - 1) * x$ncols + j
     if (idx <= length(x$cells)) {
+      if (!is.null(value)) {
+        value$cache_key <- sprintf("%d_%d", i, j)
+      }
+      drop_cached(x, sprintf("%d_%d", i, j))
       x$cells[[idx]] <- value
     }
   }

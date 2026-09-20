@@ -451,11 +451,14 @@ create_stat_cache_key <- function(variable, stratum = NULL, test_type = "none") 
 #' @return Logical indicating if result is cached
 #' @keywords internal
 is_cached <- function(blueprint, cache_key) {
-  if (is.null(blueprint$metadata$stat_cache)) {
+  cache <- blueprint$metadata$stat_cache
+  if (is.null(cache)) {
     return(FALSE)
   }
 
-  cache_key %in% ls(blueprint$metadata$stat_cache, all.names = TRUE)
+  # exists() is a hash lookup; the previous ls() scan was linear in the
+  # number of cached entries and so quadratic over a full render.
+  exists(cache_key, envir = cache, inherits = FALSE)
 }
 
 #' Get Cached Result
@@ -491,4 +494,107 @@ set_cached <- function(blueprint, cache_key, result) {
   }
 
   invisible(result)
+}
+
+#' Drop a Cached Result
+#'
+#' Removes a single entry from the blueprint cache, used when the cell
+#' occupying that position is replaced or removed.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param cache_key Character string with cache key
+#'
+#' @return NULL, invisibly
+#' @keywords internal
+drop_cached <- function(blueprint, cache_key) {
+  cache <- blueprint$metadata$stat_cache
+  if (!is.null(cache) && exists(cache_key, envir = cache, inherits = FALSE)) {
+    rm(list = cache_key, envir = cache)
+  }
+
+  invisible(NULL)
+}
+
+#' Clear the Blueprint Result Cache
+#'
+#' Empties every cached cell result. Reserved bookkeeping entries, whose
+#' names begin with a dot, are preserved.
+#'
+#' @param blueprint Table1Blueprint object
+#'
+#' @return NULL, invisibly
+#' @keywords internal
+clear_stat_cache <- function(blueprint) {
+  cache <- blueprint$metadata$stat_cache
+  if (is.null(cache)) {
+    return(invisible(NULL))
+  }
+
+  keys <- ls(cache, all.names = TRUE)
+  keys <- keys[!startsWith(keys, ".")]
+  if (length(keys) > 0) {
+    rm(list = keys, envir = cache)
+  }
+
+  invisible(NULL)
+}
+
+#' Fingerprint a Data Frame for Cache Validation
+#'
+#' Produces a cheap descriptor used to detect that the data underlying a
+#' blueprint has been swapped between renders. It is O(p), not O(n), so
+#' it can be checked on every cell evaluation without cost. It detects a
+#' change in shape or column names, not a change in values within an
+#' identically shaped frame; the latter is unsupported, as the blueprint
+#' is documented to require that its data remain unchanged.
+#'
+#' @param data Data frame, or NULL
+#'
+#' @return A list describing the data, or NULL
+#' @keywords internal
+data_fingerprint <- function(data) {
+  if (is.null(data)) {
+    return(NULL)
+  }
+
+  list(nrow = nrow(data), ncol = ncol(data), names = names(data))
+}
+
+#' Validate the Cache Against the Current Data
+#'
+#' Compares the data now being evaluated against the data that populated
+#' the cache, and empties the cache if they differ. The fingerprint is
+#' stored inside the cache environment itself, under a reserved name,
+#' because the blueprint is a plain list and a write to its metadata
+#' would not survive the function call.
+#'
+#' @param blueprint Table1Blueprint object
+#' @param data Data frame being evaluated
+#'
+#' @return TRUE if the cache is valid for this data, FALSE if it was
+#'   cleared, invisibly
+#' @keywords internal
+validate_stat_cache <- function(blueprint, data) {
+  cache <- blueprint$metadata$stat_cache
+  if (is.null(cache)) {
+    return(invisible(FALSE))
+  }
+
+  fingerprint <- data_fingerprint(data)
+  stored <- mget(".data_fingerprint",
+    envir = cache, ifnotfound = list(NULL), inherits = FALSE
+  )[[1]]
+
+  if (is.null(stored)) {
+    assign(".data_fingerprint", fingerprint, envir = cache)
+    return(invisible(TRUE))
+  }
+
+  if (!identical(stored, fingerprint)) {
+    clear_stat_cache(blueprint)
+    assign(".data_fingerprint", fingerprint, envir = cache)
+    return(invisible(FALSE))
+  }
+
+  invisible(TRUE)
 }
