@@ -43,3 +43,6 @@ Rplots.pdf
 
 # Built tarballs
 *.tgz
+
+# Machine-local Claude Code settings
+**/.claude/settings.local.json
