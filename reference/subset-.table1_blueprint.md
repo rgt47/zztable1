@@ -44,6 +44,15 @@ Assignment automatically manages memory by:
 
 - Validating cell objects before storage
 
+Assignment has value semantics. A blueprint keeps its cells and result
+cache in environments, which R does not copy when a blueprint is
+assigned to a second name, so before writing, the blueprint being
+modified receives its own copies of those environments. After
+`bp2 <- bp; bp2[i, j] <- value`, `bp` is unchanged, and a function that
+edits a blueprint it was passed does not alter the caller's object.
+Cached results for the cells that were not edited are carried over to
+the copy.
+
 ## Examples
 
 ``` r

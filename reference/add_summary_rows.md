@@ -53,4 +53,6 @@ add_summary_rows(
 
 ## Value
 
-The blueprint, modified in place.
+The blueprint with the summary rows added. The input blueprint is not
+modified, so the result must be assigned, for example
+`bp <- add_summary_rows(bp, ...)`.

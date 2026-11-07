@@ -554,7 +554,7 @@ cat("- Metadata keys: ", names(bp_small$metadata), "\n")
 
 - Metadata keys: formula options data_info data dimensions
   footnote_markers footnote_list created optimized version cell_count
-  theme stat_cache spanner_store summary_store
+  copy_on_write theme stat_cache spanner_store summary_store
 
 ## Best Practices
 
@@ -650,12 +650,12 @@ files.
 sessionInfo()
 ```
 
-R version 4.6.1 (2026-06-24) Platform: x86_64-pc-linux-gnu Running
-under: Ubuntu 24.04.5 LTS
+R version 4.6.2 (2026-10-29) Platform: x86_64-pc-linux-gnu Running
+under: Ubuntu 26.04.1 LTS
 
 Matrix products: default BLAS:
 /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 LAPACK:
-/usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;
+/usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;
 LAPACK version 3.12.0
 
 locale: \[1\] LC_CTYPE=C.UTF-8 LC_NUMERIC=C LC_TIME=C.UTF-8  
@@ -668,18 +668,18 @@ time zone: UTC tzcode source: system (glibc)
 attached base packages: \[1\] stats graphics grDevices utils datasets
 methods base
 
-other attached packages: \[1\] zztable1_0.6.0 kableExtra_1.4.1
+other attached packages: \[1\] zztable1_0.7.0 kableExtra_1.4.1
 htmltools_0.5.9
 
 loaded via a namespace (and not attached): \[1\] vctrs_0.7.3
 svglite_2.2.2 cli_3.6.6 knitr_1.52  
-\[5\] rlang_1.3.0 xfun_0.61 stringi_1.8.9 otel_0.2.0  
+\[5\] rlang_1.3.0 xfun_0.62 stringi_1.8.9 otel_0.3.0  
 \[9\] textshaping_1.0.5 jsonlite_2.0.0 glue_1.8.1 ragg_1.5.2  
 \[13\] sass_0.4.10 scales_1.4.0 rmarkdown_2.32 evaluate_1.0.5  
 \[17\] jquerylib_0.1.4 fastmap_1.2.0 yaml_2.3.12 lifecycle_1.0.5  
-\[21\] stringr_1.6.0 compiler_4.6.1 RColorBrewer_1.1-3 fs_2.1.0  
+\[21\] stringr_1.6.0 compiler_4.6.2 RColorBrewer_1.1-3 fs_2.1.0  
 \[25\] htmlwidgets_1.6.4 rstudioapi_0.19.0 farver_2.1.2
 systemfonts_1.3.2 \[29\] digest_0.6.39 viridisLite_0.4.3 R6_2.6.1
 pillar_1.11.1  
-\[33\] parallel_4.6.1 magrittr_2.0.5 bslib_0.12.0 tools_4.6.1  
+\[33\] parallel_4.6.2 magrittr_2.0.5 bslib_0.12.0 tools_4.6.2  
 \[37\] xml2_1.6.0 pkgdown_2.2.1 cachem_1.1.0 desc_1.4.3

@@ -51,8 +51,8 @@ bp <- table1(
   theme = "nejm"
 )
 
-add_spanner(bp, label = "Treatment Arms",
-            columns = c(2L, 3L))
+bp <- add_spanner(bp, label = "Treatment Arms",
+                  columns = c(2L, 3L))
 
 render_bp(bp)
 ```
@@ -73,10 +73,10 @@ bp2 <- table1(
   theme = "lancet"
 )
 
-add_spanner(bp2, label = "By Arm",
-            columns = c(2L, 3L), id = "arms")
-add_spanner(bp2, label = "Overall",
-            columns = 4L, id = "overall")
+bp2 <- add_spanner(bp2, label = "By Arm",
+                   columns = c(2L, 3L), id = "arms")
+bp2 <- add_spanner(bp2, label = "Overall",
+                   columns = 4L, id = "overall")
 
 render_bp(bp2, "lancet")
 ```
@@ -98,12 +98,12 @@ bp3 <- table1(
   theme = "jama"
 )
 
-add_spanner(bp3, label = "By Arm",
-            columns = c(2L, 3L), id = "by_arm")
-add_spanner(bp3, label = "Overall",
-            columns = 4L, id = "overall")
-add_spanner(bp3, label = "Patient Characteristics",
-            spanners = c("by_arm", "overall"))
+bp3 <- add_spanner(bp3, label = "By Arm",
+                   columns = c(2L, 3L), id = "by_arm")
+bp3 <- add_spanner(bp3, label = "Overall",
+                   columns = 4L, id = "overall")
+bp3 <- add_spanner(bp3, label = "Patient Characteristics",
+                   spanners = c("by_arm", "overall"))
 
 render_bp(bp3, "jama")
 ```
@@ -126,7 +126,7 @@ bp4 <- table1(
   theme = "nejm"
 )
 
-add_summary_rows(bp4,
+bp4 <- add_summary_rows(bp4,
   fns = list(
     "Group n" = function(x) sum(!is.na(x))
   ),
@@ -151,7 +151,7 @@ bp5 <- table1(
   theme = "lancet"
 )
 
-add_grand_summary_rows(bp5,
+bp5 <- add_grand_summary_rows(bp5,
   fns = list(
     "Overall Mean" = function(x) round(mean(x, na.rm = TRUE), 1)
   ),
@@ -177,14 +177,14 @@ bp6 <- table1(
   theme = "jama"
 )
 
-add_summary_rows(bp6,
+bp6 <- add_summary_rows(bp6,
   fns = list(
     "Subtotal n" = function(x) sum(!is.na(x))
   ),
   side = "bottom"
 )
 
-add_grand_summary_rows(bp6,
+bp6 <- add_grand_summary_rows(bp6,
   fns = list(
     "Grand Total n" = function(x) sum(!is.na(x))
   ),
@@ -210,21 +210,21 @@ bp7 <- table1(
   theme = "nejm"
 )
 
-add_spanner(bp7, label = "Randomised Arms",
-            columns = c(2L, 3L), id = "arms")
-add_spanner(bp7, label = "All",
-            columns = 4L, id = "all")
-add_spanner(bp7, label = "Participants",
-            spanners = c("arms", "all"))
+bp7 <- add_spanner(bp7, label = "Randomized Arms",
+                   columns = c(2L, 3L), id = "arms")
+bp7 <- add_spanner(bp7, label = "All",
+                   columns = 4L, id = "all")
+bp7 <- add_spanner(bp7, label = "Participants",
+                   spanners = c("arms", "all"))
 
-add_summary_rows(bp7,
+bp7 <- add_summary_rows(bp7,
   fns = list(
     "n obs" = function(x) sum(!is.na(x))
   ),
   side = "bottom"
 )
 
-add_grand_summary_rows(bp7,
+bp7 <- add_grand_summary_rows(bp7,
   fns = list(
     "Total n" = function(x) sum(!is.na(x))
   ),

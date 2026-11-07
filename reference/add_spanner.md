@@ -50,5 +50,17 @@ add_spanner(
 
 ## Value
 
-The blueprint, modified in place (spanner appended to
-`blueprint$metadata$spanners`).
+The blueprint with the spanner added. The input blueprint is not
+modified, so the result must be assigned, for example
+`bp <- add_spanner(bp, ...)`.
+
+## Examples
+
+``` r
+d <- data.frame(
+  arm = factor(rep(c("A", "B"), 20)),
+  age = seq(30, 69)
+)
+bp <- table1(arm ~ age, data = d, pvalue = FALSE)
+bp <- add_spanner(bp, label = "Treatment", columns = 2:3)
+```

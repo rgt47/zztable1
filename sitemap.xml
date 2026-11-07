@@ -54,6 +54,7 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/clear_stat_cache.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/collect_raw_values.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/combine_row_content.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/copy_env.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_cell_data_by_type.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_cell_key.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/create_cell_keys_vectorized.html</loc></url>
@@ -68,6 +69,7 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/create_theme_bundle.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/customize_theme.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/data_fingerprint.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/detach_blueprint.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/detect_row_groups.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/detect_variable_type.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/dim.table1_blueprint.html</loc></url>
@@ -152,6 +154,7 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/populate_variable_cells_simple.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/populate_variable_cells_stratified.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/populate_variables_for_stratum.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/prepare_for_write.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/print.cell.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/print.table1_blueprint.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/print.table_dimensions.html</loc></url>

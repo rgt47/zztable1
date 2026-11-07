@@ -41,4 +41,5 @@ add_grand_summary_rows(
 
 ## Value
 
-The blueprint, modified in place.
+The blueprint with the grand summary rows added. The input blueprint is
+not modified, so the result must be assigned.
