@@ -157,6 +157,9 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
 
   # Step 4: Populate and theme
   blueprint <- finalize_blueprint(blueprint, components$data, components$dimensions, theme)
+
+  # Population is complete; from here on, edits copy before writing.
+  blueprint$metadata$copy_on_write <- TRUE
   return(blueprint)
 }
 #' Parse Formula and Analyze Dimensions (Combined)
@@ -435,13 +438,17 @@ create_metadata <- function(formula, options, data_info, dimensions) {
     # Cell population tracking
     cell_count = 0L,
 
+    # Off during population; table1() turns it on before returning
+    copy_on_write = FALSE,
+
     # Theme information (set later)
     theme = NULL,
 
     # Caching infrastructure (Phase 5.2)
     stat_cache = new.env(hash = TRUE, parent = emptyenv()),
 
-    # Extension stores (environment-based for reference semantics)
+    # Extension stores. Environments, so population can write in place;
+    # user-facing modifiers copy them first (see prepare_for_write()).
     spanner_store = new.env(hash = TRUE, parent = emptyenv()),
     summary_store = new.env(hash = TRUE, parent = emptyenv())
   )
@@ -1618,6 +1625,7 @@ build_transposed_blueprint <- function(formula, data,
   )
   bp$row_names <- paste0("group_", seq_along(group_levels))
   bp$col_names <- c(grp_var, rhs_vars)
+  bp$metadata$copy_on_write <- FALSE
 
   for (i in seq_along(group_levels)) {
     bp[i, 1L] <- Cell(type = "content", content = group_levels[i])
@@ -1643,5 +1651,6 @@ build_transposed_blueprint <- function(formula, data,
   )
   bp$metadata$data <- data
   if (!is.null(title)) bp$metadata$title <- title
+  bp$metadata$copy_on_write <- TRUE
   bp
 }

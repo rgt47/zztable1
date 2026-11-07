@@ -127,6 +127,7 @@ new_table1_blueprint <- function(nrows, ncols,
                                    data_info = list(),
                                    cell_count = 0L,
                                    created = Sys.time(),
+                                   copy_on_write = TRUE,
                                    stat_cache = new.env(hash = TRUE, parent = emptyenv()),
                                    spanner_store = new.env(hash = TRUE, parent = emptyenv()),
                                    summary_store = new.env(hash = TRUE, parent = emptyenv())
@@ -347,6 +348,15 @@ validate_table1_blueprint <- function(x, strict = FALSE) {
 #'   \item Validating cell objects before storage
 #' }
 #'
+#' Assignment has value semantics. A blueprint keeps its cells and
+#' result cache in environments, which R does not copy when a blueprint
+#' is assigned to a second name, so before writing, the blueprint being
+#' modified receives its own copies of those environments. After
+#' \code{bp2 <- bp; bp2[i, j] <- value}, \code{bp} is unchanged, and a
+#' function that edits a blueprint it was passed does not alter the
+#' caller's object. Cached results for the cells that were not edited
+#' are carried over to the copy.
+#'
 #' @examples
 #' bp <- Table1Blueprint(5, 3)
 #'
@@ -388,6 +398,15 @@ validate_table1_blueprint <- function(x, strict = FALSE) {
   if (!is.null(value) && !inherits(value, "cell")) {
     stop("Value must be a Cell object or NULL", call. = FALSE)
   }
+
+  # Blueprints returned to users have value semantics: modifying one
+  # binding must not change another binding to the same blueprint.
+  # The cells and stores are environments, which R does not copy on
+  # assignment, so the blueprint being modified receives its own
+  # copies first. table1() switches this off while it populates cells,
+  # because its helpers rely on in-place writes and copying on every
+  # cell would make construction quadratic in the number of cells.
+  x <- prepare_for_write(x)
 
   # Efficient assignment with hash table
   if (inherits(x$cells, "environment")) {
@@ -431,6 +450,64 @@ validate_table1_blueprint <- function(x, strict = FALSE) {
   }
 
   return(x)
+}
+
+#' Copy an Environment
+#'
+#' Shallow copy: bindings are duplicated, but the objects they refer
+#' to are shared until R's own copy-on-modify duplicates them.
+#'
+#' @param e An environment
+#'
+#' @return A new environment with the same bindings and parent
+#' @keywords internal
+copy_env <- function(e) {
+  list2env(
+    as.list(e, all.names = TRUE, sorted = FALSE),
+    envir = new.env(hash = TRUE, parent = parent.env(e))
+  )
+}
+
+#' Give a Blueprint Its Own Environments
+#'
+#' Replaces the cell environment and the stat_cache, spanner_store, and
+#' summary_store environments with copies, so that later in-place
+#' writes do not reach any other binding that shared them. Cached
+#' results are carried over, so cells that are not subsequently edited
+#' are still served from the cache.
+#'
+#' @param x A table1_blueprint
+#'
+#' @return The blueprint with copied environments
+#' @keywords internal
+detach_blueprint <- function(x) {
+  if (is.environment(x$cells)) {
+    x$cells <- copy_env(x$cells)
+  }
+  for (store in c("stat_cache", "spanner_store", "summary_store")) {
+    if (is.environment(x$metadata[[store]])) {
+      x$metadata[[store]] <- copy_env(x$metadata[[store]])
+    }
+  }
+  x
+}
+
+#' Prepare a Blueprint for Modification
+#'
+#' Every function that writes to a blueprint's environments calls this
+#' first. When copy-on-write is enabled (all blueprints returned to
+#' users), the blueprint receives its own environments so that the
+#' write cannot reach another binding to the same blueprint.
+#'
+#' @param x A table1_blueprint
+#'
+#' @return The blueprint, safe to modify
+#' @keywords internal
+prepare_for_write <- function(x) {
+  if (isTRUE(x$metadata$copy_on_write)) {
+    x <- detach_blueprint(x)
+  }
+  x
 }
 
 #' Print Method for Blueprint

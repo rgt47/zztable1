@@ -6,9 +6,10 @@
 # objects. Summary row definitions are stored as metadata and
 # evaluated lazily at render time against the actual cell data.
 #
-# Storage:
-#   blueprint$metadata$summary_rows  -- per-group summary definitions
-#   blueprint$metadata$grand_summary -- table-wide summary definitions
+# Storage: blueprint$metadata$summary_store -- an environment holding
+# per-group ("group_<k>") and table-wide ("grand_<k>") summary
+# definitions. Functions here return a modified copy of the blueprint;
+# the caller must assign the result.
 #
 # ============================================================================
 
@@ -34,12 +35,15 @@
 #'   computed value before display. Receives a numeric value,
 #'   returns a character string.
 #'
-#' @return The blueprint, modified in place.
+#' @return The blueprint with the summary rows added. The input
+#'   blueprint is not modified, so the result must be assigned, for
+#'   example \code{bp <- add_summary_rows(bp, ...)}.
 #' @export
 add_summary_rows <- function(blueprint, fns, columns = NULL,
                              side = "bottom", groups = NULL,
                              fmt_fn = NULL) {
   stopifnot(inherits(blueprint, "table1_blueprint"))
+  blueprint <- prepare_for_write(blueprint)
   stopifnot(is.list(fns), length(fns) > 0)
   stopifnot(side %in% c("top", "bottom"))
 
@@ -62,7 +66,7 @@ add_summary_rows <- function(blueprint, fns, columns = NULL,
   key <- paste0("group_", length(ls(store, all.names = TRUE)) + 1L)
   assign(key, summary_def, envir = store)
 
-  invisible(blueprint)
+  blueprint
 }
 
 #' Add Grand Summary Rows to a Blueprint
@@ -79,11 +83,13 @@ add_summary_rows <- function(blueprint, fns, columns = NULL,
 #'   (default) or \code{"top"}.
 #' @param fmt_fn Optional formatting function for computed values.
 #'
-#' @return The blueprint, modified in place.
+#' @return The blueprint with the grand summary rows added. The input
+#'   blueprint is not modified, so the result must be assigned.
 #' @export
 add_grand_summary_rows <- function(blueprint, fns, columns = NULL,
                                    side = "bottom", fmt_fn = NULL) {
   stopifnot(inherits(blueprint, "table1_blueprint"))
+  blueprint <- prepare_for_write(blueprint)
   stopifnot(is.list(fns), length(fns) > 0)
   stopifnot(side %in% c("top", "bottom"))
 
@@ -105,7 +111,7 @@ add_grand_summary_rows <- function(blueprint, fns, columns = NULL,
   key <- paste0("grand_", length(ls(store, all.names = TRUE)) + 1L)
   assign(key, grand_def, envir = store)
 
-  invisible(blueprint)
+  blueprint
 }
 
 

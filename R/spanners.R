@@ -6,8 +6,10 @@
 # objects. Spanners group columns under shared labels and can be nested
 # to produce multi-level column hierarchies.
 #
-# Storage: blueprint$metadata$spanners -- a list of spanner definitions,
-# each with label, columns, id, level, and optional parent_id.
+# Storage: blueprint$metadata$spanner_store -- an environment of spanner
+# definitions keyed by id, each with label, columns, id, level, and
+# optional child spanners. Functions here return a modified copy of the
+# blueprint; the caller must assign the result.
 #
 # ============================================================================
 
@@ -30,12 +32,22 @@
 #'   Normally computed automatically; set manually only to force a
 #'   specific position.
 #'
-#' @return The blueprint, modified in place (spanner appended to
-#'   \code{blueprint$metadata$spanners}).
+#' @return The blueprint with the spanner added. The input blueprint
+#'   is not modified, so the result must be assigned, for example
+#'   \code{bp <- add_spanner(bp, ...)}.
+#'
+#' @examples
+#' d <- data.frame(
+#'   arm = factor(rep(c("A", "B"), 20)),
+#'   age = seq(30, 69)
+#' )
+#' bp <- table1(arm ~ age, data = d, pvalue = FALSE)
+#' bp <- add_spanner(bp, label = "Treatment", columns = 2:3)
 #' @export
 add_spanner <- function(blueprint, label, columns = NULL,
                         id = NULL, spanners = NULL, level = NULL) {
   stopifnot(inherits(blueprint, "table1_blueprint"))
+  blueprint <- prepare_for_write(blueprint)
 
   store <- blueprint$metadata$spanner_store
   existing <- as.list(store)
@@ -74,7 +86,7 @@ add_spanner <- function(blueprint, label, columns = NULL,
 
   assign(id, spanner_def, envir = store)
 
-  invisible(blueprint)
+  blueprint
 }
 
 
@@ -88,10 +100,13 @@ add_spanner <- function(blueprint, label, columns = NULL,
 #' @param blueprint A table1_blueprint object
 #' @param delim Single character delimiter (default \code{"."})
 #'
-#' @return The blueprint with spanners added.
+#' @return The blueprint with spanners added and the grouped columns
+#'   relabeled. The input blueprint is not modified, so the result must
+#'   be assigned.
 #' @export
 add_spanner_delim <- function(blueprint, delim = ".") {
   stopifnot(inherits(blueprint, "table1_blueprint"))
+  blueprint <- prepare_for_write(blueprint)
 
   col_names <- blueprint$col_names
   groups <- list()
@@ -119,11 +134,11 @@ add_spanner_delim <- function(blueprint, delim = ".") {
     for (j in seq_along(info$indices)) {
       blueprint$col_names[info$indices[j]] <- info$short[j]
     }
-    add_spanner(blueprint, label = group_label,
-                columns = info$indices)
+    blueprint <- add_spanner(blueprint, label = group_label,
+                             columns = info$indices)
   }
 
-  invisible(blueprint)
+  blueprint
 }
 
 

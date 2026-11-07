@@ -12,7 +12,9 @@ add_spanner_delim(blueprint, delim = ".")
 \item{delim}{Single character delimiter (default \code{"."})}
 }
 \value{
-The blueprint with spanners added.
+The blueprint with spanners added and the grouped columns
+  relabeled. The input blueprint is not modified, so the result must
+  be assigned.
 }
 \description{
 Automatically generates spanners by splitting column names on a

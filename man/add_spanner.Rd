@@ -34,10 +34,19 @@ Normally computed automatically; set manually only to force a
 specific position.}
 }
 \value{
-The blueprint, modified in place (spanner appended to
-  \code{blueprint$metadata$spanners}).
+The blueprint with the spanner added. The input blueprint
+  is not modified, so the result must be assigned, for example
+  \code{bp <- add_spanner(bp, ...)}.
 }
 \description{
 Groups one or more columns under a shared header label. Spanners
 can reference other spanners by id to create nested hierarchies.
+}
+\examples{
+d <- data.frame(
+  arm = factor(rep(c("A", "B"), 20)),
+  age = seq(30, 69)
+)
+bp <- table1(arm ~ age, data = d, pvalue = FALSE)
+bp <- add_spanner(bp, label = "Treatment", columns = 2:3)
 }

@@ -26,7 +26,8 @@ summarize. Defaults to all data columns.}
 \item{fmt_fn}{Optional formatting function for computed values.}
 }
 \value{
-The blueprint, modified in place.
+The blueprint with the grand summary rows added. The input
+  blueprint is not modified, so the result must be assigned.
 }
 \description{
 Defines aggregation functions computed over all data rows in the

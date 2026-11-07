@@ -1,3 +1,54 @@
+# zztable1 0.7.0
+
+## Breaking changes
+
+* `add_spanner()`, `add_spanner_delim()`, `add_summary_rows()`, and
+  `add_grand_summary_rows()` no longer modify their input. They return
+  a modified blueprint, which must be assigned:
+
+  ```r
+  # before (0.6.0)
+  add_spanner(bp, label = "Treatment", columns = 2:3)
+
+  # now
+  bp <- add_spanner(bp, label = "Treatment", columns = 2:3)
+  ```
+
+  Code written in the old style still runs without error, but the
+  spanner or summary row is discarded. This brings every function that
+  modifies a blueprint under the same value semantics as `[<-` (below),
+  matching the convention of `gt` and `gtsummary`. The return value is
+  now visible rather than invisible.
+
+## Correctness fixes
+
+* `add_spanner_delim()` lost its column relabeling. It renamed the
+  grouped columns on a local copy of the blueprint and returned that
+  copy invisibly, while its spanners were written to the shared store.
+  Called in the documented in-place style, it added the spanners but
+  left the original column names. Callers now assign the result, which
+  carries both.
+
+* **Editing a copy of a blueprint changed the original.** A blueprint
+  keeps its cells, result cache, and spanner and summary stores in
+  environments, and R does not copy environments on assignment. After
+  `bp2 <- bp; bp2[i, j] <- cell`, both names showed the edit, and a
+  function that edited a blueprint it was given altered the caller's
+  object. Because `metadata` is an ordinary list, adding or removing a
+  cell through one name also left the other name's `cell_count` out of
+  step with its cells. `[<-.table1_blueprint` and the four functions
+  above now give the blueprint being modified its own copies of those
+  environments before writing (copy-on-write), carrying cached results
+  over so that only the edited cell is recomputed. `table1()` disables the copy while it populates
+  cells and enables it before returning, so construction cost is
+  unchanged. An edit on a 450-cell blueprint costs about 0.19 ms with
+  the copy against 0.012 ms without it (compiled package, mean of 500
+  edits).
+
+* Two blueprints with identical content still compare unequal with
+  `identical()` and `all.equal()`, because environments are compared
+  by identity. Compare rendered output instead.
+
 # zztable1 0.6.0
 
 ## Correctness fixes

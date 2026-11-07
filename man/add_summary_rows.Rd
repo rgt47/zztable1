@@ -35,7 +35,9 @@ computed value before display. Receives a numeric value,
 returns a character string.}
 }
 \value{
-The blueprint, modified in place.
+The blueprint with the summary rows added. The input
+  blueprint is not modified, so the result must be assigned, for
+  example \code{bp <- add_summary_rows(bp, ...)}.
 }
 \description{
 Defines aggregation functions that are computed at render time for
