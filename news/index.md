@@ -34,6 +34,19 @@
   so the NEJM-specific formatting that is keyed on the theme name (for
   example, mean ± SD) does not carry over to it.
 
+### Packaging
+
+- The source tarball exceeded CRAN’s 5 MB limit (5.85 MB) because all 12
+  vignettes used `html_document`, which embeds about 0.9 MB of Bootstrap
+  and jQuery in every built HTML file. The vignettes now use
+  [`rmarkdown::html_vignette`](https://pkgs.rstudio.com/rmarkdown/reference/html_vignette.html),
+  which reduces the tarball to 2.28 MB and the installed `doc/`
+  directory from 12.3 MB to 1.8 MB. No vignette content was removed. The
+  floating table of contents and the ‘flatly’ Bootstrap theme are no
+  longer applied; code folding is retained. `rmarkdown (>= 2.14)` is now
+  required in Suggests, the first version whose `html_vignette()`
+  supports `code_folding`.
+
 ## zztable1 0.7.0
 
 ### Breaking changes

@@ -52,6 +52,10 @@
 <p>A custom theme derived from <code>"nejm"</code> is registered under its own name, so the NEJM-specific formatting that is keyed on the theme name (for example, mean ± SD) does not carry over to it.</p>
 </li>
 </ul></div>
+<div class="section level3">
+<h3 id="packaging-development-version">Packaging<a class="anchor" aria-label="anchor" href="#packaging-development-version"></a></h3>
+<ul><li>The source tarball exceeded CRAN’s 5 MB limit (5.85 MB) because all 12 vignettes used <code>html_document</code>, which embeds about 0.9 MB of Bootstrap and jQuery in every built HTML file. The vignettes now use <code><a href="https://pkgs.rstudio.com/rmarkdown/reference/html_vignette.html" class="external-link">rmarkdown::html_vignette</a></code>, which reduces the tarball to 2.28 MB and the installed <code>doc/</code> directory from 12.3 MB to 1.8 MB. No vignette content was removed. The floating table of contents and the ‘flatly’ Bootstrap theme are no longer applied; code folding is retained. <code>rmarkdown (&gt;= 2.14)</code> is now required in Suggests, the first version whose <code>html_vignette()</code> supports <code>code_folding</code>.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.0" id="zztable1-070">zztable1 0.7.0<a class="anchor" aria-label="anchor" href="#zztable1-070"></a></h2>
