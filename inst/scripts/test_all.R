@@ -467,11 +467,11 @@ test_results$missing_data <- run_test(
 test_results$invalid_layout <- run_test(
   "Invalid layout parameter handling",
   function() {
-    # Should work but may warn
-    bp <- suppressWarnings(
-      table1(transmission ~ mpg, data = mtcars_data, layout = "invalid")
+    result <- tryCatch(
+      table1(transmission ~ mpg, data = mtcars_data, layout = "invalid"),
+      error = function(e) "error"
     )
-    return(inherits(bp, "table1_blueprint"))
+    return(identical(result, "error"))
   }
 )
 

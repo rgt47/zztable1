@@ -72,9 +72,7 @@ register_theme <- function(theme_obj, overwrite = FALSE) {
 #'
 #' @export
 unregister_theme <- function(theme_name) {
-  builtin_themes <- c("console", "nejm", "lancet", "jama", "bmj")
-
-  if (theme_name %in% builtin_themes) {
+  if (theme_name %in% builtin_theme_names()) {
     stop(
       "Cannot unregister built-in theme '", theme_name, "'",
       call. = FALSE
@@ -105,9 +103,19 @@ unregister_theme <- function(theme_name) {
 #'
 #' @export
 list_custom_themes <- function() {
-  builtin <- c("console", "nejm", "lancet", "jama", "bmj")
-  all_themes <- list_available_themes()
-  setdiff(all_themes, builtin)
+  setdiff(list_available_themes(), builtin_theme_names())
+}
+
+#' Names of the Built-in Themes
+#'
+#' Derived from \code{.create_builtin_themes()} so that the built-in set
+#' has a single source; the two hard-coded copies it replaces omitted
+#' 'simple'.
+#'
+#' @return Character vector of built-in theme names
+#' @keywords internal
+builtin_theme_names <- function() {
+  names(.create_builtin_themes())
 }
 
 #' Get theme metadata

@@ -307,9 +307,11 @@ process_footnote_type <- function(footnote_spec, type, x_vars, counter) {
       text <- c(text, footnote_spec[[col]])
       counter <- counter + 1L
     }
-  } else if (type == "general" && is.character(footnote_spec)) {
-    # General footnotes have no markers
-    text <- c(text, footnote_spec)
+  } else if (type == "general" &&
+               (is.character(footnote_spec) || is.list(footnote_spec))) {
+    # The vignettes and README pass general notes both as a character
+    # vector and as a list of strings; a list was previously dropped.
+    text <- c(text, as.character(unlist(footnote_spec, use.names = FALSE)))
   }
 
   list(

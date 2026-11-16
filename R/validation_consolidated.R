@@ -97,6 +97,21 @@ validate_inputs <- function(formula, data, strata = NULL, theme = "console", foo
     )
     abort_or_stop(msg, class = "invalid_footnotes_type")
   }
+  # Only these three keys have a code path; any other key (notably
+  # `cells`, which has no marker or rendering support) used to vanish
+  # without trace.
+  unsupported_footnotes <- setdiff(
+    names(footnotes), c("variables", "columns", "general")
+  )
+  if (length(unsupported_footnotes) > 0) {
+    warning(
+      sprintf(
+        "Unsupported footnote type(s) ignored: %s. Supported types are 'variables', 'columns', and 'general'.",
+        paste0("'", unsupported_footnotes, "'", collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
 
   # Data quality checks (warnings, not errors)
   check_data_quality(data, all_vars)
@@ -114,6 +129,38 @@ validate_inputs <- function(formula, data, strata = NULL, theme = "console", foo
   }
 
   invisible(TRUE)
+}
+
+#' Validate a Single Choice Argument
+#'
+#' Requires an exact match (no partial matching, unlike
+#' \code{match.arg()}) so that a typo cannot silently select a different
+#' option.
+#'
+#' @param value Supplied value
+#' @param choices Character vector of allowed values
+#' @param arg Argument name used in the error message
+#'
+#' @return \code{value}, invisibly, if valid; otherwise an error
+#' @keywords internal
+validate_choice <- function(value, choices, arg) {
+  if (!is.character(value) || length(value) != 1 || is.na(value) ||
+      !value %in% choices) {
+    shown <- if (is.character(value) && length(value) == 1) {
+      paste0("'", value, "'")
+    } else {
+      paste0("an object of class ", class(value)[1], " and length ",
+             length(value))
+    }
+    stop(
+      sprintf(
+        "'%s' must be one of %s, not %s",
+        arg, paste0("'", choices, "'", collapse = ", "), shown
+      ),
+      call. = FALSE
+    )
+  }
+  invisible(value)
 }
 
 #' Quick Data Quality Check

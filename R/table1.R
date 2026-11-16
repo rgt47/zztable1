@@ -41,12 +41,21 @@ NULL
 #' @param totals Logical indicating whether to include totals column
 #' @param title Optional table title
 #' @param fname Output filename (for export functions)
-#' @param layout Output format ("console", "latex", "html")
+#' @param layout Output format, one of "console", "latex", or "html".
+#'   Any other value is an error.
 #' @param numeric_summary Summary type for numeric variables
-#' @param footnotes Footnote specifications
+#' @param footnotes Footnote specifications: a list with any of the
+#'   elements \code{variables} (named list of notes keyed by variable
+#'   name), \code{columns} (named list keyed by column name), and
+#'   \code{general} (a character vector or a list of strings, printed
+#'   without markers). Other elements, including \code{cells}, are not
+#'   supported; they are ignored with a warning.
 #' @param theme Journal theme ("console", "nejm", "lancet", "jama", "bmj", "simple")
-#' @param continuous_test Statistical test for continuous variables ("ttest", "anova", "welch", "kruskal")
-#' @param categorical_test Statistical test for categorical variables ("fisher", "chisq")
+#' @param continuous_test Statistical test for continuous variables, one
+#'   of "ttest", "anova", "welch", or "kruskal". Any other value is an
+#'   error.
+#' @param categorical_test Statistical test for categorical variables,
+#'   one of "fisher" or "chisq". Any other value is an error.
 #' @param transpose Logical; if \code{TRUE}, place groups as rows and
 #'   variables as columns (gt-style summary layout). Requires
 #'   all-numeric RHS variables and disables p-values, totals,
@@ -103,6 +112,13 @@ table1 <- function(formula, data, strata = NULL, block = NULL,
     pvalue <- FALSE
     totals <- TRUE
   }
+
+  validate_choice(layout, c("console", "latex", "html"), "layout")
+  validate_choice(
+    continuous_test, c("ttest", "anova", "welch", "kruskal"),
+    "continuous_test"
+  )
+  validate_choice(categorical_test, c("fisher", "chisq"), "categorical_test")
 
   if (isTRUE(transpose)) {
     return(build_transposed_blueprint(
@@ -1033,7 +1049,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type,
           # whether this variable differs across groups. A variable
           # whose overall F-test was 1e-16 could appear as p = 0.013
           # because the difference sat in the third group. The overall
-          # F is the correct generalisation of the two-group t-test and
+          # F is the correct generalization of the two-group t-test and
           # reduces to it exactly when there are two groups.
           pv <- if (ng > 2) {
             anova(fit)$`Pr(>F)`[1]
@@ -1137,7 +1153,7 @@ create_pvalue_cell <- function(var_name, grp_var, test_type,
           # whether this variable differs across groups. A variable
           # whose overall F-test was 1e-16 could appear as p = 0.013
           # because the difference sat in the third group. The overall
-          # F is the correct generalisation of the two-group t-test and
+          # F is the correct generalization of the two-group t-test and
           # reduces to it exactly when there are two groups.
           pv <- if (ng > 2) {
             anova(fit)$`Pr(>F)`[1]

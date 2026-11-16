@@ -789,7 +789,7 @@ bp <- table1(
   efficiency ~ hp + wt + qsec + cylinders,
   data = mtcars,
   theme = "lancet",
-  continuous_test = "wilcox",
+  continuous_test = "kruskal",
   footnotes = list(
     variables = list(
       hp = "Gross horsepower",
