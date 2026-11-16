@@ -3,7 +3,7 @@ title: "Simple Table 1 Example"
 author: "zztable1"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+  rmarkdown::html_vignette:
     toc: true
 vignette: >
   %\VignetteIndexEntry{Simple Table 1 Example}
