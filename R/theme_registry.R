@@ -25,39 +25,36 @@
 #' - css_properties: List of CSS properties
 #' - dimension_rules: List of dimension rules (optional)
 #'
+#' The theme is stored under its `theme_name` (or `name` when `theme_name`
+#' is absent) and can then be used with `table1(..., theme = theme_name)`.
+#' The registry lasts for the R session.
+#'
 #' @examples
-#' \dontrun{
 #' my_theme <- create_custom_theme("MyTheme", base_theme = "nejm")
 #' register_theme(my_theme)
-#' }
+#' "MyTheme" %in% list_available_themes()
+#' unregister_theme("MyTheme")
 #'
 #' @export
 register_theme <- function(theme_obj, overwrite = FALSE) {
   # Validate theme structure
   validate_theme_structure(theme_obj)
 
-  # Get registry
-  ns <- getNamespace("zztable1")
-  registry <- get0(".theme_registry", envir = ns, inherits = FALSE)
+  key <- theme_obj$theme_name %||% theme_obj$name
+  registry <- get_theme_registry()
 
-  # Check if already registered
-  if (!is.null(registry) && theme_obj$theme_name %in% names(registry)) {
-    if (!overwrite) {
-      message(
-        "Theme '", theme_obj$theme_name, "' already registered. ",
-        "Use overwrite = TRUE to replace."
-      )
-      return(invisible(theme_obj))
-    }
+  if (key %in% names(registry) && !overwrite) {
+    message(
+      "Theme '", key, "' already registered. ",
+      "Use overwrite = TRUE to replace."
+    )
+    return(invisible(theme_obj))
   }
 
-  # Add to registry (if built-in registry exists)
-  if (!is.null(registry)) {
-    registry[[theme_obj$theme_name]] <- theme_obj
-    assign(".theme_registry", registry, envir = ns)
-  }
+  registry[[key]] <- theme_obj
+  set_theme_registry(registry)
 
-  message("Theme '", theme_obj$theme_name, "' registered successfully")
+  message("Theme '", key, "' registered successfully")
   invisible(theme_obj)
 }
 
@@ -70,9 +67,8 @@ register_theme <- function(theme_obj, overwrite = FALSE) {
 #' @return Invisibly returns TRUE if successful
 #'
 #' @examples
-#' \dontrun{
+#' register_theme(create_custom_theme("MyCustomTheme"))
 #' unregister_theme("MyCustomTheme")
-#' }
 #'
 #' @export
 unregister_theme <- function(theme_name) {
@@ -85,12 +81,11 @@ unregister_theme <- function(theme_name) {
     )
   }
 
-  ns <- getNamespace("zztable1")
-  registry <- get0(".theme_registry", envir = ns, inherits = FALSE)
+  registry <- get_theme_registry()
 
-  if (!is.null(registry) && theme_name %in% names(registry)) {
+  if (theme_name %in% names(registry)) {
     registry[[theme_name]] <- NULL
-    assign(".theme_registry", registry, envir = ns)
+    set_theme_registry(registry)
     message("Theme '", theme_name, "' unregistered")
   }
 

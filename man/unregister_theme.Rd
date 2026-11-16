@@ -16,8 +16,7 @@ Invisibly returns TRUE if successful
 Removes a theme from the registry. Cannot unregister built-in themes.
 }
 \examples{
-\dontrun{
+register_theme(create_custom_theme("MyCustomTheme"))
 unregister_theme("MyCustomTheme")
-}
 
 }

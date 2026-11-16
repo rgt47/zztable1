@@ -10,6 +10,7 @@ get_theme_registry()
 Named list of all registered themes
 }
 \description{
-Internal function to retrieve the theme registry from package environment.
+Internal function to retrieve the theme registry from the package-level
+theme store, initializing it with the built-in themes on first use.
 }
 \keyword{internal}

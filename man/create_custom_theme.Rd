@@ -30,15 +30,16 @@ create_custom_theme(
 \item{border_color}{Border color}
 }
 \value{
-Custom theme object
+Custom theme object. Its `theme_name` is set to `name`, so the
+  theme is registered under `name` by [register_theme()] and can then be
+  selected with `table1(..., theme = name)`.
 }
 \description{
 Creates a new custom theme based on specified parameters.
 Can be used as a starting point for modifications.
 }
 \examples{
-\dontrun{
 custom <- create_custom_theme("MyTheme", base_theme = "nejm")
-}
+custom$theme_name
 
 }
