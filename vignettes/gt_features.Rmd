@@ -4,9 +4,8 @@ subtitle: "Column Spanners and Summary Rows"
 author: "Ronald (Ryy) G. Thomas"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+  rmarkdown::html_vignette:
     toc: true
-    toc_float: true
   pdf_document:
     toc: true
     extra_dependencies:

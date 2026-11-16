@@ -14,7 +14,7 @@ Depends: R (>= 3.5.0)
 Imports: stats, tools, utils
 Suggests:
     knitr,
-    rmarkdown,
+    rmarkdown (>= 2.14),
     tinytest,
     parallel,
     devtools,
