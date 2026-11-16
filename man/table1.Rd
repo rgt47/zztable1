@@ -46,17 +46,26 @@ table1(
 
 \item{fname}{Output filename (for export functions)}
 
-\item{layout}{Output format ("console", "latex", "html")}
+\item{layout}{Output format, one of "console", "latex", or "html".
+Any other value is an error.}
 
 \item{numeric_summary}{Summary type for numeric variables}
 
-\item{footnotes}{Footnote specifications}
+\item{footnotes}{Footnote specifications: a list with any of the
+elements \code{variables} (named list of notes keyed by variable
+name), \code{columns} (named list keyed by column name), and
+\code{general} (a character vector or a list of strings, printed
+without markers). Other elements, including \code{cells}, are not
+supported; they are ignored with a warning.}
 
 \item{theme}{Journal theme ("console", "nejm", "lancet", "jama", "bmj", "simple")}
 
-\item{continuous_test}{Statistical test for continuous variables ("ttest", "anova", "welch", "kruskal")}
+\item{continuous_test}{Statistical test for continuous variables, one
+of "ttest", "anova", "welch", or "kruskal". Any other value is an
+error.}
 
-\item{categorical_test}{Statistical test for categorical variables ("fisher", "chisq")}
+\item{categorical_test}{Statistical test for categorical variables,
+one of "fisher" or "chisq". Any other value is an error.}
 
 \item{transpose}{Logical; if \code{TRUE}, place groups as rows and
 variables as columns (gt-style summary layout). Requires

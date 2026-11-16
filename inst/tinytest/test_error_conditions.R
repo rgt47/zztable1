@@ -67,10 +67,10 @@ expect_warning(
 )
 
 # Invalid layout
-bp <- suppressWarnings(
-  table1(transmission ~ mpg, data = mtcars, layout = "invalid")
+expect_error(
+  table1(transmission ~ mpg, data = mtcars, layout = "invalid"),
+  "'layout' must be one of"
 )
-expect_inherits(bp, "table1_blueprint")  # Should work but warn
 
 
 # Invalid dimensions
