@@ -14,7 +14,7 @@ not already been reported. When opening a new issue, include:
 - The output of
   [`sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html).
 - The version of zztable1 in use (`packageVersion('zztable1')`).
-- The expected behaviour and the observed behaviour.
+- The expected behavior and the observed behavior.
 - For rendering issues, the target output format (console, HTML, LaTeX)
   and the theme in use.
 
@@ -39,9 +39,9 @@ points and a brief design discussion saves rework.
 3.  Make your changes. Keep commits focused; prefer many small commits
     over one large one.
 
-4.  Add or update tests in `tests/testthat/`. New exported functions
-    require tests. Include cases for each output format (console, HTML,
-    LaTeX) when adding rendering features.
+4.  Add or update tests in `inst/tinytest/` (files named `test_*.R`).
+    New exported functions require tests. Include cases for each output
+    format (console, HTML, LaTeX) when adding rendering features.
 
 5.  Run
     [`devtools::document()`](https://devtools.r-lib.org/reference/document.html)
@@ -76,11 +76,12 @@ points and a brief design discussion saves rework.
 
 ## Tests
 
-Tests use `testthat` 3rd edition. Run with:
+Tests use `tinytest`. Run with:
 
 ``` r
 
-devtools::test()
+pkgload::load_all('.')
+tinytest::run_test_dir('inst/tinytest')
 ```
 
 For coverage reports:
@@ -92,7 +93,7 @@ covr::package_coverage()
 
 ## Vignettes
 
-If your change affects user-facing behaviour, update the corresponding
+If your change affects user-facing behavior, update the corresponding
 vignette in `vignettes/`. Vignettes that produce PDF output are not
 committed; only the `.Rmd` source is tracked. Verify the vignette
 builds:

@@ -6,24 +6,19 @@
 
 `zztable1` provides an architecture for creating publication-ready
 summary tables (Table 1) commonly used in biomedical research and
-clinical trials. The package maintains full compatibility with the
-original `zztable1` interface while providing enhanced features through
-a lazy evaluation blueprint system.
+clinical trials, built on a lazy evaluation blueprint system.
 
 ### Key Features
 
-- **Lazy Evaluation**: Deferred blueprint creation with computation on
-  demand
+- **Lazy Evaluation**: Statistics are computed when the table is
+  rendered, and cached for reuse
 - **Journal Theming**: NEJM, Lancet, JAMA, BMJ formatting styles
-- **Advanced Footnotes**: Variable-specific, targeted footnote system
-- **Multiple Formats**: Console, LaTeX, and HTML output with proper
-  column headers
-- **Performance**: Efficient handling of large datasets
+- **Footnotes**: Variable-specific, column, and general footnotes
+- **Multiple Formats**: Console, LaTeX, and HTML output (column headers
+  and group sizes in LaTeX and HTML; the console renderer currently
+  prints no header row)
 - **Configurable Statistics**: Built-in and custom summary functions
 - **Stratified Analysis**: Subgroup analysis support
-- **Full Compatibility**: Same interface as original zztable1
-- **R Markdown Ready**: Automatic format detection for integrated
-  document support
 
 ### Installation
 
@@ -65,7 +60,7 @@ bp_nejm <- table1(transmission ~ mpg + hp + wt,
                       hp = "Gross horsepower",
                       wt = "Vehicle weight (1000 lbs)"
                     ),
-                    general = list("Data from mtcars dataset")
+                    general = c("Data from mtcars dataset")
                   ))
 display_table(bp_nejm, mtcars)
 ```
@@ -75,42 +70,56 @@ display_table(bp_nejm, mtcars)
 The package uses a **lazy evaluation blueprint** approach:
 
 1.  **Formula Analysis** → Determines table dimensions and structure
-2.  **Blueprint Creation** → Stores computation metadata (no
-    calculations)
-3.  **Lazy Evaluation** → Executes calculations only when needed
+2.  **Blueprint Creation** → Stores computation expressions in cells (no
+    statistics computed)
+3.  **Lazy Evaluation** → Computes statistics when the table is rendered
 4.  **Multiple Output** → Same blueprint renders to different formats
 
 ``` r
 
-# Blueprint creation is instant (no computations)
+# Builds the blueprint; statistics are not yet computed
 bp <- table1(group ~ var1 + var2 + var3, data = large_dataset)
 
-# Calculations happen during display
-display_table(bp, large_dataset)    # Computes on demand
-as.data.frame(bp, data = large_dataset)  # Cached for performance
+# Statistics are computed on first render and cached in the blueprint
+display_table(bp, large_dataset)
+as.data.frame(bp)  # Reuses the cached results
 ```
+
+Blueprints have value semantics (since 0.7.0). Functions that modify a
+blueprint, such as
+[`add_spanner()`](https://rgt47.github.io/zztable1/reference/add_spanner.md)
+and
+[`add_summary_rows()`](https://rgt47.github.io/zztable1/reference/add_summary_rows.md),
+return a modified copy, so assign the result:
+`bp <- add_spanner(bp, ...)`.
 
 ### Journal Theming
 
-Built-in themes for major medical journals:
+Built-in themes for major medical journals, plus `"console"` (the
+default) and `"simple"`:
 
 ``` r
 
 # List available themes
 list_available_themes()
 
-# NEJM style (1 decimal place, numbered footnotes)
+# NEJM style (1 decimal place, ± separator, symbol footnote markers)
 bp_nejm <- table1(group ~ variables, data = data, theme = "nejm")
 
-# Lancet style (1 decimal, Vancouver formatting)
+# Lancet style (1 decimal place, lettered footnotes)
 bp_lancet <- table1(group ~ variables, data = data, theme = "lancet")
 
-# JAMA style (2 decimals, lettered footnotes)  
+# JAMA style (1 decimal place, lettered footnotes)
 bp_jama <- table1(group ~ variables, data = data, theme = "jama")
 
-# BMJ style (minimal formatting)
+# BMJ style (2 decimal places)
 bp_bmj <- table1(group ~ variables, data = data, theme = "bmj")
 ```
+
+Custom themes can be created with
+[`create_custom_theme()`](https://rgt47.github.io/zztable1/reference/create_custom_theme.md)
+and added with
+[`register_theme()`](https://rgt47.github.io/zztable1/reference/register_theme.md).
 
 ### Advanced Features
 
@@ -146,12 +155,8 @@ table1(group ~ var1 + var2, data = data,
          columns = list(
            "p.value" = "Two-tailed t-test, α = 0.05"
          ),
-         # Cell-specific (advanced)
-         cells = list(
-           list(row = 2, col = 3, text = "Missing data excluded")
-         ),
-         # General footnotes
-         general = list(
+         # General footnotes (a character vector)
+         general = c(
            "ITT population (N=500)",
            "Data are mean (SD) or n (%)"
          )
@@ -171,11 +176,18 @@ table1(treatment ~ age + sex + bmi,
 
 ### Output Formats
 
+The output format is chosen when the table is rendered. The `layout`
+argument of
+[`table1()`](https://rgt47.github.io/zztable1/reference/table1.md) sets
+how footnote markers are written into variable labels, so set it to
+match the intended output.
+
 #### Console Output
 
 ``` r
 
-table1(group ~ variables, data = data, layout = "console")
+bp <- table1(group ~ variables, data = data)
+render_console(bp)  # or display_table(bp, data)
 ```
 
 #### LaTeX Output
@@ -183,7 +195,8 @@ table1(group ~ variables, data = data, layout = "console")
 ``` r
 
 bp <- table1(group ~ variables, data = data, layout = "latex", theme = "nejm")
-# Use in R Markdown with results='asis'
+render_latex(bp)  # or display_table(bp, data, format = "latex")
+# In R Markdown, print with cat() in a chunk with results='asis'
 ```
 
 #### HTML Output
@@ -191,12 +204,12 @@ bp <- table1(group ~ variables, data = data, layout = "latex", theme = "nejm")
 ``` r
 
 bp <- table1(group ~ variables, data = data, layout = "html")
-# Renders in R Markdown HTML output
+render_html(bp)  # or display_table(bp, data, format = "html")
 ```
 
 #### Conditional Formatting in R Markdown
 
-For automatic format detection in R Markdown documents:
+To choose the format from the document’s output type:
 
 ``` r
 
@@ -204,18 +217,16 @@ For automatic format detection in R Markdown documents:
 create_table <- function(formula, data, ...) {
   # Determine output format
   if (knitr::is_latex_output()) {
-    layout <- "latex"
     format_type <- "latex"
   } else {
-    layout <- "html"
     format_type <- "html"
   }
   
-  bp <- table1(form = formula, data = data, layout = layout, ...)
+  bp <- table1(formula = formula, data = data, layout = format_type, ...)
   display_table(bp, data, format = format_type)
 }
 
-# Use in R Markdown - automatically detects PDF vs HTML output
+# Use in a chunk with results='asis'
 create_table(group ~ variables, data = data, theme = "nejm")
 ```
 
@@ -237,9 +248,9 @@ baseline_table <- table1(
       hypertension = "Hypertension diagnosis per medical history"
     ),
     columns = list(
-      "p.value" = "ANOVA for continuous, χ² test for categorical variables"
+      "p.value" = "t-test (F-test for 3+ groups) for continuous, Fisher exact test for categorical variables"
     ),
-    general = list(
+    general = c(
       "Data are mean (SD) for continuous variables, n (%) for categorical",
       "Intent-to-treat population (N=500)",
       "Missing values excluded from percentage calculations"
@@ -252,30 +263,10 @@ display_table(baseline_table, trial_data)
 
 ### Performance
 
-The lazy evaluation architecture provides deferred computation:
-
-``` r
-
-# Large dataset (10,000 rows × 50 variables)
-system.time({
-  bp <- table1(group ~ ., data = large_data)  # Instant blueprint
-})
-#>    user  system elapsed 
-#>   0.003   0.000   0.003 
-
-# Computations happen during display (cached for reuse)
-system.time({
-  display_table(bp, large_data)  # First evaluation
-})
-#>    user  system elapsed 
-#>   0.243   0.002   0.245 
-
-system.time({
-  df <- as.data.frame(bp, data = large_data)  # Uses cached results
-})
-#>    user  system elapsed 
-#>   0.001   0.000   0.001
-```
+Cell statistics are computed on the first render and cached in the
+blueprint, so later renders of the same blueprint (for example to
+console and then to LaTeX) reuse the cached values. `NEWS.md` (version
+0.6.0) records the timings measured when the cache was repaired.
 
 ### API Reference
 
@@ -285,8 +276,21 @@ system.time({
   Create summary table blueprint
 - [`display_table()`](https://rgt47.github.io/zztable1/reference/display_table.md) -
   Display formatted table  
+- [`render_console()`](https://rgt47.github.io/zztable1/reference/render_console.md),
+  [`render_latex()`](https://rgt47.github.io/zztable1/reference/render_latex.md),
+  [`render_html()`](https://rgt47.github.io/zztable1/reference/render_html.md) -
+  Render to a format
+- [`add_spanner()`](https://rgt47.github.io/zztable1/reference/add_spanner.md),
+  [`add_spanner_delim()`](https://rgt47.github.io/zztable1/reference/add_spanner_delim.md) -
+  Column spanners (assign the result)
+- [`add_summary_rows()`](https://rgt47.github.io/zztable1/reference/add_summary_rows.md),
+  [`add_grand_summary_rows()`](https://rgt47.github.io/zztable1/reference/add_grand_summary_rows.md) -
+  Summary rows (assign the result)
 - [`list_available_themes()`](https://rgt47.github.io/zztable1/reference/list_available_themes.md) -
   Show available themes
+- [`register_theme()`](https://rgt47.github.io/zztable1/reference/register_theme.md),
+  [`create_custom_theme()`](https://rgt47.github.io/zztable1/reference/create_custom_theme.md) -
+  Custom themes
 - [`Table1Blueprint()`](https://rgt47.github.io/zztable1/reference/Table1Blueprint.md) -
   Create blueprint object (advanced)
 - [`Cell()`](https://rgt47.github.io/zztable1/reference/Cell.md) -
@@ -294,15 +298,17 @@ system.time({
 
 #### Key Parameters
 
-- `form` - Formula: `group ~ var1 + var2 + ...`
+- `formula` - Formula: `group ~ var1 + var2 + ...`
 - `data` - Data frame with variables
-- `theme` - Journal style: “nejm”, “lancet”, “jama”, “bmj”
+- `theme` - Theme: “console” (default), “nejm”, “lancet”, “jama”, “bmj”,
+  “simple”
 - `pvalue` - Include statistical tests
 - `totals` - Include overall column
 - `strata` - Stratification variable
 - `numeric_summary` - Summary statistic type
 - `footnotes` - Footnote specifications
-- `layout` - Output format: “console”, “latex”, “html”
+- `layout` - Target format for footnote markers: “console”, “latex”,
+  “html”
 
 ### Testing
 
@@ -322,40 +328,25 @@ tinytest::test_package("zztable1")
   friends
 - **Tests**: `inst/tinytest/` - tinytest suite run by `tests/tinytest.R`
 
-### Comparison with Original zztable1
-
-| Feature            | Original zztable1      | zztable1                        |
-|--------------------|------------------------|---------------------------------|
-| **Architecture**   | Immediate computation  | Lazy evaluation blueprint       |
-| **Performance**    | Slower with large data | Fast blueprint, cached results  |
-| **Memory**         | Higher usage           | Efficient metadata storage      |
-| **Theming**        | Limited formatting     | Journal-specific themes         |
-| **Footnotes**      | Basic support          | Advanced targeting system       |
-| **Extensibility**  | Monolithic functions   | Modular cell-based design       |
-| **Output Formats** | Single format          | Multiple formats from blueprint |
-| **Interface**      | ✅ Same                | ✅ Fully compatible             |
-
 ### Contributing
 
 This is a research/development project. Key areas for contribution:
 
 1.  **Additional Journal Themes** - More publication styles
-2.  **Export Functions** - Direct LaTeX/HTML/Word export
+2.  **Export Functions** - Word export (LaTeX and HTML rendering exist)
 3.  **Advanced Statistics** - Additional statistical tests
 4.  **Error Handling** - Enhanced input validation
 5.  **Performance** - Further optimization for very large datasets
 
 ### Roadmap
 
-**v1.1**: Export functions for direct LaTeX/HTML output
+Planned, not yet implemented:
 
-**v1.2**: Additional journal themes (BMC, PLOS, etc.)
+Additional journal themes (BMC, PLOS, etc.)
 
-**v1.3**: Advanced statistical tests (non-parametric, etc.)
+CRAN submission
 
-**v1.4**: R package structure with CRAN submission
-
-**v2.0**: Interactive table editor and GUI
+Interactive table editor and GUI
 
 ### License
 
@@ -368,7 +359,7 @@ GPL (\>= 3)
   title = {zztable1: Next Generation Summary Tables},
   author = {Ronald G. Thomas},
   year = {2026},
-  note = {R package version 0.5.0},
+  note = {R package version 0.7.0},
   url = {https://github.com/rgt47/zztable1}
 }
 ```
@@ -377,7 +368,7 @@ GPL (\>= 3)
 
 - **Issues**: Report bugs and feature requests
 - **Documentation**: See vignette and help files  
-- **Examples**: Check `tests/` and `vignettes/` directories
+- **Examples**: Check `inst/tinytest/` and `vignettes/` directories
 
 ------------------------------------------------------------------------
 

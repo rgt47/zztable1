@@ -51,7 +51,7 @@
 <ul><li>A minimal reproducible example (a <code>reprex::reprex()</code> is preferred).</li>
 <li>The output of <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>.</li>
 <li>The version of zztable1 in use (<code>packageVersion('zztable1')</code>).</li>
-<li>The expected behaviour and the observed behaviour.</li>
+<li>The expected behavior and the observed behavior.</li>
 <li>For rendering issues, the target output format (console, HTML, LaTeX) and the theme in use.</li>
 </ul></div>
 <div class="section level2">
@@ -67,7 +67,7 @@
 <code class="sourceCode R"><span><span class="fu">renv</span><span class="fu">::</span><span class="fu">restore</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </li>
 <li><p>Make your changes. Keep commits focused; prefer many small commits over one large one.</p></li>
-<li><p>Add or update tests in <code>tests/testthat/</code>. New exported functions require tests. Include cases for each output format (console, HTML, LaTeX) when adding rendering features.</p></li>
+<li><p>Add or update tests in <code>inst/tinytest/</code> (files named <code>test_*.R</code>). New exported functions require tests. Include cases for each output format (console, HTML, LaTeX) when adding rendering features.</p></li>
 <li><p>Run <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> to regenerate <code>man/</code> and <code>NAMESPACE</code>.</p></li>
 <li>
 <p>Run the full check locally:</p>
@@ -90,16 +90,17 @@
 </ul></div>
 <div class="section level2">
 <h2 id="tests">Tests<a class="anchor" aria-label="anchor" href="#tests"></a></h2>
-<p>Tests use <code>testthat</code> 3rd edition. Run with:</p>
+<p>Tests use <code>tinytest</code>. Run with:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">pkgload</span><span class="fu">::</span><span class="fu"><a href="https://pkgload.r-lib.org/reference/load_all.html" class="external-link">load_all</a></span><span class="op">(</span><span class="st">'.'</span><span class="op">)</span></span>
+<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/run_test_dir.html" class="external-link">run_test_dir</a></span><span class="op">(</span><span class="st">'inst/tinytest'</span><span class="op">)</span></span></code></pre></div>
 <p>For coverage reports:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">covr</span><span class="fu">::</span><span class="fu">package_coverage</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a></h2>
-<p>If your change affects user-facing behaviour, update the corresponding vignette in <code>vignettes/</code>. Vignettes that produce PDF output are not committed; only the <code>.Rmd</code> source is tracked. Verify the vignette builds:</p>
+<p>If your change affects user-facing behavior, update the corresponding vignette in <code>vignettes/</code>. Vignettes that produce PDF output are not committed; only the <code>.Rmd</code> source is tracked. Verify the vignette builds:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/build_vignettes.html" class="external-link">build_vignettes</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
