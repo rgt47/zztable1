@@ -85,7 +85,7 @@ create_theme <- function(name, decimal_places = 1, variable_indent = 2,
       dimension_rules = dimension_rules,
       rendering_rules = rendering_rules,
       css_properties = css_properties,
-      css_class = paste0("table1-", tolower(gsub("[^a-z0-9]", "", name)))
+      css_class = paste0("table1-", gsub("[^a-z0-9]", "", tolower(name)))
     ),
     class = c("table1_theme", "list")
   )
@@ -291,23 +291,39 @@ get_theme <- function(theme_name = "console") {
   return(theme)
 }
 
+# Namespace bindings are locked once the package is loaded, so the
+# registry lives inside this environment and is updated by modifying
+# its contents rather than by rebinding a namespace symbol.
+.theme_env <- new.env(parent = emptyenv())
+
 #' Get Theme Registry
 #'
-#' Internal function to retrieve the theme registry from package environment.
+#' Internal function to retrieve the theme registry from the package-level
+#' theme store, initializing it with the built-in themes on first use.
 #'
 #' @return Named list of all registered themes
 #'
 #' @keywords internal
 get_theme_registry <- function() {
-  ns <- getNamespace("zztable1")
-  registry <- get0(".theme_registry", envir = ns, inherits = FALSE)
-
-  # Fallback to creating themes if registry not initialized
-  if (is.null(registry)) {
-    registry <- .create_builtin_themes()
+  if (is.null(.theme_env$registry)) {
+    .theme_env$registry <- .create_builtin_themes()
   }
+  .theme_env$registry
+}
 
-  return(registry)
+#' Set Theme Registry
+#'
+#' Internal function that replaces the contents of the package-level theme
+#' store.
+#'
+#' @param registry Named list of theme objects
+#'
+#' @return Invisibly returns `registry`
+#'
+#' @keywords internal
+set_theme_registry <- function(registry) {
+  .theme_env$registry <- registry
+  invisible(registry)
 }
 
 #' List Available Themes
@@ -386,12 +402,13 @@ apply_theme <- function(blueprint, theme) {
 #' @param background_color Background color
 #' @param border_color Border color
 #'
-#' @return Custom theme object
+#' @return Custom theme object. Its `theme_name` is set to `name`, so the
+#'   theme is registered under `name` by [register_theme()] and can then be
+#'   selected with `table1(..., theme = name)`.
 #'
 #' @examples
-#' \dontrun{
 #' custom <- create_custom_theme("MyTheme", base_theme = "nejm")
-#' }
+#' custom$theme_name
 #'
 #' @export
 create_custom_theme <- function(name = "Custom", base_theme = "console",
@@ -405,7 +422,10 @@ create_custom_theme <- function(name = "Custom", base_theme = "console",
   # Create new theme with overrides
   theme <- base
   theme$name <- name
-  theme$css_class <- paste0("table1-", tolower(gsub("[^a-z0-9]", "", name)))
+  # The registry is keyed by theme_name; inheriting the base theme's key
+  # would make register_theme() treat the new theme as the base theme.
+  theme$theme_name <- name
+  theme$css_class <- paste0("table1-", gsub("[^a-z0-9]", "", tolower(name)))
 
   # Apply overrides
   if (!is.null(decimal_places)) {

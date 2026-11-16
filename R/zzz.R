@@ -16,16 +16,7 @@
 #'
 #' @keywords internal
 .onLoad <- function(libname, pkgname) {
-  # Initialize package namespace
-  ns <- getNamespace(pkgname)
-
-  # Create and register built-in themes in package environment
-  # This ensures themes are immutable and properly scoped
-  builtin_themes <- .create_builtin_themes()
-
-  assign(".theme_registry",
-    builtin_themes,
-    envir = ns)
+  set_theme_registry(.create_builtin_themes())
 
   # Optional: Startup message (disabled by default to avoid clutter)
   # Uncomment to show startup message:

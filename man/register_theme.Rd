@@ -24,11 +24,15 @@ A valid theme must have:
 - decimal_places: Numeric decimal places
 - css_properties: List of CSS properties
 - dimension_rules: List of dimension rules (optional)
+
+The theme is stored under its `theme_name` (or `name` when `theme_name`
+is absent) and can then be used with `table1(..., theme = theme_name)`.
+The registry lasts for the R session.
 }
 \examples{
-\dontrun{
 my_theme <- create_custom_theme("MyTheme", base_theme = "nejm")
 register_theme(my_theme)
-}
+"MyTheme" \%in\% list_available_themes()
+unregister_theme("MyTheme")
 
 }
