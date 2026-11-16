@@ -1,5 +1,39 @@
 # Changelog
 
+## zztable1 (development version)
+
+### Bug fixes
+
+- [`register_theme()`](https://rgt47.github.io/zztable1/reference/register_theme.md)
+  and
+  [`unregister_theme()`](https://rgt47.github.io/zztable1/reference/unregister_theme.md)
+  failed on any installed copy of the package with “cannot change value
+  of locked binding for ‘.theme_registry’”; they worked only under
+  [`devtools::load_all()`](https://devtools.r-lib.org/reference/load_all.html).
+  The theme registry now lives in a package-level environment whose
+  contents are updated in place, and every reader
+  ([`get_theme()`](https://rgt47.github.io/zztable1/reference/get_theme.md),
+  [`list_available_themes()`](https://rgt47.github.io/zztable1/reference/list_available_themes.md),
+  [`list_custom_themes()`](https://rgt47.github.io/zztable1/reference/list_custom_themes.md),
+  and the theme check in
+  [`table1()`](https://rgt47.github.io/zztable1/reference/table1.md))
+  uses that store. A registered theme can now be selected with
+  `table1(..., theme = "<name>")` without the “Unknown theme” warning
+  and console fallback.
+
+- [`create_custom_theme()`](https://rgt47.github.io/zztable1/reference/create_custom_theme.md)
+  kept the base theme’s `theme_name`, so
+  `register_theme(create_custom_theme("MyTheme", base_theme = "nejm"))`
+  reported “Theme ‘nejm’ already registered” and registered nothing
+  (with `overwrite = TRUE` it would have replaced the built-in theme).
+  `theme_name` is now set to `name`. The generated `css_class` also
+  lowercased the name after stripping non-lowercase characters, which
+  turned “MyTheme” into “table1-yheme”; it is now “table1-mytheme”.
+
+  A custom theme derived from `"nejm"` is registered under its own name,
+  so the NEJM-specific formatting that is keyed on the theme name (for
+  example, mean ± SD) does not carry over to it.
+
 ## zztable1 0.7.0
 
 ### Breaking changes

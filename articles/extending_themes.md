@@ -98,7 +98,7 @@ cat("- Decimal places:", my_theme$decimal_places, "\n")
 cat("- CSS class:", my_theme$css_class, "\n")
 ```
 
-- CSS class: table1-yustom
+- CSS class: table1-mycustom
 
 ### Advanced Custom Theme
 

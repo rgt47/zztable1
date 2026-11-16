@@ -679,7 +679,7 @@ svglite_2.2.2 cli_3.6.6 knitr_1.52
 \[17\] jquerylib_0.1.4 fastmap_1.2.0 yaml_2.3.12 lifecycle_1.0.5  
 \[21\] stringr_1.6.0 compiler_4.6.2 RColorBrewer_1.1-3 fs_2.1.0  
 \[25\] htmlwidgets_1.6.4 rstudioapi_0.19.0 farver_2.1.2
-systemfonts_1.3.2 \[29\] digest_0.6.39 viridisLite_0.4.3 R6_2.6.1
+systemfonts_1.3.3 \[29\] digest_0.6.39 viridisLite_0.4.3 R6_2.6.1
 pillar_1.11.1  
 \[33\] parallel_4.6.2 magrittr_2.0.5 bslib_0.12.0 tools_4.6.2  
 \[37\] xml2_1.6.0 pkgdown_2.2.1 cachem_1.1.0 desc_1.4.3

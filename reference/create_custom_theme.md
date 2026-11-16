@@ -49,12 +49,14 @@ create_custom_theme(
 
 ## Value
 
-Custom theme object
+Custom theme object. Its \`theme_name\` is set to \`name\`, so the theme
+is registered under \`name\` by \[register_theme()\] and can then be
+selected with \`table1(..., theme = name)\`.
 
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 custom <- create_custom_theme("MyTheme", base_theme = "nejm")
-} # }
+custom$theme_name
+#> [1] "MyTheme"
 ```

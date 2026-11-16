@@ -1,7 +1,7 @@
 # Get Theme Registry
 
-Internal function to retrieve the theme registry from package
-environment.
+Internal function to retrieve the theme registry from the package-level
+theme store, initializing it with the built-in themes on first use.
 
 ## Usage
 
