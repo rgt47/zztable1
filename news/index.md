@@ -2,7 +2,43 @@
 
 ## zztable1 (development version)
 
+### Breaking changes
+
+- [`table1()`](https://rgt47.github.io/zztable1/reference/table1.md) now
+  validates `layout` (one of “console”, “latex”, “html”),
+  `continuous_test` (one of “ttest”, “anova”, “welch”, “kruskal”), and
+  `categorical_test` (one of “fisher”, “chisq”) and stops with an
+  informative error for any other value. Previously an unknown layout
+  was accepted silently, and an unknown test name (for example
+  `continuous_test = "wilcox"`) silently ran the t-test. Matching is
+  exact; abbreviations are not expanded.
+
 ### Bug fixes
+
+- `footnotes$general` given as a list of strings, as in the package
+  guide vignette, was silently dropped; only a character vector was
+  used. Both forms are now accepted and give the same output.
+
+- Footnote types other than `variables`, `columns`, and `general` (for
+  example `cells`) were ignored without notice. They are still
+  unsupported, but
+  [`table1()`](https://rgt47.github.io/zztable1/reference/table1.md) now
+  warns that they are ignored.
+
+- [`knit_print.table1_blueprint()`](https://rgt47.github.io/zztable1/reference/knit_print.table1_blueprint.md)
+  was exported but not registered as an S3 method, so since R 4.0.0
+  `knitr` never dispatched to it and the automatic HTML/LaTeX output in
+  R Markdown described in DESCRIPTION did not occur. The method is now
+  registered for
+  [`knitr::knit_print`](https://rdrr.io/pkg/knitr/man/knit_print.html)
+  when `knitr` is loaded; `knitr` remains in Suggests. A blueprint
+  auto-printed in a knitted document now renders as an HTML or LaTeX
+  table instead of console text.
+
+- [`list_custom_themes()`](https://rgt47.github.io/zztable1/reference/list_custom_themes.md)
+  reported the built-in “simple” theme as a custom theme, and
+  `unregister_theme("simple")` removed it. Both now take the built-in
+  set from the theme definitions, so “simple” is treated as built-in.
 
 - [`register_theme()`](https://rgt47.github.io/zztable1/reference/register_theme.md)
   and

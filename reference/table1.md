@@ -74,7 +74,8 @@ table1(
 
 - layout:
 
-  Output format ("console", "latex", "html")
+  Output format, one of "console", "latex", or "html". Any other value
+  is an error.
 
 - numeric_summary:
 
@@ -82,7 +83,11 @@ table1(
 
 - footnotes:
 
-  Footnote specifications
+  Footnote specifications: a list with any of the elements `variables`
+  (named list of notes keyed by variable name), `columns` (named list
+  keyed by column name), and `general` (a character vector or a list of
+  strings, printed without markers). Other elements, including `cells`,
+  are not supported; they are ignored with a warning.
 
 - theme:
 
@@ -90,12 +95,13 @@ table1(
 
 - continuous_test:
 
-  Statistical test for continuous variables ("ttest", "anova", "welch",
-  "kruskal")
+  Statistical test for continuous variables, one of "ttest", "anova",
+  "welch", or "kruskal". Any other value is an error.
 
 - categorical_test:
 
-  Statistical test for categorical variables ("fisher", "chisq")
+  Statistical test for categorical variables, one of "fisher" or
+  "chisq". Any other value is an error.
 
 - transpose:
 

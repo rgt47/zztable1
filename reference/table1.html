@@ -125,7 +125,8 @@ functionality.</p>
 
 
 <dt id="arg-layout">layout<a class="anchor" aria-label="anchor" href="#arg-layout"></a></dt>
-<dd><p>Output format ("console", "latex", "html")</p></dd>
+<dd><p>Output format, one of "console", "latex", or "html".
+Any other value is an error.</p></dd>
 
 
 <dt id="arg-numeric-summary">numeric_summary<a class="anchor" aria-label="anchor" href="#arg-numeric-summary"></a></dt>
@@ -133,7 +134,12 @@ functionality.</p>
 
 
 <dt id="arg-footnotes">footnotes<a class="anchor" aria-label="anchor" href="#arg-footnotes"></a></dt>
-<dd><p>Footnote specifications</p></dd>
+<dd><p>Footnote specifications: a list with any of the
+elements <code>variables</code> (named list of notes keyed by variable
+name), <code>columns</code> (named list keyed by column name), and
+<code>general</code> (a character vector or a list of strings, printed
+without markers). Other elements, including <code>cells</code>, are not
+supported; they are ignored with a warning.</p></dd>
 
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
@@ -141,11 +147,14 @@ functionality.</p>
 
 
 <dt id="arg-continuous-test">continuous_test<a class="anchor" aria-label="anchor" href="#arg-continuous-test"></a></dt>
-<dd><p>Statistical test for continuous variables ("ttest", "anova", "welch", "kruskal")</p></dd>
+<dd><p>Statistical test for continuous variables, one
+of "ttest", "anova", "welch", or "kruskal". Any other value is an
+error.</p></dd>
 
 
 <dt id="arg-categorical-test">categorical_test<a class="anchor" aria-label="anchor" href="#arg-categorical-test"></a></dt>
-<dd><p>Statistical test for categorical variables ("fisher", "chisq")</p></dd>
+<dd><p>Statistical test for categorical variables,
+one of "fisher" or "chisq". Any other value is an error.</p></dd>
 
 
 <dt id="arg-transpose">transpose<a class="anchor" aria-label="anchor" href="#arg-transpose"></a></dt>

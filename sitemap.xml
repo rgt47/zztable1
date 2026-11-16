@@ -40,6 +40,7 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/build_row_structure.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/build_spanner_rows.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/build_transposed_blueprint.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/builtin_theme_names.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/calculate_cell_count.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/calculate_frequency_table.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/calculate_storage_efficiency.html</loc></url>
@@ -160,6 +161,7 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/print.table_dimensions.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/print.theme_bundle.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/process_footnote_type.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/register_s3_method.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/register_theme.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/render_console.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/render_footnotes.html</loc></url>
@@ -189,6 +191,7 @@
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_cell.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_cell_by_type.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_cell_inputs.html</loc></url>
+<url><loc>https://rgt47.github.io/zztable1/reference/validate_choice.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_dimensions_inputs.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_formula_enhanced.html</loc></url>
 <url><loc>https://rgt47.github.io/zztable1/reference/validate_formula_structure.html</loc></url>
